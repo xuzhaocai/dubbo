@@ -74,19 +74,19 @@ public class ExtensionLoader<T> {
 
     // ==============================
 
-    private final Class<?> type;
+    private final Class<?> type;//接口类型
 
-    private final ExtensionFactory objectFactory;
+    private final ExtensionFactory objectFactory;// factory  一般是适配类 AdaptiveExtensionFactory
 
     private final ConcurrentMap<Class<?>, String> cachedNames = new ConcurrentHashMap<Class<?>, String>();
 
-    private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<Map<String, Class<?>>>();
+    private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<Map<String, Class<?>>>();  // 存储 class s
 
     private final Map<String, Activate> cachedActivates = new ConcurrentHashMap<String, Activate>();
     private final ConcurrentMap<String, Holder<Object>> cachedInstances = new ConcurrentHashMap<String, Holder<Object>>();
     private final Holder<Object> cachedAdaptiveInstance = new Holder<Object>();
     private volatile Class<?> cachedAdaptiveClass = null;
-    private String cachedDefaultName;
+    private String cachedDefaultName;   // 默认的 @SPI("dubbo")
     private volatile Throwable createAdaptiveInstanceError;
 
     private Set<Class<?>> cachedWrapperClasses;
@@ -646,12 +646,12 @@ public class ExtensionLoader<T> {
     }
 
     private void loadClass(Map<String, Class<?>> extensionClasses, java.net.URL resourceURL, Class<?> clazz, String name) throws NoSuchMethodException {
-        if (!type.isAssignableFrom(clazz)) {
+        if (!type.isAssignableFrom(clazz)) {// 判断是否是某个类的子类
             throw new IllegalStateException("Error when load extension class(interface: " +
                     type + ", class line: " + clazz.getName() + "), class "
                     + clazz.getName() + "is not subtype of interface.");
         }
-        if (clazz.isAnnotationPresent(Adaptive.class)) {
+        if (clazz.isAnnotationPresent(Adaptive.class)) {//   Adaptive 注解是否在该类上面
             if (cachedAdaptiveClass == null) {
                 cachedAdaptiveClass = clazz;
             } else if (!cachedAdaptiveClass.equals(clazz)) {
@@ -659,7 +659,7 @@ public class ExtensionLoader<T> {
                         + cachedAdaptiveClass.getClass().getName()
                         + ", " + clazz.getClass().getName());
             }
-        } else if (isWrapperClass(clazz)) {
+        } else if (isWrapperClass(clazz)) {// 该类是否是wapper 类
             Set<Class<?>> wrappers = cachedWrapperClasses;
             if (wrappers == null) {
                 cachedWrapperClasses = new ConcurrentHashSet<Class<?>>();
@@ -682,7 +682,7 @@ public class ExtensionLoader<T> {
                 }
                 for (String n : names) {
                     if (!cachedNames.containsKey(clazz)) {
-                        cachedNames.put(clazz, n);
+                        cachedNames.put(clazz, n); ///"class com.alibaba.dubbo.common.extension.factory.SpiExtensionFactory" -> "spi"
                     }
                     Class<?> c = extensionClasses.get(n);
                     if (c == null) {
@@ -694,7 +694,7 @@ public class ExtensionLoader<T> {
             }
         }
     }
-
+    /// 是否是wapper类型
     private boolean isWrapperClass(Class<?> clazz) {
         try {
             clazz.getConstructor(type);

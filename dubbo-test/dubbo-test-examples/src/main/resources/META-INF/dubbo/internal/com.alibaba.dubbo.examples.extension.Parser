@@ -1,0 +1,2 @@
+table=com.alibaba.dubbo.examples.extension.TableParser
+text=com.alibaba.dubbo.examples.extension.TextParser
