@@ -63,7 +63,6 @@ public class Bytes {
 
     /**
      * to byte array.
-     *
      * @param v value.
      * @return byte[].
      */

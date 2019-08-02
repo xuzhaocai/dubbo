@@ -46,6 +46,9 @@ public class DubboConfigConfiguration {
 
     /**
      * Single Dubbo {@link AbstractConfig Config} Bean Binding
+     *
+     *
+     * 单
      */
     @EnableDubboConfigBindings({
             @EnableDubboConfigBinding(prefix = "dubbo.application", type = ApplicationConfig.class),
@@ -62,6 +65,7 @@ public class DubboConfigConfiguration {
 
     /**
      * Multiple Dubbo {@link AbstractConfig Config} Bean Binding
+     * 多
      */
     @EnableDubboConfigBindings({
             @EnableDubboConfigBinding(prefix = "dubbo.applications", type = ApplicationConfig.class, multiple = true),

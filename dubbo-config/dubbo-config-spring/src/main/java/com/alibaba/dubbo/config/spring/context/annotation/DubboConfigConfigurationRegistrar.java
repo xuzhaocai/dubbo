@@ -36,7 +36,11 @@ import static com.alibaba.dubbo.config.spring.util.AnnotatedBeanDefinitionRegist
  * @since 2.5.8
  */
 public class DubboConfigConfigurationRegistrar implements ImportBeanDefinitionRegistrar {
-
+    /**
+     * 注册bean
+     * @param importingClassMetadata
+     * @param registry
+     */
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 
@@ -45,9 +49,9 @@ public class DubboConfigConfigurationRegistrar implements ImportBeanDefinitionRe
 
         boolean multiple = attributes.getBoolean("multiple");
 
-        // Single Config Bindings
+        // 注册为单一的配置
         registerBeans(registry, DubboConfigConfiguration.Single.class);
-
+        // 注册多配置
         if (multiple) { // Since 2.6.6 https://github.com/apache/incubator-dubbo/issues/3193
             registerBeans(registry, DubboConfigConfiguration.Multiple.class);
         }

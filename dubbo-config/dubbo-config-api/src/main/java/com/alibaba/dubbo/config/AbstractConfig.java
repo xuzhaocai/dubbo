@@ -88,6 +88,8 @@ public abstract class AbstractConfig implements Serializable {
         }
         return value;
     }
+    // 将配置的中的一些属性值设置到对象的值中
+
 
     protected static void appendProperties(AbstractConfig config) {
         if (config == null) {
@@ -99,7 +101,9 @@ public abstract class AbstractConfig implements Serializable {
             try {
                 String name = method.getName();
                 if (name.length() > 3 && name.startsWith("set") && Modifier.isPublic(method.getModifiers())
-                        && method.getParameterTypes().length == 1 && isPrimitive(method.getParameterTypes()[0])) {
+                        && method.getParameterTypes().length == 1 && isPrimitive(method.getParameterTypes()[0])) {  //查找常规类型set的方法
+
+                    // 取得参数名称  例如 getName  取得name
                     String property = StringUtils.camelToSplitName(name.substring(3, 4).toLowerCase() + name.substring(4), ".");
 
                     String value = null;

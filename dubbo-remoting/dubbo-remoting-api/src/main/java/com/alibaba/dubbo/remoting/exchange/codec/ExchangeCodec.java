@@ -49,30 +49,43 @@ import java.io.InputStream;
  */
 public class ExchangeCodec extends TelnetCodec {
 
-    // header length.
+    // header length. 长度  字节 128bit
     protected static final int HEADER_LENGTH = 16;
     // magic header.
-    protected static final short MAGIC = (short) 0xdabb;
-    protected static final byte MAGIC_HIGH = Bytes.short2bytes(MAGIC)[0];
-    protected static final byte MAGIC_LOW = Bytes.short2bytes(MAGIC)[1];
+    protected static final short MAGIC = (short) 0xdabb;  // 2字节
+    protected static final byte MAGIC_HIGH = Bytes.short2bytes(MAGIC)[0];  //magic 第一个字节
+    protected static final byte MAGIC_LOW = Bytes.short2bytes(MAGIC)[1];   // magic 第二个字节
     // message flag.
-    protected static final byte FLAG_REQUEST = (byte) 0x80;
-    protected static final byte FLAG_TWOWAY = (byte) 0x40;
-    protected static final byte FLAG_EVENT = (byte) 0x20;
-    protected static final int SERIALIZATION_MASK = 0x1f;
+    protected static final byte FLAG_REQUEST = (byte) 0x80;  // 数据包类型 1bit   1request  0 response
+    protected static final byte FLAG_TWOWAY = (byte) 0x40;  // 调用方式  1bit  0 是单向 1是双向
+    protected static final byte FLAG_EVENT = (byte) 0x20;  // 事件表识  1bit  0是 当前数据包是请求或者响应包   1是数据包是心跳包
+    protected static final int SERIALIZATION_MASK = 0x1f;    // 序列化编号  5bit
     private static final Logger logger = LoggerFactory.getLogger(ExchangeCodec.class);
 
     public Short getMagicCode() {
         return MAGIC;
     }
 
+    /**
+     * 编码
+     * @param channel
+     * @param buffer
+     * @param msg
+     * @throws IOException
+     */
     @Override
     public void encode(Channel channel, ChannelBuffer buffer, Object msg) throws IOException {
-        if (msg instanceof Request) {
+        if (msg instanceof Request) {  // msg 是request 的时候
+
+            // 编码请求
             encodeRequest(channel, buffer, (Request) msg);
-        } else if (msg instanceof Response) {
+        } else if (msg instanceof Response) {  // msg 是response的时候
+
+            //编码响应
             encodeResponse(channel, buffer, (Response) msg);
         } else {
+
+            // 剩下的交给telnet 编码
             super.encode(channel, buffer, msg);
         }
     }
@@ -210,9 +223,11 @@ public class ExchangeCodec extends TelnetCodec {
 
     protected void encodeRequest(Channel channel, ChannelBuffer buffer, Request req) throws IOException {
         Serialization serialization = getSerialization(channel);
-        // header.
+        // header.  创建一个header的字节数组  16 byte
         byte[] header = new byte[HEADER_LENGTH];
         // set magic number.
+
+
         Bytes.short2bytes(MAGIC, header);
 
         // set request and serialization flag.

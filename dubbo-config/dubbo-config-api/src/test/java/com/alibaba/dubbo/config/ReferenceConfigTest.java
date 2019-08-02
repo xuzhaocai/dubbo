@@ -34,7 +34,7 @@ public class ReferenceConfigTest {
         application.setName("test-protocol-random-port");
 
         RegistryConfig registry = new RegistryConfig();
-        registry.setAddress("multicast://224.5.6.7:1234");
+        registry.setAddress("multicast://224.5.6.7:1234"); // 使用局域网广播的形式
 
         ProtocolConfig protocol = new ProtocolConfig();
         protocol.setName("dubbo");
@@ -93,6 +93,8 @@ public class ReferenceConfigTest {
 
     /**
      * unit test for dubbo-1765
+     *
+     * 测试 连接重试
      */
     @Test
     public void testReferenceRetry() {
@@ -114,6 +116,10 @@ public class ReferenceConfigTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+
+
+
         Assert.assertFalse(success);
         Assert.assertNull(demoService);
         ServiceConfig<DemoService> sc = new ServiceConfig<DemoService>();

@@ -132,6 +132,8 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         }
     }
 
+    //检查application
+
     @SuppressWarnings("deprecation")
     protected void checkApplication() {
         // for backward compatibility

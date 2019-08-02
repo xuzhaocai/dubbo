@@ -155,12 +155,18 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
     public List<URL> toUrls() {
         return urls;
     }
-
+    //  获取
     public synchronized T get() {
+
+        // 已经销毁
         if (destroyed) {
             throw new IllegalStateException("Already destroyed!");
         }
+
+        // 还没有初始化的时候进行初始化
         if (ref == null) {
+
+            // 初始化
             init();
         }
         return ref;
@@ -184,22 +190,35 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
     }
 
     private void init() {
+
+        // 已经初始化过了， 就返回
+
         if (initialized) {
             return;
         }
+
+        // 设置初始化标记
         initialized = true;
         if (interfaceName == null || interfaceName.length() == 0) {
             throw new IllegalStateException("<dubbo:reference interface=\"\" /> interface not allow null!");
         }
-        // get consumer's global configuration
+        // get consumer's global configuration   检查consumer 是否存在， 不存在就new 一个出来
         checkDefault();
+
+        // 设置本对象的配置
         appendProperties(this);
+
+        // 将consumer 中的泛化参数设置到  本类中
         if (getGeneric() == null && getConsumer() != null) {
             setGeneric(getConsumer().getGeneric());
         }
+
+        // 如果泛化参数 为true 的时候， 就将interfaceClass 设置成GenericService.class
         if (ProtocolUtils.isGeneric(getGeneric())) {
             interfaceClass = GenericService.class;
         } else {
+
+            // 普通参数
             try {
                 interfaceClass = Class.forName(interfaceName, true, Thread.currentThread()
                         .getContextClassLoader());
@@ -337,19 +356,24 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
         ApplicationModel.initConsumerModel(getUniqueServiceName(), consumerModel);
     }
 
+    /**
+     * 创建代理对象
+     * @param map
+     * @return
+     */
     @SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
     private T createProxy(Map<String, String> map) {
         URL tmpUrl = new URL("temp", "localhost", 0, map);
         final boolean isJvmRefer;
         if (isInjvm() == null) {
-            if (url != null && url.length() > 0) { // if a url is specified, don't do local reference
-                isJvmRefer = false;
-            } else if (InjvmProtocol.getInjvmProtocol().isInjvmRefer(tmpUrl)) {
-                // by default, reference local service if there is
-                isJvmRefer = true;
-            } else {
-                isJvmRefer = false;
-            }
+                if (url != null && url.length() > 0) { // if a url is specified, don't do local reference
+                    isJvmRefer = false;
+                } else if (InjvmProtocol.getInjvmProtocol().isInjvmRefer(tmpUrl)) {
+                    // by default, reference local service if there is
+                    isJvmRefer = true;
+                } else {
+                    isJvmRefer = false;
+                }
         } else {
             isJvmRefer = isInjvm().booleanValue();
         }
@@ -471,7 +495,7 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
     public String getInterface() {
         return interfaceName;
     }
-
+    // 设置需要的服务的接口   与下面那个 setInterface 方法重载
     public void setInterface(Class<?> interfaceClass) {
         if (interfaceClass != null && !interfaceClass.isInterface()) {
             throw new IllegalStateException("The interface class " + interfaceClass + " is not a interface!");
