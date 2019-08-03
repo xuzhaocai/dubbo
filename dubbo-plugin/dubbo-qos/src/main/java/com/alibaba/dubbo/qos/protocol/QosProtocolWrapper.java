@@ -52,9 +52,11 @@ public class QosProtocolWrapper implements Protocol {
     public int getDefaultPort() {
         return protocol.getDefaultPort();
     }
-
+    //  暴露服务
     @Override
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+
+        //判断是不是registry
         if (Constants.REGISTRY_PROTOCOL.equals(invoker.getUrl().getProtocol())) {
             startQosServer(invoker.getUrl());
             return protocol.export(invoker);
@@ -79,6 +81,7 @@ public class QosProtocolWrapper implements Protocol {
 
     private void startQosServer(URL url) {
         try {
+            //qos.enable
             boolean qosEnable = url.getParameter(QOS_ENABLE,true);
             if (!qosEnable) {
                 logger.info("qos won't be started because it is disabled. " +

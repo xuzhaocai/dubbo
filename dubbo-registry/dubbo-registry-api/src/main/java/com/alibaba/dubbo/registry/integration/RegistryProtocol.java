@@ -169,7 +169,7 @@ public class RegistryProtocol implements Protocol {
                 exporter = (ExporterChangeableWrapper<T>) bounds.get(key);
                 if (exporter == null) {
                     final Invoker<?> invokerDelegete = new InvokerDelegete<T>(originInvoker, getProviderUrl(originInvoker));
-                    exporter = new ExporterChangeableWrapper<T>((Exporter<T>) protocol.export(invokerDelegete), originInvoker);
+                    exporter = new ExporterChangeableWrapper<T>((Exporter<T>) protocol.export(invokerDelegete), originInvoker);/// dubbo protocol
                     bounds.put(key, exporter);
                 }
             }
@@ -330,7 +330,7 @@ public class RegistryProtocol implements Protocol {
         }
         bounds.clear();
     }
-
+    // InvokerDelegete
     public static class InvokerDelegete<T> extends InvokerWrapper<T> {
         private final Invoker<T> invoker;
 

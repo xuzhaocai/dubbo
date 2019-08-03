@@ -514,7 +514,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                         Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));
                         DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
                         //  registryURL.getProtocol= registry
-                        //  qos ---> filter ---->listener --->registryProtocol   ( 这里使用了wapper 包装机制)
+                        //   filter ---->listener --->registryProtocol   ( 这里使用了wapper 包装机制)
 
                         Exporter<?> exporter = protocol.export(wrapperInvoker);
                         exporters.add(exporter);
