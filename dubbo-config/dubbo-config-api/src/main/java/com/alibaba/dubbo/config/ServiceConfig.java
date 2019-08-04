@@ -484,19 +484,20 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         if (!Constants.SCOPE_NONE.toString().equalsIgnoreCase(scope)) {
 
             // export to local if the config is not remote (export to remote only when config is remote)
-            if (!Constants.SCOPE_REMOTE.toString().equalsIgnoreCase(scope)) {
+            if (!Constants.SCOPE_REMOTE.toString().equalsIgnoreCase(scope)) {  // 本地服务暴露
                 exportLocal(url);
             }
             // export to remote if the config is not local (export to local only when config is local)
-            if (!Constants.SCOPE_LOCAL.toString().equalsIgnoreCase(scope)) {
+            if (!Constants.SCOPE_LOCAL.toString().equalsIgnoreCase(scope)) {  // 远程服务暴露
                 if (logger.isInfoEnabled()) {
                     logger.info("Export dubbo service " + interfaceClass.getName() + " to url " + url);
                 }
-                if (registryURLs != null && !registryURLs.isEmpty()) {// 注册中心
+                if (registryURLs != null && !registryURLs.isEmpty()) {
+                    //遍历注册中心
                     for (URL registryURL : registryURLs) {
                         url = url.addParameterIfAbsent(Constants.DYNAMIC_KEY, registryURL.getParameter(Constants.DYNAMIC_KEY));
-                        URL monitorUrl = loadMonitor(registryURL);//监控中心
-                        if (monitorUrl != null) {
+                        URL monitorUrl = loadMonitor(registryURL);//获取监控中心
+                        if (monitorUrl != null) {  // 将监控中心添加到 url中
                             url = url.addParameterAndEncoded(Constants.MONITOR_KEY, monitorUrl.toFullString());
                         }
                         if (logger.isInfoEnabled()) {
@@ -504,22 +505,24 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                         }
 
                         // For providers, this is used to enable custom proxy to generate invoker
-                        String proxy = url.getParameter(Constants.PROXY_KEY);
-                        if (StringUtils.isNotEmpty(proxy)) {
+                        String proxy = url.getParameter(Constants.PROXY_KEY);  // 配置中有proxy_key 的话就使用配置的
+                        if (StringUtils.isNotEmpty(proxy)) {  //  设置配置的 proxy_key
                             registryURL = registryURL.addParameter(Constants.PROXY_KEY, proxy);
                         }
 
 
-                        // invoker
+                        // invoker  使用ProxyFactory 生成 invoker对象
                         Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));
+                        // 创建  DelegateProvoderMetaInvoker 对象
                         DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
                         //  registryURL.getProtocol= registry
                         //   filter ---->listener --->registryProtocol   ( 这里使用了wapper 包装机制)
-
+                        //  filter ----> listener ----> dubboProtocol    服务暴露
                         Exporter<?> exporter = protocol.export(wrapperInvoker);
+                        // 添加exporter
                         exporters.add(exporter);
                     }
-                } else {
+                } else { // 没有注册中心
                     Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, url);
                     DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
 
@@ -532,7 +535,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void exportLocal(URL url) {
+    private void exportLocal(URL url) {  // 本地服务暴露
         if (!Constants.LOCAL_PROTOCOL.equalsIgnoreCase(url.getProtocol())) {
             URL local = URL.valueOf(url.toFullString())
                     .setProtocol(Constants.LOCAL_PROTOCOL)

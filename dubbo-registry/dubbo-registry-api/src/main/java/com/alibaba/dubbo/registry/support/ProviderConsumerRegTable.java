@@ -28,16 +28,29 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @date 2017/11/23
+ *
+ * 本地服务注册表
  */
 public class ProviderConsumerRegTable {
+
+    // 服务提供者
     public static ConcurrentHashMap<String, Set<ProviderInvokerWrapper>> providerInvokers = new ConcurrentHashMap<String, Set<ProviderInvokerWrapper>>();
+    // 服务消费者
     public static ConcurrentHashMap<String, Set<ConsumerInvokerWrapper>> consumerInvokers = new ConcurrentHashMap<String, Set<ConsumerInvokerWrapper>>();
 
+    /**
+     *
+     * @param invoker  invoker
+     * @param registryUrl  注册中心URL
+     * @param providerUrl  服务提供者URL
+     */
     public static void registerProvider(Invoker invoker, URL registryUrl, URL providerUrl) {
+        // 服务提供者包装类
         ProviderInvokerWrapper wrapperInvoker = new ProviderInvokerWrapper(invoker, registryUrl, providerUrl);
-        String serviceUniqueName = providerUrl.getServiceKey();
+        // 唯一的key
+        String serviceUniqueName = providerUrl.getServiceKey();// 获得serviceKey
         Set<ProviderInvokerWrapper> invokers = providerInvokers.get(serviceUniqueName);
-        if (invokers == null) {
+        if (invokers == null) {// 没有就创建 设置
             providerInvokers.putIfAbsent(serviceUniqueName, new ConcurrentHashSet<ProviderInvokerWrapper>());
             invokers = providerInvokers.get(serviceUniqueName);
         }

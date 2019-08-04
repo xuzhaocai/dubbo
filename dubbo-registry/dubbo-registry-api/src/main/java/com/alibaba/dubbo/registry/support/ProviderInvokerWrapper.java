@@ -29,8 +29,8 @@ public class ProviderInvokerWrapper<T> implements Invoker {
     private Invoker<T> invoker;
     private URL originUrl;
     private URL registryUrl;
-    private URL providerUrl;
-    private volatile boolean isReg;
+    private URL providerUrl; // 服务提供者 URL
+    private volatile boolean isReg;  // 是否注册的一个标志
 
     public ProviderInvokerWrapper(Invoker<T> invoker,URL registryUrl,URL providerUrl) {
         this.invoker = invoker;

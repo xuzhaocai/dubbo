@@ -68,7 +68,7 @@ public class Exchangers {
         if (handler == null) {
             throw new IllegalArgumentException("handler == null");
         }
-        url = url.addParameterIfAbsent(Constants.CODEC_KEY, "exchange");
+        url = url.addParameterIfAbsent(Constants.CODEC_KEY, "exchange"); // 如果没有codec  的话 就设置为exchange
         return getExchanger(url).bind(url, handler);
     }
 
@@ -112,7 +112,7 @@ public class Exchangers {
     }
 
     public static Exchanger getExchanger(URL url) {
-        String type = url.getParameter(Constants.EXCHANGER_KEY, Constants.DEFAULT_EXCHANGER);
+        String type = url.getParameter(Constants.EXCHANGER_KEY, Constants.DEFAULT_EXCHANGER);  // 获取exchanger  缺省header
         return getExchanger(type);
     }
 

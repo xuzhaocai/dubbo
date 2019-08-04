@@ -33,6 +33,8 @@ public abstract class AbstractExporter<T> implements Exporter<T> {
     private volatile boolean unexported = false;
 
     public AbstractExporter(Invoker<T> invoker) {
+
+        // 验证
         if (invoker == null)
             throw new IllegalStateException("service invoker == null");
         if (invoker.getInterface() == null)

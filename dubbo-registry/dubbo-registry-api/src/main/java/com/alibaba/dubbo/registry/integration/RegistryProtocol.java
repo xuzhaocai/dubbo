@@ -125,29 +125,32 @@ public class RegistryProtocol implements Protocol {
     }
 
     public void register(URL registryUrl, URL registedProviderUrl) {
+        // 获取对应的 registry 对象
         Registry registry = registryFactory.getRegistry(registryUrl);
-        registry.register(registedProviderUrl);
+        registry.register(registedProviderUrl);// 注册
     }
 
     @Override
     public <T> Exporter<T> export(final Invoker<T> originInvoker) throws RpcException {
-        //export invoker
+        //export invoker  暴露服务
         final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker);
-
+        // 获得注册中心URL
         URL registryUrl = getRegistryUrl(originInvoker);
 
-        //registry provider
+        //registry provider   获得注册中心对象
         final Registry registry = getRegistry(originInvoker);
+
+        // 获得服务提供者URL
         final URL registeredProviderUrl = getRegisteredProviderUrl(originInvoker);
 
         //to judge to delay publish whether or not
         boolean register = registeredProviderUrl.getParameter("register", true);
-
+        // 向本地服务注册表注册服务
         ProviderConsumerRegTable.registerProvider(originInvoker, registryUrl, registeredProviderUrl);
 
-        if (register) {
+        if (register) {  // 向注册中心注册自己
             register(registryUrl, registeredProviderUrl);
-            ProviderConsumerRegTable.getProviderWrapper(originInvoker).setReg(true);
+            ProviderConsumerRegTable.getProviderWrapper(originInvoker).setReg(true);  // 设置注册标志
         }
 
         // Subscribe the override data
@@ -159,7 +162,7 @@ public class RegistryProtocol implements Protocol {
         //Ensure that a new exporter instance is returned every time export
         return new DestroyableExporter<T>(exporter, originInvoker, overrideSubscribeUrl, registeredProviderUrl);
     }
-
+    // 暴露服务
     @SuppressWarnings("unchecked")
     private <T> ExporterChangeableWrapper<T> doLocalExport(final Invoker<T> originInvoker) {
         String key = getCacheKey(originInvoker);
@@ -168,6 +171,8 @@ public class RegistryProtocol implements Protocol {
             synchronized (bounds) {
                 exporter = (ExporterChangeableWrapper<T>) bounds.get(key);
                 if (exporter == null) {
+
+                    // 封装 InvokerDelegete
                     final Invoker<?> invokerDelegete = new InvokerDelegete<T>(originInvoker, getProviderUrl(originInvoker));
                     exporter = new ExporterChangeableWrapper<T>((Exporter<T>) protocol.export(invokerDelegete), originInvoker);/// dubbo protocol
                     bounds.put(key, exporter);
@@ -330,7 +335,7 @@ public class RegistryProtocol implements Protocol {
         }
         bounds.clear();
     }
-    // InvokerDelegete
+    // InvokerDelegete  委托类
     public static class InvokerDelegete<T> extends InvokerWrapper<T> {
         private final Invoker<T> invoker;
 
@@ -342,9 +347,9 @@ public class RegistryProtocol implements Protocol {
             super(invoker, url);
             this.invoker = invoker;
         }
-
+        // 获取invoker
         public Invoker<T> getInvoker() {
-            if (invoker instanceof InvokerDelegete) {
+            if (invoker instanceof InvokerDelegete) {  // 如果是 委托类的话，就获取委托类里面的那个
                 return ((InvokerDelegete<T>) invoker).getInvoker();
             } else {
                 return invoker;
