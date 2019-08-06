@@ -50,7 +50,7 @@ public class Transporters {
         ChannelHandler handler;
         if (handlers.length == 1) {
             handler = handlers[0];
-        } else {
+        } else {   // 多个channal  对 Channel分发
             handler = new ChannelHandlerDispatcher(handlers);
         }
         return getTransporter().bind(url, handler);
@@ -75,7 +75,7 @@ public class Transporters {
         return getTransporter().connect(url, handler);
     }
 
-    public static Transporter getTransporter() {
+    public static Transporter getTransporter() {  // 获取transporter
         return ExtensionLoader.getExtensionLoader(Transporter.class).getAdaptiveExtension();
     }
 

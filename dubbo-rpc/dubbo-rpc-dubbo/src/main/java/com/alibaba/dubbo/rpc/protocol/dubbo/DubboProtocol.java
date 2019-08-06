@@ -270,7 +270,7 @@ public class DubboProtocol extends AbstractProtocol {
             if (server == null) {// 没有找到server 就要创建server
                 serverMap.put(key, createServer(url));
             } else {
-                // server supports reset, use together with override
+                // server supports reset, use together with override  server 支持重置，与覆盖一起使用
                 server.reset(url);   //
             }
         }
@@ -293,7 +293,7 @@ public class DubboProtocol extends AbstractProtocol {
         } catch (RemotingException e) {
             throw new RpcException("Fail to start server(url: " + url + ") " + e.getMessage(), e);
         }
-        str = url.getParameter(Constants.CLIENT_KEY);
+        str = url.getParameter(Constants.CLIENT_KEY);// client
         if (str != null && str.length() > 0) {
             Set<String> supportedTypes = ExtensionLoader.getExtensionLoader(Transporter.class).getSupportedExtensions();
             if (!supportedTypes.contains(str)) {
