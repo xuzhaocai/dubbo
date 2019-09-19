@@ -37,7 +37,7 @@ import java.util.Set;
  */
 public class SpringExtensionFactory implements ExtensionFactory {
     private static final Logger logger = LoggerFactory.getLogger(SpringExtensionFactory.class);
-
+    // 存储context
     private static final Set<ApplicationContext> contexts = new ConcurrentHashSet<ApplicationContext>();
 
     private static final ApplicationListener shutdownHookListener = new ShutdownHookListener();
@@ -45,7 +45,7 @@ public class SpringExtensionFactory implements ExtensionFactory {
     public static void addApplicationContext(ApplicationContext context) {
         contexts.add(context);
 
-        // 使用反射添加 往context 中添加监听钩子
+        // 使用反射添加 往context 中添加监听关闭的钩子
         BeanFactoryUtils.addApplicationListener(context, shutdownHookListener);
     }
 

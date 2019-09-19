@@ -80,6 +80,7 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
         SpringExtensionFactory.addApplicationContext(applicationContext);
+        // 将自己添加到spring  applicationlister 中
         supportedApplicationListener = addApplicationListener(applicationContext, this);
     }
 
@@ -96,7 +97,7 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
     public Service getService() {
         return service;
     }
-
+    // 监听 实现 spring的 ApplicationListener  interface
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (isDelay() && !isExported() && !isUnexported()) {
@@ -119,7 +120,7 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
     @Override
     @SuppressWarnings({"unchecked", "deprecation"})
     public void afterPropertiesSet() throws Exception {
-        if (getProvider() == null) {
+        if (getProvider() == null) { // 第一次的时候肯定是获取不到的
             Map<String, ProviderConfig> providerConfigMap = applicationContext == null ? null : BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, ProviderConfig.class, false, false);
             if (providerConfigMap != null && providerConfigMap.size() > 0) {
                 Map<String, ProtocolConfig> protocolConfigMap = applicationContext == null ? null : BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, ProtocolConfig.class, false, false);

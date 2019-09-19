@@ -41,17 +41,19 @@ import static org.springframework.util.ObjectUtils.containsElement;
  * @see org.springframework.beans.factory.BeanFactoryUtils
  */
 public abstract class BeanFactoryUtils {
-
+    // 从applicationcontext 中获取 ApplicationListener 的实现类 的addApplicationListener 方法， 反射执行
     public static boolean addApplicationListener(ApplicationContext applicationContext, ApplicationListener listener) {
         try {
             // backward compatibility to spring 2.0.1
             Method method = applicationContext.getClass().getMethod("addApplicationListener", ApplicationListener.class);
+            // 执行
             method.invoke(applicationContext, listener);
             return true;
         } catch (Throwable t) {
+
             if (applicationContext instanceof AbstractApplicationContext) {
                 try {
-                    // backward compatibility to spring 2.0.1
+                    // backward compatibility to spring 2.0.1   为了兼容 spring2
                     Method method = AbstractApplicationContext.class.getDeclaredMethod("addListener", ApplicationListener.class);
                     if (!method.isAccessible()) {
                         method.setAccessible(true);
