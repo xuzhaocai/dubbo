@@ -44,6 +44,8 @@ public class SpringExtensionFactory implements ExtensionFactory {
 
     public static void addApplicationContext(ApplicationContext context) {
         contexts.add(context);
+
+        // 使用反射添加 往context 中添加监听钩子
         BeanFactoryUtils.addApplicationListener(context, shutdownHookListener);
     }
 
@@ -94,7 +96,7 @@ public class SpringExtensionFactory implements ExtensionFactory {
 
         return null;
     }
-
+    //  spring  context 关闭监听钩子
     private static class ShutdownHookListener implements ApplicationListener {
         @Override
         public void onApplicationEvent(ApplicationEvent event) {
@@ -102,7 +104,10 @@ public class SpringExtensionFactory implements ExtensionFactory {
                 // we call it anyway since dubbo shutdown hook make sure its destroyAll() is re-entrant.
                 // pls. note we should not remove dubbo shutdown hook when spring framework is present, this is because
                 // its shutdown hook may not be installed.
+                //  获取dubbo 关闭监听钩子
                 DubboShutdownHook shutdownHook = DubboShutdownHook.getDubboShutdownHook();
+
+                // 进行销毁
                 shutdownHook.destroyAll();
             }
         }
