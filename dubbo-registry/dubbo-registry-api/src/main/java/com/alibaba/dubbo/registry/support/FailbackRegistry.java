@@ -126,10 +126,10 @@ public abstract class FailbackRegistry extends AbstractRegistry {
             notified.remove(listener);
         }
     }
-
+    // 注册
     @Override
     public void register(URL url) {
-        super.register(url);
+        super.register(url);  // 检查做缓存
         failedRegistered.remove(url);
         failedUnregistered.remove(url);
         try {

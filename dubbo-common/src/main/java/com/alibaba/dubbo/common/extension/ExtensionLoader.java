@@ -59,15 +59,15 @@ import java.util.regex.Pattern;
 public class ExtensionLoader<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(ExtensionLoader.class);
-
+    // java spi  技术配置位置
     private static final String SERVICES_DIRECTORY = "META-INF/services/";
-
+    // dubbo  spi  技术配置文件位置
     private static final String DUBBO_DIRECTORY = "META-INF/dubbo/";
-
+    // dubbo  spi 框架本身配置文件位置
     private static final String DUBBO_INTERNAL_DIRECTORY = DUBBO_DIRECTORY + "internal/";
 
     private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
-
+    // 缓存 extensionloader
     private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<Class<?>, ExtensionLoader<?>>();
 
     private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<Class<?>, Object>();
@@ -113,9 +113,10 @@ public class ExtensionLoader<T> {
             throw new IllegalArgumentException("Extension type(" + type +
                     ") is not extension, because WITHOUT @" + SPI.class.getSimpleName() + " Annotation!");
         }
-
+        // 先从缓存中查找
         ExtensionLoader<T> loader = (ExtensionLoader<T>) EXTENSION_LOADERS.get(type);
-        if (loader == null) {
+        if (loader == null) {// dubbo 中很多的处理都是这样的 创建先put  然后再get 获取值，保证线程安全
+            //创建
             EXTENSION_LOADERS.putIfAbsent(type, new ExtensionLoader<T>(type));
             loader = (ExtensionLoader<T>) EXTENSION_LOADERS.get(type);
         }

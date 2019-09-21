@@ -69,6 +69,7 @@ public class Exchangers {
             throw new IllegalArgumentException("handler == null");
         }
         url = url.addParameterIfAbsent(Constants.CODEC_KEY, "exchange"); // 如果没有codec  的话 就设置为exchange
+        // exchanger.bind()
         return getExchanger(url).bind(url, handler);
     }
 

@@ -62,6 +62,8 @@ public class AbortPolicyWithReport extends ThreadPoolExecutor.AbortPolicy {
                 e.getTaskCount(), e.getCompletedTaskCount(), e.isShutdown(), e.isTerminated(), e.isTerminating(),
                 url.getProtocol(), url.getIp(), url.getPort());
         logger.warn(msg);
+
+        // 打印栈内存信息
         dumpJStack();
         throw new RejectedExecutionException(msg);
     }
@@ -77,7 +79,7 @@ public class AbortPolicyWithReport extends ThreadPoolExecutor.AbortPolicy {
         if (!guard.tryAcquire()) {
             return;
         }
-
+        //整一个线程来专门打印
         Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
             public void run() {
@@ -98,6 +100,7 @@ public class AbortPolicyWithReport extends ThreadPoolExecutor.AbortPolicy {
                 FileOutputStream jstackStream = null;
                 try {
                     jstackStream = new FileOutputStream(new File(dumpPath, "Dubbo_JStack.log" + "." + dateStr));
+                    //  jstack
                     JVMUtil.jstack(jstackStream);
                 } catch (Throwable t) {
                     logger.error("dump jstack error", t);

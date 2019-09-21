@@ -16,7 +16,7 @@
  */
 
 package com.alibaba.dubbo.common.utils;
-
+// 断言
 public abstract class Assert {
 
     protected Assert() {

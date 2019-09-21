@@ -173,7 +173,7 @@ public final class Version {
     public static void checkDuplicate(Class<?> cls) {
         checkDuplicate(cls, false);
     }
-
+    // 检查
     public static void checkDuplicate(String path, boolean failOnError) {
         try {
             // search in caller's classloader

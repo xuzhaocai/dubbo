@@ -24,7 +24,7 @@ import com.alibaba.dubbo.common.extension.SPI;
 import java.util.concurrent.Executor;
 
 /**
- * ThreadPool
+ * ThreadPool 默认线程池是使用固定
  */
 @SPI("fixed")
 public interface ThreadPool {

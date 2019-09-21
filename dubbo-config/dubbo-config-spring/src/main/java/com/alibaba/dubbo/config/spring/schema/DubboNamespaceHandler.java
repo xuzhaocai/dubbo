@@ -39,9 +39,11 @@ public class DubboNamespaceHandler extends NamespaceHandlerSupport {
     static {
         Version.checkDuplicate(DubboNamespaceHandler.class);
     }
-
+    // 解析dubbo xml 标签
     @Override
     public void init() {
+
+        // 注册 parser
         registerBeanDefinitionParser("application", new DubboBeanDefinitionParser(ApplicationConfig.class, true));
         registerBeanDefinitionParser("module", new DubboBeanDefinitionParser(ModuleConfig.class, true));
         registerBeanDefinitionParser("registry", new DubboBeanDefinitionParser(RegistryConfig.class, true));

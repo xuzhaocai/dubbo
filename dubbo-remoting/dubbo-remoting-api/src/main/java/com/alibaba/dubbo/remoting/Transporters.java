@@ -53,6 +53,8 @@ public class Transporters {
         } else {   // 多个channal  对 Channel分发
             handler = new ChannelHandlerDispatcher(handlers);
         }
+
+        // 真正服务器  
         return getTransporter().bind(url, handler);
     }
 

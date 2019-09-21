@@ -40,7 +40,7 @@ import static org.springframework.util.StringUtils.trimArrayElements;
  * @see ReferenceAnnotationBeanPostProcessor
  * @since 2.5.9
  */
-public class AnnotationBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+    public class AnnotationBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
     /**
      * parse
@@ -80,7 +80,7 @@ public class AnnotationBeanDefinitionParser extends AbstractSingleBeanDefinition
      */
     private void registerReferenceAnnotationBeanPostProcessor(BeanDefinitionRegistry registry) {
 
-        // Register @Reference Annotation Bean Processor
+        // Register @Reference Annotation Bean Processor   注解reference  解析
         BeanRegistrar.registerInfrastructureBean(registry,
                 ReferenceAnnotationBeanPostProcessor.BEAN_NAME, ReferenceAnnotationBeanPostProcessor.class);
 
