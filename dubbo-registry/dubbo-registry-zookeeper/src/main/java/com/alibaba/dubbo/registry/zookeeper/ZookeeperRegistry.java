@@ -48,7 +48,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
     private final static String DEFAULT_ROOT = "dubbo";
 
-    private final String root;
+    private final String root;  //  根路径
 
     private final Set<String> anyServices = new ConcurrentHashSet<String>();
 
@@ -61,9 +61,10 @@ public class ZookeeperRegistry extends FailbackRegistry {
         if (url.isAnyHost()) {
             throw new IllegalStateException("registry address == null");
         }
+        // group     默认dubbo
         String group = url.getParameter(Constants.GROUP_KEY, DEFAULT_ROOT);
         if (!group.startsWith(Constants.PATH_SEPARATOR)) {
-            group = Constants.PATH_SEPARATOR + group;
+            group = Constants.PATH_SEPARATOR + group;   //例如 /dubbo
         }
         this.root = group;
         zkClient = zookeeperTransporter.connect(url);
