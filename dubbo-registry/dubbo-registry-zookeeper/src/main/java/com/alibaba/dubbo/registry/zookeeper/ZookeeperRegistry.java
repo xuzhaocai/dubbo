@@ -67,12 +67,16 @@ public class ZookeeperRegistry extends FailbackRegistry {
             group = Constants.PATH_SEPARATOR + group;   //例如 /dubbo
         }
         this.root = group;
+
+        //默认是使用的curator
         zkClient = zookeeperTransporter.connect(url);
         zkClient.addStateListener(new StateListener() {
             @Override
             public void stateChanged(int state) {
-                if (state == RECONNECTED) {
+                if (state == RECONNECTED) { // 状态是 已连接的时候
                     try {
+
+                        //
                         recover();
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);

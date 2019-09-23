@@ -38,33 +38,38 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * FailbackRegistry. (SPI, Prototype, ThreadSafe)
- *
+ * 主要是封装了失败重试
  */
 public abstract class FailbackRegistry extends AbstractRegistry {
 
-    // Scheduled executor service
+    // Scheduled executor service  定时线程池
     private final ScheduledExecutorService retryExecutor = Executors.newScheduledThreadPool(1, new NamedThreadFactory("DubboRegistryFailedRetryTimer", true));
-
+    // 定时任务 默认是5s
     // Timer for failure retry, regular check if there is a request for failure, and if there is, an unlimited retry
     private final ScheduledFuture<?> retryFuture;
-
+    // 注册失败
     private final Set<URL> failedRegistered = new ConcurrentHashSet<URL>();
-
+    // 注销失败
     private final Set<URL> failedUnregistered = new ConcurrentHashSet<URL>();
-
+    // 订阅失败
     private final ConcurrentMap<URL, Set<NotifyListener>> failedSubscribed = new ConcurrentHashMap<URL, Set<NotifyListener>>();
-
+    // 取消订阅失败
     private final ConcurrentMap<URL, Set<NotifyListener>> failedUnsubscribed = new ConcurrentHashMap<URL, Set<NotifyListener>>();
-
+    // 通知失败
     private final ConcurrentMap<URL, Map<NotifyListener, List<URL>>> failedNotified = new ConcurrentHashMap<URL, Map<NotifyListener, List<URL>>>();
 
     /**
      * The time in milliseconds the retryExecutor will wait
+     *
+     * 重试时间间隔
      */
     private final int retryPeriod;
 
     public FailbackRegistry(URL url) {
         super(url);
+
+
+        //retry.period   默认是5000 ms  5s
         this.retryPeriod = url.getParameter(Constants.REGISTRY_RETRY_PERIOD_KEY, Constants.DEFAULT_REGISTRY_RETRY_PERIOD);
         this.retryFuture = retryExecutor.scheduleWithFixedDelay(new Runnable() {
             @Override
@@ -307,7 +312,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
         }
     }
 
-    // Retry the failed actions
+    // Retry the failed actions  重试动作
     protected void retry() {
         if (!failedRegistered.isEmpty()) {
             Set<URL> failed = new HashSet<URL>(failedRegistered);

@@ -32,7 +32,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * AbstractRegistryFactory. (SPI, Singleton, ThreadSafe)
- *
+ * 主要是缓存不同的注册中心  ，同时提供了创建注册中心对象的 抽象方法供子类工厂实现
  * @see com.alibaba.dubbo.registry.RegistryFactory
  */
 public abstract class AbstractRegistryFactory implements RegistryFactory {
@@ -48,7 +48,7 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
 
     /**
      * Get all registries
-     *
+     * 获取所有的registry
      * @return all registries
      */
     public static Collection<Registry> getRegistries() {
@@ -64,6 +64,8 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
             LOGGER.info("Close all registries " + getRegistries());
         }
         // Lock up the registry shutdown process
+
+        // 循环注销各个registry  ， 最后再清空registry缓存
         LOCK.lock();
         try {
             for (Registry registry : getRegistries()) {
@@ -83,16 +85,22 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
     @Override
     public Registry getRegistry(URL url) {
         url = url.setPath(RegistryService.class.getName())
+                // interface
                 .addParameter(Constants.INTERFACE_KEY, RegistryService.class.getName())
+                // export  refer
                 .removeParameters(Constants.EXPORT_KEY, Constants.REFER_KEY);
         String key = url.toServiceString();
         // Lock the registry access process to ensure a single instance of the registry
         LOCK.lock();
         try {
+
+            // 从缓存中获取， 有就返回， 没有就创建
             Registry registry = REGISTRIES.get(key);
             if (registry != null) {
                 return registry;
             }
+
+            // 创建方法由子类实现  模板方法设计模式
             registry = createRegistry(url);
             if (registry == null) {
                 throw new IllegalStateException("Can not create registry " + url);
@@ -104,7 +112,7 @@ public abstract class AbstractRegistryFactory implements RegistryFactory {
             LOCK.unlock();
         }
     }
-
+    // 由子类实现的 创建方法， 模板方法设计模式
     protected abstract Registry createRegistry(URL url);
 
 }

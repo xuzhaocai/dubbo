@@ -71,7 +71,7 @@ public abstract class AbstractRegistry implements Registry {
     private final Set<URL> registered = new ConcurrentHashSet<URL>();
     private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<URL, Set<NotifyListener>>();
     private final ConcurrentMap<URL, Map<String, List<URL>>> notified = new ConcurrentHashMap<URL, Map<String, List<URL>>>();
-    private URL registryUrl;
+    private URL registryUrl;  // 注册url
     // Local disk cache file
     private File file;
 
