@@ -78,6 +78,8 @@ import java.util.concurrent.RejectedExecutionException;
  * expensive workaround in {@code JdkFutureAdapters}. However, when possible, it
  * is more efficient and reliable to create a {@code ListenableFuture} directly.
  */
+
+// 添加监听属性
 public interface ListenableFuture<V> extends Future<V> {
     /**
      * Registers a listener to be {@linkplain Executor#execute(Runnable) run} on

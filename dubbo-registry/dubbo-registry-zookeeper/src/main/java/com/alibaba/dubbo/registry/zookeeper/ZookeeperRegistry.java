@@ -112,7 +112,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
             logger.warn("Failed to close zookeeper client " + getUrl() + ", cause: " + e.getMessage(), e);
         }
     }
-
+    // 进行注册
     @Override
     protected void doRegister(URL url) {
         try {
@@ -121,7 +121,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
             throw new RpcException("Failed to register " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
         }
     }
-
+    //进行下线
     @Override
     protected void doUnregister(URL url) {
         try {
@@ -130,10 +130,12 @@ public class ZookeeperRegistry extends FailbackRegistry {
             throw new RpcException("Failed to unregister " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
         }
     }
-
+    // 进行订阅
     @Override
     protected void doSubscribe(final URL url, final NotifyListener listener) {
         try {
+
+            // *
             if (Constants.ANY_VALUE.equals(url.getServiceInterface())) {
                 String root = toRootPath();
                 ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners.get(url);
@@ -170,7 +172,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 }
             } else {
                 List<URL> urls = new ArrayList<URL>();
-                for (String path : toCategoriesPath(url)) {
+                for (String path : toCategoriesPath(url)) { //分类
                     ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners.get(url);
                     if (listeners == null) {
                         zkListeners.putIfAbsent(url, new ConcurrentHashMap<NotifyListener, ChildListener>());
@@ -254,7 +256,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         }
         return toRootDir() + URL.encode(name);
     }
-
+    // 对url进行分类category  是* 的话 ，就是providers ，comsumers ， routers ，configurators
     private String[] toCategoriesPath(URL url) {
         String[] categories;
         if (Constants.ANY_VALUE.equals(url.getParameter(Constants.CATEGORY_KEY))) {

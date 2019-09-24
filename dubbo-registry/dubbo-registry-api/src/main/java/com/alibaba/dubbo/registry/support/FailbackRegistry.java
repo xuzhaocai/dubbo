@@ -161,7 +161,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
             failedRegistered.add(url);
         }
     }
-
+    //下线
     @Override
     public void unregister(URL url) {
         super.unregister(url);
@@ -454,7 +454,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
         ExecutorUtil.gracefulShutdown(retryExecutor, retryPeriod);
     }
 
-    // ==== Template method ====
+    // ==== Template method ====  模板方法
 
     protected abstract void doRegister(URL url);
 

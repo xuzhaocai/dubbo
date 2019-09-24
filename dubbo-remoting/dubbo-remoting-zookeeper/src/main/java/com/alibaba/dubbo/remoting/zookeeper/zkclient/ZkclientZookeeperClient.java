@@ -42,13 +42,13 @@ public class ZkclientZookeeperClient extends AbstractZookeeperClient<IZkChildLis
             @Override
             public void handleStateChanged(KeeperState state) throws Exception {
                 ZkclientZookeeperClient.this.state = state;
-                if (state == KeeperState.Disconnected) {
+                if (state == KeeperState.Disconnected) {// 断线状态
                     stateChanged(StateListener.DISCONNECTED);
-                } else if (state == KeeperState.SyncConnected) {
+                } else if (state == KeeperState.SyncConnected) {// 连接状态
                     stateChanged(StateListener.CONNECTED);
                 }
             }
-
+            // 创建一个新会话的时候
             @Override
             public void handleNewSession() throws Exception {
                 stateChanged(StateListener.RECONNECTED);

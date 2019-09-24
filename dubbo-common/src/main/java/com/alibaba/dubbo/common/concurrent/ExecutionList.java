@@ -50,7 +50,7 @@ public final class ExecutionList {
     private RunnableExecutorPair runnables;
 
     private boolean executed;
-
+    //默认线程池
     private static final Executor DEFAULT_EXECUTOR = new ThreadPoolExecutor(1, 10, 60000L, TimeUnit.MILLISECONDS, new SynchronousQueue<Runnable>(), new NamedThreadFactory("DubboFutureCallbackDefault", true));
 
     /**
@@ -84,7 +84,7 @@ public final class ExecutionList {
         if (runnable == null) {
             throw new NullPointerException("Runnable can not be null!");
         }
-        if (executor == null) {
+        if (executor == null) {  // 使用默认的线程池
             logger.info("Executor for listenablefuture is null, will use default executor!");
             executor = DEFAULT_EXECUTOR;
         }
@@ -92,7 +92,8 @@ public final class ExecutionList {
         // new pair so that another thread can't run the list out from under us.
         // We only add to the list if we have not yet started execution.
         synchronized (this) {
-            if (!executed) {
+            if (!executed) {   // 没有在执行的时候需要添加到链表的前面
+                // 最后添加的  遍历的时候在前面  ，到最后执行的时候会统一倒序 ，然后按照添加时的先后顺序往线程池投寄
                 runnables = new RunnableExecutorPair(runnable, executor, runnables);
                 return;
             }
@@ -101,6 +102,8 @@ public final class ExecutionList {
         // getting called before some of the previously added runnables, but we're
         // OK with that.  If we want to change the contract to guarantee ordering
         // among runnables we'd have to modify the logic here to allow it.
+
+        // executed 为true的时候  ， 立即执行
         executeListener(runnable, executor);
     }
 
@@ -137,6 +140,7 @@ public final class ExecutionList {
 
         // N.B. All writes to the list and the next pointers must have happened before the above
         // synchronized block, so we can iterate the list without the lock held here.
+        // 把顺序正过来（之前是后添加的在头上）
         RunnableExecutorPair reversedList = null;
         while (list != null) {
             RunnableExecutorPair tmp = list;
@@ -145,6 +149,7 @@ public final class ExecutionList {
             reversedList = tmp;
         }
         while (reversedList != null) {
+            // 往线程池投递
             executeListener(reversedList.runnable, reversedList.executor);
             reversedList = reversedList.next;
         }
@@ -156,6 +161,7 @@ public final class ExecutionList {
      */
     private static void executeListener(Runnable runnable, Executor executor) {
         try {
+            // 往线程池投递
             executor.execute(runnable);
         } catch (RuntimeException e) {
             // Log it and keep going, bad runnable and/or executor.  Don't

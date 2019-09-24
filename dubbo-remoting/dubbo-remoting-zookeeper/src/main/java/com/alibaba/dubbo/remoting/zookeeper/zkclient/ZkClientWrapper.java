@@ -89,46 +89,46 @@ public class ZkClientWrapper {
             }
         });
     }
-
+    //判断是否是连接状态
     public boolean isConnected() {
         return client != null && state == KeeperState.SyncConnected;
     }
-
+    // 创建永久节点
     public void createPersistent(String path) {
         Assert.notNull(client, new IllegalStateException("Zookeeper is not connected yet!"));
         client.createPersistent(path, true);
     }
-
+    //创建临时节点
     public void createEphemeral(String path) {
         Assert.notNull(client, new IllegalStateException("Zookeeper is not connected yet!"));
         client.createEphemeral(path);
     }
-
+    //删除节点
     public void delete(String path) {
         Assert.notNull(client, new IllegalStateException("Zookeeper is not connected yet!"));
         client.delete(path);
     }
-
+    //获取节点的子节点列表
     public List<String> getChildren(String path) {
         Assert.notNull(client, new IllegalStateException("Zookeeper is not connected yet!"));
         return client.getChildren(path);
     }
-
+    // 判断是否存在
     public boolean exists(String path) {
         Assert.notNull(client, new IllegalStateException("Zookeeper is not connected yet!"));
         return client.exists(path);
     }
-
+    // 关闭
     public void close() {
         Assert.notNull(client, new IllegalStateException("Zookeeper is not connected yet!"));
         client.close();
     }
-
+    // 订阅子节点
     public List<String> subscribeChildChanges(String path, final IZkChildListener listener) {
         Assert.notNull(client, new IllegalStateException("Zookeeper is not connected yet!"));
         return client.subscribeChildChanges(path, listener);
     }
-
+    //取消订阅
     public void unsubscribeChildChanges(String path, IZkChildListener listener) {
         Assert.notNull(client, new IllegalStateException("Zookeeper is not connected yet!"));
         client.unsubscribeChildChanges(path, listener);

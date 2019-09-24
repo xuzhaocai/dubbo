@@ -33,8 +33,8 @@ public abstract class AbstractZookeeperClient<TargetChildListener> implements Zo
 
     protected static final Logger logger = LoggerFactory.getLogger(AbstractZookeeperClient.class);
 
-    private final URL url;
-
+    private final URL url;  // 注册中心的url
+    // 状态listener 列表  CopyOnWriteArraySet：线程安全
     private final Set<StateListener> stateListeners = new CopyOnWriteArraySet<StateListener>();
 
     private final ConcurrentMap<String, ConcurrentMap<ChildListener, TargetChildListener>> childListeners = new ConcurrentHashMap<String, ConcurrentMap<ChildListener, TargetChildListener>>();
@@ -107,7 +107,7 @@ public abstract class AbstractZookeeperClient<TargetChildListener> implements Zo
             }
         }
     }
-
+    // 状态改变的时候， 进行通知
     protected void stateChanged(int state) {
         for (StateListener sessionListener : getSessionListeners()) {
             sessionListener.stateChanged(state);

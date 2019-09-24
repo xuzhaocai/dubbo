@@ -32,7 +32,7 @@ public class ListenableFutureTask<V> extends FutureTask<V>
     // some valid reasons such as BoundedQueueExecutorService to allow extends but it
     // would be nice to make it final to avoid unintended usage.
 
-    // The execution list to hold our listeners.
+    // The execution list to hold our listeners.     使用执行列表保存 listener
     private final ExecutionList executionList = new ExecutionList();
 
     /**
@@ -83,6 +83,7 @@ public class ListenableFutureTask<V> extends FutureTask<V>
 
     /**
      * Internal implementation detail used to invoke the listeners.
+     * 实现FutureTask done方法  。 这个方法会在run方法执行完成后调用
      */
     @Override
     protected void done() {

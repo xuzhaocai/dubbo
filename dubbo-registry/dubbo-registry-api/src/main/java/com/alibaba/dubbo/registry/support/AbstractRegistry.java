@@ -65,19 +65,24 @@ public abstract class AbstractRegistry implements Registry {
     private final Properties properties = new Properties();
     // File cache timing writing
     private final ExecutorService registryCacheExecutor = Executors.newFixedThreadPool(1, new NamedThreadFactory("DubboSaveRegistryCache", true));
-    // Is it synchronized to save the file
+    // Is it synchronized to save the file  是否同步保存到file中
+
     private final boolean syncSaveFile;
     private final AtomicLong lastCacheChanged = new AtomicLong();
     private final Set<URL> registered = new ConcurrentHashSet<URL>();
+
+    // 已经订阅的
     private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<URL, Set<NotifyListener>>();
+    // 已经通知的
     private final ConcurrentMap<URL, Map<String, List<URL>>> notified = new ConcurrentHashMap<URL, Map<String, List<URL>>>();
     private URL registryUrl;  // 注册url
     // Local disk cache file
     private File file;
 
+
     public AbstractRegistry(URL url) {
-        setUrl(url);
-        // Start file save timer
+        setUrl(url);// 设置url
+        // Start file save timer  是否同步保存到文件中
         syncSaveFile = url.getParameter(Constants.REGISTRY_FILESAVE_SYNC_KEY, false);
         String filename = url.getParameter(Constants.FILE_KEY, System.getProperty("user.home") + "/.dubbo/dubbo-registry-" + url.getParameter(Constants.APPLICATION_KEY) + "-" + url.getAddress() + ".cache");
         File file = null;
@@ -263,7 +268,7 @@ public abstract class AbstractRegistry implements Registry {
         }
         return result;
     }
-
+    // 注册
     @Override
     public void register(URL url) {
         if (url == null) {
@@ -274,7 +279,7 @@ public abstract class AbstractRegistry implements Registry {
         }
         registered.add(url);
     }
-
+    // 取消注册
     @Override
     public void unregister(URL url) {
         if (url == null) {
@@ -285,7 +290,7 @@ public abstract class AbstractRegistry implements Registry {
         }
         registered.remove(url);
     }
-
+    // 订阅
     @Override
     public void subscribe(URL url, NotifyListener listener) {
         if (url == null) {
@@ -304,7 +309,7 @@ public abstract class AbstractRegistry implements Registry {
         }
         listeners.add(listener);
     }
-
+    // 取消订阅
     @Override
     public void unsubscribe(URL url, NotifyListener listener) {
         if (url == null) {
@@ -410,6 +415,8 @@ public abstract class AbstractRegistry implements Registry {
             String category = entry.getKey();
             List<URL> categoryList = entry.getValue();
             categoryNotified.put(category, categoryList);
+
+            // 保存到properties中
             saveProperties(url);
             listener.notify(categoryList);
         }
@@ -434,10 +441,11 @@ public abstract class AbstractRegistry implements Registry {
                 }
             }
             properties.setProperty(url.getServiceKey(), buf.toString());
+            // 版本
             long version = lastCacheChanged.incrementAndGet();
-            if (syncSaveFile) {
+            if (syncSaveFile) {// 同步
                 doSaveProperties(version);
-            } else {
+            } else { //异步
                 registryCacheExecutor.execute(new SaveProperties(version));
             }
         } catch (Throwable t) {

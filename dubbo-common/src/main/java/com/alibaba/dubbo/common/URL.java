@@ -366,6 +366,10 @@ public final class URL implements Serializable {
         return address.toString();
     }
 
+    /**
+     * 获取备份的url
+     * @return
+     */
     public List<URL> getBackupUrls() {
         List<URL> urls = new ArrayList<URL>();
         urls.add(this);
