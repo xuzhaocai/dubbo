@@ -12,7 +12,10 @@ public class ExtensionTest {
 
 
         Parser textParser = extensionLoader.getExtension("text");
+        Parser defaultExtension = extensionLoader.getDefaultExtension();
 
+
+        System.out.println(defaultExtension);
         textParser.parser("ss");
     }
 }
