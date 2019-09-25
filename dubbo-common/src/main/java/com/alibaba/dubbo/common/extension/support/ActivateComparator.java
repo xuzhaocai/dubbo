@@ -24,6 +24,8 @@ import java.util.Comparator;
 
 /**
  * OrderComparetor
+ *
+ * 计算filter顺序
  */
 public class ActivateComparator implements Comparator<Object> {
 
