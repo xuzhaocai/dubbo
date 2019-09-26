@@ -19,6 +19,8 @@ package com.alibaba.dubbo.common.bytecode;
 import com.alibaba.dubbo.common.utils.ClassHelper;
 import com.alibaba.dubbo.common.utils.ReflectUtils;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -104,18 +106,20 @@ public abstract class Wrapper {
 
         Wrapper ret = WRAPPER_MAP.get(c);
         if (ret == null) {
-            ret = makeWrapper(c);
+            ret = makeWrapper(c);// 创建mapper
+
+
             WRAPPER_MAP.put(c, ret);
         }
         return ret;
     }
 
     private static Wrapper makeWrapper(Class<?> c) {
-        if (c.isPrimitive())
+        if (c.isPrimitive())// 是否原始类型   （boolean、char、byte、short、int、long、float、double）。
             throw new IllegalArgumentException("Can not create wrapper for primitive type: " + c);
 
-        String name = c.getName();
-        ClassLoader cl = ClassHelper.getClassLoader(c);
+        String name = c.getName(); //com.alibaba.dubbo.demo.DemoService
+        ClassLoader cl = ClassHelper.getClassLoader(c);// 获取classloader
 
         StringBuilder c1 = new StringBuilder("public void setPropertyValue(Object o, String n, Object v){ ");
         StringBuilder c2 = new StringBuilder("public Object getPropertyValue(Object o, String n){ ");
@@ -242,6 +246,7 @@ public abstract class Wrapper {
         cc.addMethod(c3.toString());
 
         try {
+
             Class<?> wc = cc.toClass();
             // setup static field.
             wc.getField("pts").set(null, pts);

@@ -97,7 +97,7 @@ public class ExtensionLoader<T> {
         this.type = type;
         objectFactory = (type == ExtensionFactory.class ? null : ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension());
     }
-
+    // 判断有没有@SPI注解
     private static <T> boolean withExtensionAnnotation(Class<T> type) {
         return type.isAnnotationPresent(SPI.class);
     }
@@ -123,6 +123,10 @@ public class ExtensionLoader<T> {
         return loader;
     }
 
+    /**
+     * 获取classloader
+     * @return
+     */
     private static ClassLoader findClassLoader() {
         return ExtensionLoader.class.getClassLoader();
     }

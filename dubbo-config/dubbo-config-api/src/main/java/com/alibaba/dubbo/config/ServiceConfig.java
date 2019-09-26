@@ -76,7 +76,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
     private static final ProxyFactory proxyFactory = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getAdaptiveExtension();
 
     private static final Map<String, Integer> RANDOM_PORT_MAP = new HashMap<String, Integer>();
-
+    // 延时暴露
     private static final ScheduledExecutorService delayExportExecutor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("DubboServiceDelayExporter", true));
     private final List<URL> urls = new ArrayList<URL>();
     private final List<Exporter<?>> exporters = new ArrayList<Exporter<?>>();
@@ -205,7 +205,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         if (export != null && !export) {
             return;
         }
-
+        //  延时暴露
         if (delay != null && delay > 0) {
             delayExportExecutor.schedule(new Runnable() {
                 @Override
@@ -269,15 +269,15 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 generic = Boolean.TRUE.toString();
             }
         } else {
-            try {
+            try {// 创建class对象
                 interfaceClass = Class.forName(interfaceName, true, Thread.currentThread()
                         .getContextClassLoader());
             } catch (ClassNotFoundException e) {
                 throw new IllegalStateException(e.getMessage(), e);
-            }
+            }//  检查方法是否在接口中
             checkInterfaceAndMethods(interfaceClass, methods);
-            checkRef();
-            generic = Boolean.FALSE.toString();
+            checkRef();// 检查实现类
+            generic = Boolean.FALSE.toString();// 不是泛化
         }
         if (local != null) {
             if ("true".equals(local)) {
@@ -364,15 +364,15 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
     private void doExportUrlsFor1Protocol(ProtocolConfig protocolConfig, List<URL> registryURLs) {
         String name = protocolConfig.getName();
         if (name == null || name.length() == 0) {
-            name = "dubbo";
+            name = "dubbo";/// 默认是dubbo
         }
 
         Map<String, String> map = new HashMap<String, String>();
-        map.put(Constants.SIDE_KEY, Constants.PROVIDER_SIDE);
-        map.put(Constants.DUBBO_VERSION_KEY, Version.getProtocolVersion());
-        map.put(Constants.TIMESTAMP_KEY, String.valueOf(System.currentTimeMillis()));
+        map.put(Constants.SIDE_KEY, Constants.PROVIDER_SIDE);// side 哪一端
+        map.put(Constants.DUBBO_VERSION_KEY, Version.getProtocolVersion());// 版本
+        map.put(Constants.TIMESTAMP_KEY, String.valueOf(System.currentTimeMillis()));// timestamp
         if (ConfigUtils.getPid() > 0) {
-            map.put(Constants.PID_KEY, String.valueOf(ConfigUtils.getPid()));
+            map.put(Constants.PID_KEY, String.valueOf(ConfigUtils.getPid()));// pid
         }
         appendParameters(map, application);
         appendParameters(map, module);
@@ -435,7 +435,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             } // end of methods for
         }
 
-        if (ProtocolUtils.isGeneric(generic)) {
+        if (ProtocolUtils.isGeneric(generic)) {//泛化调用
             map.put(Constants.GENERIC_KEY, generic);
             map.put(Constants.METHODS_KEY, Constants.ANY_VALUE);
         } else {
@@ -459,7 +459,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 map.put(Constants.TOKEN_KEY, token);
             }
         }
-        if (Constants.LOCAL_PROTOCOL.equals(protocolConfig.getName())) {
+        if (Constants.LOCAL_PROTOCOL.equals(protocolConfig.getName())) {// 本地injvm
             protocolConfig.setRegister(false);
             map.put("notify", "false");
         }
@@ -468,9 +468,9 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         if ((contextPath == null || contextPath.length() == 0) && provider != null) {
             contextPath = provider.getContextpath();
         }
-
+        //  host
         String host = this.findConfigedHosts(protocolConfig, registryURLs, map);
-        Integer port = this.findConfigedPorts(protocolConfig, name, map);
+        Integer port = this.findConfigedPorts(protocolConfig, name, map);// port
         URL url = new URL(name, host, port, (contextPath == null || contextPath.length() == 0 ? "" : contextPath + "/") + path, map);
 
         if (ExtensionLoader.getExtensionLoader(ConfiguratorFactory.class)
@@ -484,11 +484,11 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         if (!Constants.SCOPE_NONE.toString().equalsIgnoreCase(scope)) {
 
             // export to local if the config is not remote (export to remote only when config is remote)
-            if (!Constants.SCOPE_REMOTE.toString().equalsIgnoreCase(scope)) {  // 本地服务暴露
+            if (!Constants.SCOPE_REMOTE.toString().equalsIgnoreCase(scope)) {  // 本地服务暴露   不是remote就本地暴露，如果不配置scope也进行本地暴露
                 exportLocal(url);
             }
             // export to remote if the config is not local (export to local only when config is local)
-            if (!Constants.SCOPE_LOCAL.toString().equalsIgnoreCase(scope)) {  // 远程服务暴露
+            if (!Constants.SCOPE_LOCAL.toString().equalsIgnoreCase(scope)) {  // 远程服务暴露    不是local
                 if (logger.isInfoEnabled()) {
                     logger.info("Export dubbo service " + interfaceClass.getName() + " to url " + url);
                 }
