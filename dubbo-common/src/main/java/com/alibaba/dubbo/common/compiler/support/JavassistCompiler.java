@@ -34,6 +34,8 @@ import java.util.regex.Pattern;
 
 /**
  * JavassistCompiler. (SPI, Singleton, ThreadSafe)
+ *
+ * 使用javassist编译生成代理
  */
 public class JavassistCompiler extends AbstractCompiler {
 

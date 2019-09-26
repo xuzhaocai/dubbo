@@ -786,15 +786,19 @@ public class ExtensionLoader<T> {
      * @return
      */
     private Class<?> createAdaptiveExtensionClass() {
+
+        // 拼装代理类的java代码
         String code = createAdaptiveExtensionClassCode();
-
-
-
         ClassLoader classLoader = findClassLoader();
         com.alibaba.dubbo.common.compiler.Compiler compiler = ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.common.compiler.Compiler.class).getAdaptiveExtension();
+        // 进行编译
         return compiler.compile(code, classLoader);
     }
 
+    /**
+     * 拼装代理类的java 代码
+     * @return
+     */
     private String createAdaptiveExtensionClassCode() {
         StringBuilder codeBuilder = new StringBuilder();
         Method[] methods = type.getMethods();
@@ -879,25 +883,25 @@ public class ExtensionLoader<T> {
                                 + ": not found url parameter or url attribute in parameters of method " + method.getName());
                     }
 
-                    // Null point check
+                    // Null point check  验证有get方法返回值是URL的参数 是否为null  然后get到的URL 是否为null
                     String s = String.format("\nif (arg%d == null) throw new IllegalArgumentException(\"%s argument == null\");",
                             urlTypeIndex, pts[urlTypeIndex].getName());
                     code.append(s);
                     s = String.format("\nif (arg%d.%s() == null) throw new IllegalArgumentException(\"%s argument %s() == null\");",
                             urlTypeIndex, attribMethod, pts[urlTypeIndex].getName(), attribMethod);
                     code.append(s);
-
+                    // URL url = argX.getXXXX();
                     s = String.format("%s url = arg%d.%s();", URL.class.getName(), urlTypeIndex, attribMethod);
                     code.append(s);
                 }
 
                 String[] value = adaptiveAnnotation.value();
                 // value is not set, use the value generated from class name as the key
-                if (value.length == 0) {
+                if (value.length == 0) {// 没有值
                     char[] charArray = type.getSimpleName().toCharArray();
                     StringBuilder sb = new StringBuilder(128);
                     for (int i = 0; i < charArray.length; i++) {
-                        if (Character.isUpperCase(charArray[i])) {
+                        if (Character.isUpperCase(charArray[i])) {  // 是大写字母
                             if (i != 0) {
                                 sb.append(".");
                             }
@@ -959,7 +963,7 @@ public class ExtensionLoader<T> {
                                 "throw new IllegalStateException(\"Fail to get extension(%s) name from url(\" + url.toString() + \") use keys(%s)\");",
                         type.getName(), Arrays.toString(value));
                 code.append(s);
-
+                // 获取扩展
                 s = String.format("\n%s extension = (%<s)%s.getExtensionLoader(%s.class).getExtension(extName);",
                         type.getName(), ExtensionLoader.class.getSimpleName(), type.getName());
                 code.append(s);
@@ -968,9 +972,10 @@ public class ExtensionLoader<T> {
                 if (!rt.equals(void.class)) {
                     code.append("\nreturn ");
                 }
-
+                //调用 源方法
                 s = String.format("extension.%s(", method.getName());
                 code.append(s);
+                //拼装调用的参数
                 for (int i = 0; i < pts.length; i++) {
                     if (i != 0)
                         code.append(", ");
@@ -978,7 +983,7 @@ public class ExtensionLoader<T> {
                 }
                 code.append(");");
             }
-
+            // 拼装代理类
             codeBuilder.append("\npublic ").append(rt.getCanonicalName()).append(" ").append(method.getName()).append("(");
             for (int i = 0; i < pts.length; i++) {
                 if (i > 0) {
@@ -989,7 +994,10 @@ public class ExtensionLoader<T> {
                 codeBuilder.append("arg").append(i);
             }
             codeBuilder.append(")");
-            if (ets.length > 0) {
+
+
+
+            if (ets.length > 0) {  // 异常处理
                 codeBuilder.append(" throws ");
                 for (int i = 0; i < ets.length; i++) {
                     if (i > 0) {
