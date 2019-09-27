@@ -62,14 +62,20 @@ import static com.alibaba.dubbo.common.Constants.CHECK_KEY;
 public class RegistryProtocol implements Protocol {
 
     private final static Logger logger = LoggerFactory.getLogger(RegistryProtocol.class);
+
     private static RegistryProtocol INSTANCE;
     private final Map<URL, NotifyListener> overrideListeners = new ConcurrentHashMap<URL, NotifyListener>();
     //To solve the problem of RMI repeated exposure port conflicts, the services that have been exposed are no longer exposed.
     //providerurl <--> exporter
     private final Map<String, ExporterChangeableWrapper<?>> bounds = new ConcurrentHashMap<String, ExporterChangeableWrapper<?>>();
+
+    // 自动注入
     private Cluster cluster;
+    // 自动注入
     private Protocol protocol;
+    // 自动注入
     private RegistryFactory registryFactory;
+    // 自动注入
     private ProxyFactory proxyFactory;
 
     public RegistryProtocol() {
@@ -98,19 +104,19 @@ public class RegistryProtocol implements Protocol {
             return new String[]{};
         }
     }
-
+    // dubbo spi 自动注入
     public void setCluster(Cluster cluster) {
         this.cluster = cluster;
     }
-
+    // dubbo spi 自动注入
     public void setProtocol(Protocol protocol) {
         this.protocol = protocol;
     }
-
+    // dubbo spi 自动注入
     public void setRegistryFactory(RegistryFactory registryFactory) {
         this.registryFactory = registryFactory;
     }
-
+    // dubbo spi 自动注入
     public void setProxyFactory(ProxyFactory proxyFactory) {
         this.proxyFactory = proxyFactory;
     }
@@ -127,12 +133,13 @@ public class RegistryProtocol implements Protocol {
     public void register(URL registryUrl, URL registedProviderUrl) {
         // 获取对应的 registry 对象
         Registry registry = registryFactory.getRegistry(registryUrl);
+        //registedProviderUrl 是provider
         registry.register(registedProviderUrl);// 注册
     }
 
     @Override
     public <T> Exporter<T> export(final Invoker<T> originInvoker) throws RpcException {
-        //export invoker  暴露服务
+        //export invoker  暴露服务    doLocalExport表示本地启动服务不包括去注册中心注册
         final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker);
         // 获得注册中心URL
         URL registryUrl = getRegistryUrl(originInvoker);
@@ -167,14 +174,16 @@ public class RegistryProtocol implements Protocol {
     private <T> ExporterChangeableWrapper<T> doLocalExport(final Invoker<T> originInvoker) {
         String key = getCacheKey(originInvoker);
         ExporterChangeableWrapper<T> exporter = (ExporterChangeableWrapper<T>) bounds.get(key);
-        if (exporter == null) {
+        if (exporter == null) {//之前没有暴露过
             synchronized (bounds) {
                 exporter = (ExporterChangeableWrapper<T>) bounds.get(key);
                 if (exporter == null) {
 
-                    // 封装 InvokerDelegete
+                    // 封装 InvokerDelegete  将url封装起来了
                     final Invoker<?> invokerDelegete = new InvokerDelegete<T>(originInvoker, getProviderUrl(originInvoker));
                     exporter = new ExporterChangeableWrapper<T>((Exporter<T>) protocol.export(invokerDelegete), originInvoker);/// dubbo protocol
+
+                    // 缓存起来
                     bounds.put(key, exporter);
                 }
             }
@@ -335,7 +344,7 @@ public class RegistryProtocol implements Protocol {
         }
         bounds.clear();
     }
-    // InvokerDelegete  委托类
+    // InvokerDelegete  委托类  将provider 的url 进行缓存
     public static class InvokerDelegete<T> extends InvokerWrapper<T> {
         private final Invoker<T> invoker;
 

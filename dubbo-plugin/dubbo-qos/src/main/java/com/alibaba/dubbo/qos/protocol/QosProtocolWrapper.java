@@ -32,7 +32,7 @@ import static com.alibaba.dubbo.common.Constants.ACCEPT_FOREIGN_IP;
 import static com.alibaba.dubbo.common.Constants.QOS_ENABLE;
 import static com.alibaba.dubbo.common.Constants.QOS_PORT;
 import static com.alibaba.dubbo.qos.common.QosConstants.DEFAULT_PORT;
-
+// Qos
 public class QosProtocolWrapper implements Protocol {
 
     private final Logger logger = LoggerFactory.getLogger(QosProtocolWrapper.class);
@@ -58,6 +58,7 @@ public class QosProtocolWrapper implements Protocol {
 
         //判断是不是registry
         if (Constants.REGISTRY_PROTOCOL.equals(invoker.getUrl().getProtocol())) {
+            // 启动Qos服务器？
             startQosServer(invoker.getUrl());
             return protocol.export(invoker);
         }

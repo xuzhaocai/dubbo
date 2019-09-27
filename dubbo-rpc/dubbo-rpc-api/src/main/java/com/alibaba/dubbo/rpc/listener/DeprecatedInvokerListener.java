@@ -24,7 +24,7 @@ import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.RpcException;
 
 /**
- * DeprecatedProtocolFilter
+ * Deprecated
  */
 @Activate(Constants.DEPRECATED_KEY)
 public class DeprecatedInvokerListener extends InvokerListenerAdapter {

@@ -26,11 +26,17 @@ import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.Protocol;
 import com.alibaba.dubbo.rpc.Result;
 import com.alibaba.dubbo.rpc.RpcException;
+import com.alibaba.dubbo.rpc.filter.*;
+import com.alibaba.dubbo.rpc.proxy.AbstractProxyInvoker;
 
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * ListenerProtocol
+ *
+ * Protocol 包装类
  */
 public class ProtocolFilterWrapper implements Protocol {
 
@@ -43,6 +49,14 @@ public class ProtocolFilterWrapper implements Protocol {
         this.protocol = protocol;
     }
 
+    /**
+     *
+     * @param invoker  invoker
+     * @param key  service.filter
+     * @param group  provider
+     * @param <T>  EchoFilter ,ClassLoaderFilter,GenericFilter,ContextFilter,TraceFilter,TimeoutFilter,MonitorFilter,ExceptionFilter
+     * @return
+     */
     private static <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
         Invoker<T> last = invoker;    //  size = 8
         List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(invoker.getUrl(), key, group);
@@ -66,7 +80,7 @@ public class ProtocolFilterWrapper implements Protocol {
                     public boolean isAvailable() {
                         return invoker.isAvailable();
                     }
-
+                    //exception->moniter->timeout->trace->context->generic->classloader->echo
                     @Override
                     public Result invoke(Invocation invocation) throws RpcException {
                         return filter.invoke(next, invocation);

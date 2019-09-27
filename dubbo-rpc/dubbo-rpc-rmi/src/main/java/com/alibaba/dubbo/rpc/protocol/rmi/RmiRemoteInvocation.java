@@ -38,7 +38,7 @@ public class RmiRemoteInvocation extends RemoteInvocation {
 
     /**
      * Need to restore context on provider side (Though context will be overridden by Invocation's attachment
-     * when ContextFilter gets executed, we will restore the attachment when Invocation is constructed, check more
+     * when Context gets executed, we will restore the attachment when Invocation is constructed, check more
      * from {@link com.alibaba.dubbo.rpc.proxy.InvokerInvocationHandler}
      */
     @SuppressWarnings("unchecked")

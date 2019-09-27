@@ -23,6 +23,10 @@ import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.Result;
 import com.alibaba.dubbo.rpc.RpcException;
 
+/**
+ *代理类， 主要是存放了原始信息
+ * @param <T>
+ */
 public class DelegateProviderMetaDataInvoker<T> implements Invoker {
     protected final Invoker<T> invoker;
     private ServiceConfig metadata;

@@ -69,7 +69,7 @@ public class ExtensionLoader<T> {
     private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
     // 缓存 extensionloader
     private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<Class<?>, ExtensionLoader<?>>();
-
+    // 缓存了instance  ， key是 class对象，value 是对应的实例
     private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<Class<?>, Object>();
 
     // ==============================
@@ -181,8 +181,8 @@ public class ExtensionLoader<T> {
      * Get activate extensions.
      *
      * @param url    url
-     * @param values extension point names
-     * @param group  group
+     * @param values extension point names  例如   service.filter
+     * @param group  group   例如provider
      * @return extension list which are activated
      * @see com.alibaba.dubbo.common.extension.Activate
      */
@@ -203,12 +203,14 @@ public class ExtensionLoader<T> {
                     }
                 }
             }
+
+            //排序
             Collections.sort(exts, ActivateComparator.COMPARATOR);
         }
         List<T> usrs = new ArrayList<T>();
         for (int i = 0; i < names.size(); i++) {
             String name = names.get(i);
-            if (!name.startsWith(Constants.REMOVE_VALUE_PREFIX)
+            if (!name.startsWith(Constants.REMOVE_VALUE_PREFIX)  // name没有-开头或者是names中没有-xxx  这种
                     && !names.contains(Constants.REMOVE_VALUE_PREFIX + name)) {
                 if (Constants.DEFAULT_KEY.equals(name)) {
                     if (!usrs.isEmpty()) {
@@ -504,10 +506,10 @@ public class ExtensionLoader<T> {
                 EXTENSION_INSTANCES.putIfAbsent(clazz, clazz.newInstance());
                 instance = (T) EXTENSION_INSTANCES.get(clazz);
             }
-            injectExtension(instance);
-            Set<Class<?>> wrapperClasses = cachedWrapperClasses;
+            injectExtension(instance);// setter 注入
+            Set<Class<?>> wrapperClasses = cachedWrapperClasses;  //所有的wrapper缓存
             if (wrapperClasses != null && !wrapperClasses.isEmpty()) {
-                for (Class<?> wrapperClass : wrapperClasses) {
+                for (Class<?> wrapperClass : wrapperClasses) {// 包装Wrapper
                     instance = injectExtension((T) wrapperClass.getConstructor(type).newInstance(instance));
                 }
             }

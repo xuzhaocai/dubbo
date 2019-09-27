@@ -511,11 +511,16 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                         }
 
 
-                        // invoker  使用ProxyFactory 生成 invoker对象
+                        // invoker  使用ProxyFactory 生成 invoker对象，这里这个invoker其实是一个代理对象
                         Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));
                         // 创建  DelegateProvoderMetaInvoker 对象
                         DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
                         //  registryURL.getProtocol= registry
+
+
+
+
+
                         //   filter ---->listener --->registryProtocol   ( 这里使用了wapper 包装机制)
                         //  filter ----> listener ----> dubboProtocol    服务暴露
                         Exporter<?> exporter = protocol.export(wrapperInvoker);
