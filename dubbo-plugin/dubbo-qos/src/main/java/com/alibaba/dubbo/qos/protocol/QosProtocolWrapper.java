@@ -56,7 +56,7 @@ public class QosProtocolWrapper implements Protocol {
     @Override
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
 
-        //判断是不是registry
+        //判断是registry
         if (Constants.REGISTRY_PROTOCOL.equals(invoker.getUrl().getProtocol())) {
             // 启动Qos服务器？
             startQosServer(invoker.getUrl());
@@ -90,11 +90,11 @@ public class QosProtocolWrapper implements Protocol {
                         "dubbo.properties or XML/spring boot configuration.");
                 return;
             }
-
+            // 判断是否已经启动
             if (!hasStarted.compareAndSet(false, true)) {
                 return;
             }
-
+            // 默认的port 22222
             int port = url.getParameter(QOS_PORT, DEFAULT_PORT);
             boolean acceptForeignIp = Boolean.parseBoolean(url.getParameter(ACCEPT_FOREIGN_IP,"false"));
             Server server = com.alibaba.dubbo.qos.server.Server.getInstance();
