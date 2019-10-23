@@ -48,8 +48,10 @@ public abstract class AbstractEndpoint extends AbstractPeer implements Resetable
     }
 
     protected static Codec2 getChannelCodec(URL url) {
+
+        //codec 类型
         String codecName = url.getParameter(Constants.CODEC_KEY, "telnet");
-        if (ExtensionLoader.getExtensionLoader(Codec2.class).hasExtension(codecName)) {
+        if (ExtensionLoader.getExtensionLoader(Codec2.class).hasExtension(codecName)) {//如果扩展中有，就
             return ExtensionLoader.getExtensionLoader(Codec2.class).getExtension(codecName);
         } else {
             return new CodecAdapter(ExtensionLoader.getExtensionLoader(Codec.class)

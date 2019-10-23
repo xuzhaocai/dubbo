@@ -777,6 +777,10 @@ public class ExtensionLoader<T> {
         return extension.value();
     }
 
+    /**
+     * 创建扩展对象
+     * @return
+     */
     @SuppressWarnings("unchecked")
     private T createAdaptiveExtension() {
         try {

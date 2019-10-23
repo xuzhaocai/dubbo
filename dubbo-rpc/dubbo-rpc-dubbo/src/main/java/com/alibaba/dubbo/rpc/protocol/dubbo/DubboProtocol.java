@@ -101,6 +101,7 @@ public class DubboProtocol extends AbstractProtocol {
                     }
                 }
                 RpcContext.getContext().setRemoteAddress(channel.getRemoteAddress());
+                // 真正的执行
                 return invoker.invoke(inv);
             }
             throw new RemotingException(channel, "Unsupported request: "
@@ -265,7 +266,9 @@ public class DubboProtocol extends AbstractProtocol {
         String key = url.getAddress();
         //client can export a service which's only for server to invoke  客户端可以导出仅供服务器调用的服务
         boolean isServer = url.getParameter(Constants.IS_SERVER_KEY, true);
-        if (isServer) {
+        if (isServer) {// 判断是否是服务器
+
+            //查找缓存的服务器
             ExchangeServer server = serverMap.get(key);
             if (server == null) {// 没有找到server 就要创建server
                 serverMap.put(key, createServer(url));
@@ -281,6 +284,7 @@ public class DubboProtocol extends AbstractProtocol {
         url = url.addParameterIfAbsent(Constants.CHANNEL_READONLYEVENT_SENT_KEY, Boolean.TRUE.toString());
         // enable heartbeat by default    60 * 1000   设置心跳
         url = url.addParameterIfAbsent(Constants.HEARTBEAT_KEY, String.valueOf(Constants.DEFAULT_HEARTBEAT));
+        //获取配置的服务器类型， 缺省就是使用netty
         String str = url.getParameter(Constants.SERVER_KEY, Constants.DEFAULT_REMOTING_SERVER);  // 获取的使用的server  缺省使用netty
         // 不存在Transports 话  ， 就抛出 不支持的server type
         if (str != null && str.length() > 0 && !ExtensionLoader.getExtensionLoader(Transporter.class).hasExtension(str))

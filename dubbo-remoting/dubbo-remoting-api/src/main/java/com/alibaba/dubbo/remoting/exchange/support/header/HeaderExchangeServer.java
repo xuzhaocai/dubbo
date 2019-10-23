@@ -63,12 +63,20 @@ public class HeaderExchangeServer implements ExchangeServer {
         if (server == null) {
             throw new IllegalArgumentException("server == null");
         }
+
+        // 服务器
         this.server = server;
+
+        //心跳
         this.heartbeat = server.getUrl().getParameter(Constants.HEARTBEAT_KEY, 0);
+
+        // 心跳超时
         this.heartbeatTimeout = server.getUrl().getParameter(Constants.HEARTBEAT_TIMEOUT_KEY, heartbeat * 3);
         if (heartbeatTimeout < heartbeat * 2) {
             throw new IllegalStateException("heartbeatTimeout < heartbeatInterval * 2");
         }
+
+        // 启动心跳
         startHeartbeatTimer();
     }
 
@@ -251,7 +259,7 @@ public class HeaderExchangeServer implements ExchangeServer {
         }
         server.send(message, sent);
     }
-
+    //启动心跳timer
     private void startHeartbeatTimer() {
         stopHeartbeatTimer();
         if (heartbeat > 0) {

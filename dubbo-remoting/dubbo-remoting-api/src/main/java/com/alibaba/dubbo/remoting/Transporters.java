@@ -41,6 +41,7 @@ public class Transporters {
     }
 
     public static Server bind(URL url, ChannelHandler... handlers) throws RemotingException {
+        //验证
         if (url == null) {
             throw new IllegalArgumentException("url == null");
         }
