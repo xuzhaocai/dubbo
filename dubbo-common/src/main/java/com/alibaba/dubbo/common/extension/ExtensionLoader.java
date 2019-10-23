@@ -67,14 +67,14 @@ public class ExtensionLoader<T> {
     private static final String DUBBO_INTERNAL_DIRECTORY = DUBBO_DIRECTORY + "internal/";
 
     private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
-    // 缓存 extensionloader
+    // 缓存 extensionloader  扩展加载器集合
     private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<Class<?>, ExtensionLoader<?>>();
-    // 缓存了instance  ， key是 class对象，value 是对应的实例
+    // 缓存了instance  ， key是 class对象，value 是对应的实例  ， 扩展实现类集合
     private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<Class<?>, Object>();
 
     // ==============================
 
-    private final Class<?> type;//接口类型
+    private final Class<?> type;//接口类型  ， 扩展接口
 
     private final ExtensionFactory objectFactory;// factory  一般是适配类 AdaptiveExtensionFactory
 
@@ -95,6 +95,8 @@ public class ExtensionLoader<T> {
 
     private ExtensionLoader(Class<?> type) {
         this.type = type;
+
+        //扩展工厂
         objectFactory = (type == ExtensionFactory.class ? null : ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension());
     }
     // 判断有没有@SPI注解
@@ -519,7 +521,7 @@ public class ExtensionLoader<T> {
                     type + ")  could not be instantiated: " + t.getMessage(), t);
         }
     }
-
+    // 注入扩展
     private T injectExtension(T instance) {
         try {
             if (objectFactory != null) {
@@ -564,6 +566,10 @@ public class ExtensionLoader<T> {
         return clazz;
     }
 
+    /**
+     * 获取扩展实现类数组
+     * @return  扩展实现类数组
+     */
     private Map<String, Class<?>> getExtensionClasses() {
         Map<String, Class<?>> classes = cachedClasses.get();
 
@@ -597,7 +603,7 @@ public class ExtensionLoader<T> {
                     throw new IllegalStateException("more than 1 default extension name on extension " + type.getName()
                             + ": " + Arrays.toString(names));
                 }
-                //  缓存起来
+                //  将默认实现类的名字缓存起来
                 if (names.length == 1) cachedDefaultName = names[0];
             }
         }
@@ -697,6 +703,8 @@ public class ExtensionLoader<T> {
                     type + ", class line: " + clazz.getName() + "), class "
                     + clazz.getName() + "is not subtype of interface.");
         }
+
+        //缓存自适应拓展对象的类到 `cachedAdaptiveClass`
         if (clazz.isAnnotationPresent(Adaptive.class)) {//   Adaptive 注解是否在该类上面
             if (cachedAdaptiveClass == null) {
                 cachedAdaptiveClass = clazz;
@@ -705,7 +713,8 @@ public class ExtensionLoader<T> {
                         + cachedAdaptiveClass.getClass().getName()
                         + ", " + clazz.getClass().getName());
             }
-        } else if (isWrapperClass(clazz)) {// 该类是否是wapper 类 , 其实就是判断构造方法有没有传入扩展的这个类class
+        } else if (isWrapperClass(clazz)) {// 该类是否是wapper (包装类)类 , 其实就是判断构造方法有没有传入扩展的这个类class
+
             Set<Class<?>> wrappers = cachedWrapperClasses;  // 缓存
             if (wrappers == null) {
                 cachedWrapperClasses = new ConcurrentHashSet<Class<?>>();
@@ -714,7 +723,7 @@ public class ExtensionLoader<T> {
             wrappers.add(clazz);
         } else {  // 其他的
             clazz.getConstructor();
-            if (name == null || name.length() == 0) {  //兼容jdk
+            if (name == null || name.length() == 0) {  //兼容jdk的spi
                 name = findAnnotationName(clazz);
                 if (name.length() == 0) {
                     throw new IllegalStateException("No such extension name for the class " + clazz.getName() + " in the config " + resourceURL);
@@ -722,10 +731,12 @@ public class ExtensionLoader<T> {
             }
             String[] names = NAME_SEPARATOR.split(name);
             if (names != null && names.length > 0) {
+                //获取自动激活的
                 Activate activate = clazz.getAnnotation(Activate.class);
-                if (activate != null) { // 有@Active 缓存起来
+                if (activate != null) { //能够自动激活  有@Active 缓存起来
                     cachedActivates.put(names[0], activate);
                 }
+                //缓存
                 for (String n : names) {
                     if (!cachedNames.containsKey(clazz)) {
                         cachedNames.put(clazz, n); ///"class com.alibaba.dubbo.common.extension.factory.SpiExtensionFactory" -> "spi"
@@ -752,12 +763,15 @@ public class ExtensionLoader<T> {
 
     @SuppressWarnings("deprecation")
     private String findAnnotationName(Class<?> clazz) {
+        //获取Extension 注解
         com.alibaba.dubbo.common.Extension extension = clazz.getAnnotation(com.alibaba.dubbo.common.Extension.class);
         if (extension == null) {
             String name = clazz.getSimpleName();// 类名
             if (name.endsWith(type.getSimpleName())) {
+                //实现类的类名是以接口名结尾的，就取实现类类名的前一段
                 name = name.substring(0, name.length() - type.getSimpleName().length());
             }
+            // 转成小写
             return name.toLowerCase();
         }
         return extension.value();

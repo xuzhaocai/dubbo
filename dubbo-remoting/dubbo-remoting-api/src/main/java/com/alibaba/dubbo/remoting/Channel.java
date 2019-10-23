@@ -31,14 +31,14 @@ public interface Channel extends Endpoint {
 
     /**
      * get remote address.
-     *
+     * 获取远程地址
      * @return remote address.
      */
     InetSocketAddress getRemoteAddress();
 
     /**
      * is connected.
-     *
+     * 是否已连接
      * @return connected
      */
     boolean isConnected();

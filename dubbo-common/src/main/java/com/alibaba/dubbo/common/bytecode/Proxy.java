@@ -61,7 +61,7 @@ public abstract class Proxy {
 
     /**
      * Get proxy.
-     *
+     * 获取代理
      * @param ics interface class array.
      * @return Proxy instance.
      */
@@ -81,6 +81,7 @@ public abstract class Proxy {
             throw new IllegalArgumentException("interface limit exceeded");
 
         StringBuilder sb = new StringBuilder();
+        //拼接接口名
         for (int i = 0; i < ics.length; i++) {
             String itf = ics[i].getName();
             if (!ics[i].isInterface())
