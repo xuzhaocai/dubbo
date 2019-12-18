@@ -51,7 +51,7 @@ public class Transporters {
         ChannelHandler handler;
         if (handlers.length == 1) {
             handler = handlers[0];
-        } else {   // 多个channal  对 Channel分发
+        } else {   // 多个channal  对 Channel分发   ChannelHandlerDispatcher 循环
             handler = new ChannelHandlerDispatcher(handlers);
         }
 

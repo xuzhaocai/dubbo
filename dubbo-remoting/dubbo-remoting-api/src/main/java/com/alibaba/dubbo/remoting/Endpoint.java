@@ -22,7 +22,7 @@ import java.net.InetSocketAddress;
 
 /**
  * Endpoint. (API/SPI, Prototype, ThreadSafe)
- *
+ * 端点，可以理解为一个客户端或者服务端就是一个端点
  *
  * @see com.alibaba.dubbo.remoting.Channel
  * @see com.alibaba.dubbo.remoting.Client
@@ -32,21 +32,21 @@ public interface Endpoint {
 
     /**
      * get url.
-     *
+     * 获取url
      * @return url
      */
     URL getUrl();
 
     /**
      * get channel handler.
-     *
+     * 获取channelhandler
      * @return channel handler
      */
     ChannelHandler getChannelHandler();
 
     /**
      * get local address.
-     *
+     * 获取本地地址
      * @return local address.
      */
     InetSocketAddress getLocalAddress();

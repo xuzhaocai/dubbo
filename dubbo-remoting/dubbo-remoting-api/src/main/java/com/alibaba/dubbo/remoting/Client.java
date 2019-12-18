@@ -29,6 +29,7 @@ public interface Client extends Endpoint, Channel, Resetable {
 
     /**
      * reconnect.
+     * 重连
      */
     void reconnect() throws RemotingException;
 

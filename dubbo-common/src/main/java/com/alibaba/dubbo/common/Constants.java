@@ -291,7 +291,7 @@ public class Constants {
 
     public static final String CHARSET_KEY = "charset";
 
-    public static final String RECONNECT_KEY = "reconnect";
+    public static final String RECONNECT_KEY = "reconnect"; // 重连 true / false
 
     public static final String SEND_RECONNECT_KEY = "send.reconnect";
 

@@ -45,7 +45,7 @@ public interface Channel extends Endpoint {
 
     /**
      * has attribute.
-     *
+     * 根据key判断属性值是否存在
      * @param key key.
      * @return has or has not.
      */
@@ -53,7 +53,7 @@ public interface Channel extends Endpoint {
 
     /**
      * get attribute.
-     *
+     * 根据key获取属性值
      * @param key key.
      * @return value.
      */
@@ -61,7 +61,7 @@ public interface Channel extends Endpoint {
 
     /**
      * set attribute.
-     *
+     * 设置属性值
      * @param key   key.
      * @param value value.
      */
@@ -69,7 +69,7 @@ public interface Channel extends Endpoint {
 
     /**
      * remove attribute.
-     *
+     * 移除属性值
      * @param key key.
      */
     void removeAttribute(String key);

@@ -57,9 +57,12 @@ public abstract class AbstractEndpoint extends AbstractPeer implements Resetable
 
         //codec 类型  dubbo协议的话设置的是  dubbo
         String codecName = url.getParameter(Constants.CODEC_KEY, "telnet");
+
+        // 判断codec 2代中有没有这个类的实现
         if (ExtensionLoader.getExtensionLoader(Codec2.class).hasExtension(codecName)) {//如果扩展中有，就
             return ExtensionLoader.getExtensionLoader(Codec2.class).getExtension(codecName);
         } else {
+            //基本已经废弃，是codec一代的适配器类
             return new CodecAdapter(ExtensionLoader.getExtensionLoader(Codec.class)
                     .getExtension(codecName));
         }
