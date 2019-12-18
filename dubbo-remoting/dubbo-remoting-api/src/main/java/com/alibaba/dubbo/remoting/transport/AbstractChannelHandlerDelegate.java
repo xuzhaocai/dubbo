@@ -20,29 +20,39 @@ import com.alibaba.dubbo.common.utils.Assert;
 import com.alibaba.dubbo.remoting.Channel;
 import com.alibaba.dubbo.remoting.ChannelHandler;
 import com.alibaba.dubbo.remoting.RemotingException;
-
+// handler 委派
 public abstract class AbstractChannelHandlerDelegate implements ChannelHandlerDelegate {
 
     protected ChannelHandler handler;
 
     protected AbstractChannelHandlerDelegate(ChannelHandler handler) {
-        Assert.notNull(handler, "handler == null");
+        Assert.notNull(handler, "handler == null");//判断handler是否是null
         this.handler = handler;
     }
 
     @Override
     public ChannelHandler getHandler() {
-        if (handler instanceof ChannelHandlerDelegate) {
+        if (handler instanceof ChannelHandlerDelegate) { //如果 委派类型，直接转成委派类
             return ((ChannelHandlerDelegate) handler).getHandler();
         }
         return handler;
     }
 
+    /**
+     * 连接
+     * @param channel channel.
+     * @throws RemotingException
+     */
     @Override
     public void connected(Channel channel) throws RemotingException {
         handler.connected(channel);
     }
 
+    /**
+     * 断开连接
+     * @param channel channel.
+     * @throws RemotingException
+     */
     @Override
     public void disconnected(Channel channel) throws RemotingException {
         handler.disconnected(channel);

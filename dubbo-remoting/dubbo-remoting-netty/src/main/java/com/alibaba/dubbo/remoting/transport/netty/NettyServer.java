@@ -46,6 +46,10 @@ import java.util.concurrent.Executors;
 
 /**
  * NettyServer
+ *
+ * netty3
+ *
+ *
  */
 public class NettyServer extends AbstractServer implements Server {
 
@@ -63,6 +67,10 @@ public class NettyServer extends AbstractServer implements Server {
         super(url, ChannelHandlers.wrap(handler, ExecutorUtil.setThreadName(url, SERVER_THREAD_POOL_NAME)));
     }
 
+    /**
+     * 打开netty服务器
+     * @throws Throwable
+     */
     @Override
     protected void doOpen() throws Throwable {
         NettyHelper.setNettyLoggerFactory();
@@ -76,7 +84,7 @@ public class NettyServer extends AbstractServer implements Server {
         // https://issues.jboss.org/browse/NETTY-365
         // https://issues.jboss.org/browse/NETTY-379
         // final Timer timer = new HashedWheelTimer(new NamedThreadFactory("NettyIdleTimer", true));
-        bootstrap.setOption("child.tcpNoDelay", true);
+        bootstrap.setOption("child.tcpNoDelay", true); //关闭 nagle算法 ，这种算法能够减少小包，碎包的发送
         bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
             @Override
             public ChannelPipeline getPipeline() {

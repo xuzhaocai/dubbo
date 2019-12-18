@@ -62,7 +62,7 @@ public class Exchangers {
     }
     // bind
     public static ExchangeServer bind(URL url, ExchangeHandler handler) throws RemotingException {
-        //验证
+               //验证
         if (url == null) {
             throw new IllegalArgumentException("url == null");
         }

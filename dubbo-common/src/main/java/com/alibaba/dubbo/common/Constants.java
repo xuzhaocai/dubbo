@@ -91,15 +91,15 @@ public class Constants {
 
     public static final String DEFAULT_TRANSPORTER = "netty";
 
-    public static final String DEFAULT_REMOTING_SERVER = "netty";
+    public static final String DEFAULT_REMOTING_SERVER = "netty";//默认服务器使用netty
 
-    public static final String DEFAULT_REMOTING_CLIENT = "netty";
+    public static final String DEFAULT_REMOTING_CLIENT = "netty";//默认客户端 使用netty
 
-    public static final String DEFAULT_REMOTING_CODEC = "dubbo";
+    public static final String DEFAULT_REMOTING_CODEC = "dubbo";//默认协议dubbo
 
-    public static final String DEFAULT_REMOTING_SERIALIZATION = "hessian2";
+    public static final String DEFAULT_REMOTING_SERIALIZATION = "hessian2";// 默认序列化hession2
 
-    public static final String DEFAULT_HTTP_SERVER = "servlet";
+    public static final String DEFAULT_HTTP_SERVER = "servlet";//默认的http servlet
 
     public static final String DEFAULT_HTTP_CLIENT = "jdk";
 

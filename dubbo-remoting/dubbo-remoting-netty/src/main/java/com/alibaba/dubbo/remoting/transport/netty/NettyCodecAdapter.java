@@ -56,7 +56,12 @@ final class NettyCodecAdapter {
         this.codec = codec;
         this.url = url;
         this.handler = handler;
+
+
+        // 默认buffer 大小是 8k
         int b = url.getPositiveParameter(Constants.BUFFER_KEY, Constants.DEFAULT_BUFFER_SIZE);
+
+        //用户设置的buffer 大小需要介于1k ---16k 之间，否则就设置成8k
         this.bufferSize = b >= Constants.MIN_BUFFER_SIZE && b <= Constants.MAX_BUFFER_SIZE ? b : Constants.DEFAULT_BUFFER_SIZE;
     }
 
@@ -68,6 +73,10 @@ final class NettyCodecAdapter {
         return decoder;
     }
 
+    /**
+     * encoder
+     * 编码器
+     */
     @Sharable
     private class InternalEncoder extends OneToOneEncoder {
 
@@ -85,6 +94,10 @@ final class NettyCodecAdapter {
         }
     }
 
+    /**
+     * decoder
+     * 解码器
+     */
     private class InternalDecoder extends SimpleChannelUpstreamHandler {
 
         private com.alibaba.dubbo.remoting.buffer.ChannelBuffer buffer =
@@ -93,18 +106,18 @@ final class NettyCodecAdapter {
         @Override
         public void messageReceived(ChannelHandlerContext ctx, MessageEvent event) throws Exception {
             Object o = event.getMessage();
-            if (!(o instanceof ChannelBuffer)) {
+            if (!(o instanceof ChannelBuffer)) {  // netty 的 buffer
                 ctx.sendUpstream(event);
                 return;
             }
 
             ChannelBuffer input = (ChannelBuffer) o;
-            int readable = input.readableBytes();
-            if (readable <= 0) {
+            int readable = input.readableBytes(); //获取可以读的字节数
+            if (readable <= 0) {  // 字节数是小于等于0的直接返回
                 return;
             }
 
-            com.alibaba.dubbo.remoting.buffer.ChannelBuffer message;
+            com.alibaba.dubbo.remoting.buffer.ChannelBuffer message; // dubbo 的channelbuffer
             if (buffer.readable()) {
                 if (buffer instanceof DynamicChannelBuffer) {
                     buffer.writeBytes(input.toByteBuffer());
@@ -117,6 +130,7 @@ final class NettyCodecAdapter {
                     message.writeBytes(input.toByteBuffer());
                 }
             } else {
+                //包装buffer
                 message = com.alibaba.dubbo.remoting.buffer.ChannelBuffers.wrappedBuffer(
                         input.toByteBuffer());
             }
@@ -158,7 +172,7 @@ final class NettyCodecAdapter {
                 NettyChannel.removeChannelIfDisconnected(ctx.getChannel());
             }
         }
-
+        //异常
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
             ctx.sendUpstream(e);

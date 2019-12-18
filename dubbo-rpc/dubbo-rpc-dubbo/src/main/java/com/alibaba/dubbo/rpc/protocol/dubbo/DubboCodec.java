@@ -43,6 +43,8 @@ import static com.alibaba.dubbo.rpc.protocol.dubbo.CallbackServiceCodec.encodeIn
 
 /**
  * Dubbo codec.
+ *
+ * dubbo协议用的编解码
  */
 public class DubboCodec extends ExchangeCodec implements Codec2 {
 

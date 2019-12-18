@@ -29,7 +29,7 @@ import com.alibaba.dubbo.remoting.exchange.Response;
 public class DecodeHandler extends AbstractChannelHandlerDelegate {
 
     private static final Logger log = LoggerFactory.getLogger(DecodeHandler.class);
-
+    //父类维护handler 引用
     public DecodeHandler(ChannelHandler handler) {
         super(handler);
     }

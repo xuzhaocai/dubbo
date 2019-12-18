@@ -55,7 +55,7 @@ public class Transporters {
             handler = new ChannelHandlerDispatcher(handlers);
         }
 
-        // 真正服务器  
+        // 真正服务器 进行bind
         return getTransporter().bind(url, handler);
     }
 
