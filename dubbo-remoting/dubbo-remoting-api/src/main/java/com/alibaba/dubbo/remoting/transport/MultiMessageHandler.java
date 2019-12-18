@@ -24,6 +24,8 @@ import com.alibaba.dubbo.remoting.exchange.support.MultiMessage;
 /**
  *
  * @see MultiMessage
+ *
+ * 多消息通道处理器
  */
 public class MultiMessageHandler extends AbstractChannelHandlerDelegate {
 

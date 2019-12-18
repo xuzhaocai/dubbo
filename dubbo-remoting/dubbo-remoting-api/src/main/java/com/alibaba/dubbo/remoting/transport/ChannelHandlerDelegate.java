@@ -18,6 +18,10 @@ package com.alibaba.dubbo.remoting.transport;
 
 import com.alibaba.dubbo.remoting.ChannelHandler;
 
+
+/**
+ * 通道处理器 装饰器
+ */
 public interface ChannelHandlerDelegate extends ChannelHandler {
     ChannelHandler getHandler();
 }

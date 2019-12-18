@@ -36,7 +36,7 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
 
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
-        if (message instanceof Decodeable) {
+        if (message instanceof Decodeable) {// 如果message直接Decodeable的
             decode(message);
         }
 
@@ -50,7 +50,7 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
 
         handler.received(channel, message);
     }
-
+    // TODO 不懂要干啥子
     private void decode(Object message) {
         if (message != null && message instanceof Decodeable) {
             try {

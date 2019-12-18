@@ -127,13 +127,22 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
                 .getDefaultExtension().remove(Constants.CONSUMER_SIDE, Integer.toString(url.getPort()));
     }
 
+    /**
+     * 包装通道处理器
+     * @param url
+     * @param handler
+     * @return
+     */
     protected static ChannelHandler wrapChannelHandler(URL url, ChannelHandler handler) {
-        url = ExecutorUtil.setThreadName(url, CLIENT_THREAD_POOL_NAME);
-        url = url.addParameterIfAbsent(Constants.THREADPOOL_KEY, Constants.DEFAULT_CLIENT_THREADPOOL);
+        url = ExecutorUtil.setThreadName(url, CLIENT_THREAD_POOL_NAME);//设置线程名
+        //  threadpool
+        url = url.addParameterIfAbsent(Constants.THREADPOOL_KEY, Constants.DEFAULT_CLIENT_THREADPOOL);// 设置使用的线程池类型
         return ChannelHandlers.wrap(handler, url);
     }
 
     /**
+     *
+     * 获取重连频率参数
      * @param url
      * @return 0-false
      */
@@ -200,6 +209,9 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
         }
     }
 
+    /**
+     * 销毁定时器
+     */
     private synchronized void destroyConnectStatusCheckCommand() {
         try {
             if (reconnectExecutorFuture != null && !reconnectExecutorFuture.isDone()) {
@@ -277,14 +289,16 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
 
     @Override
     public void send(Object message, boolean sent) throws RemotingException {
+        //发送断开重连 true  &&  没有连接
         if (send_reconnect && !isConnected()) {
-            connect();
+            connect(); //进行重连工作
         }
         Channel channel = getChannel();
         //TODO Can the value returned by getChannel() be null? need improvement.
         if (channel == null || !channel.isConnected()) {
             throw new RemotingException(this, "message can not send, because channel is closed . url:" + getUrl());
         }
+        //发送
         channel.send(message, sent);
     }
 
@@ -326,6 +340,9 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
         }
     }
 
+    /**
+     * 销毁连接
+     */
     public void disconnect() {
         connectLock.lock();// 获取连接锁
         try {
@@ -421,7 +438,7 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
 
     /**
      * Get the connected channel.
-     *
+     * 获取channel 由子类实现
      * @return channel
      */
     protected abstract Channel getChannel();

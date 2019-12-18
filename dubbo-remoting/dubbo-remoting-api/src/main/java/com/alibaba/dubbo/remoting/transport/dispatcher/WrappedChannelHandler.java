@@ -47,6 +47,7 @@ public class WrappedChannelHandler implements ChannelHandlerDelegate {
     public WrappedChannelHandler(ChannelHandler handler, URL url) {
         this.handler = handler;
         this.url = url;
+        //获取线程池
         executor = (ExecutorService) ExtensionLoader.getExtensionLoader(ThreadPool.class).getAdaptiveExtension().getExecutor(url);
 
         String componentKey = Constants.EXECUTOR_SERVICE_COMPONENT_KEY;
@@ -54,6 +55,8 @@ public class WrappedChannelHandler implements ChannelHandlerDelegate {
             componentKey = Constants.CONSUMER_SIDE;
         }
         DataStore dataStore = ExtensionLoader.getExtensionLoader(DataStore.class).getDefaultExtension();
+
+        // 将线程池设置到datastore中
         dataStore.put(componentKey, Integer.toString(url.getPort()), executor);
     }
 
@@ -99,7 +102,7 @@ public class WrappedChannelHandler implements ChannelHandlerDelegate {
     @Override
     public ChannelHandler getHandler() {
         if (handler instanceof ChannelHandlerDelegate) {
-            return ((ChannelHandlerDelegate) handler).getHandler();
+            return ((ChannelHandlerDelegate) handler).getHandler();// 直到获取原始的那个handler
         } else {
             return handler;
         }

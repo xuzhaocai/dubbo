@@ -31,10 +31,36 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 编解码工具类
+ *
+ * 以键值对的形式缓存所有的序列化类对象
+ * 通过id ，url 等方式获取序列化对象
+ *
+ */
 public class CodecSupport {
 
     private static final Logger logger = LoggerFactory.getLogger(CodecSupport.class);
+
+
+
+    // id  ---> 序列化对象
+    /**
+     * 1--->DubboSerialization对象
+     */
     private static Map<Byte, Serialization> ID_SERIALIZATION_MAP = new HashMap<Byte, Serialization>();
+
+    // id ----> 序列化的名字
+    /**
+     * 1--->dubbo
+     * 2--->hessian2
+     * 3--->java
+     * 4--->compectedjava
+     * 6--->fastjson
+     * 7--->nativejava
+     * 8--->kryo
+     * 9--->fst
+     */
     private static Map<Byte, String> ID_SERIALIZATIONNAME_MAP = new HashMap<Byte, String>();
 
     static {
@@ -57,19 +83,42 @@ public class CodecSupport {
     private CodecSupport() {
     }
 
+    /**
+     * 通过id获取对应的序列化对象
+     * @param id
+     * @return
+     */
     public static Serialization getSerializationById(Byte id) {
         return ID_SERIALIZATION_MAP.get(id);
     }
-
+    /**
+     * 通过url获取序列化对象
+     * 通过serialization 参数， 默认序列化方式是hessian2
+     * @param url
+     * @return
+     */
     public static Serialization getSerialization(URL url) {
         return ExtensionLoader.getExtensionLoader(Serialization.class).getExtension(
                 url.getParameter(Constants.SERIALIZATION_KEY, Constants.DEFAULT_REMOTING_SERIALIZATION));
     }
 
+    /**
+     * 根据url与id 获取序列化对象
+     * @param url
+     * @param id
+     * @return
+     * @throws IOException
+     */
     public static Serialization getSerialization(URL url, Byte id) throws IOException {
         Serialization serialization = getSerializationById(id);
         String serializationName = url.getParameter(Constants.SERIALIZATION_KEY, Constants.DEFAULT_REMOTING_SERIALIZATION);
         // Check if "serialization id" passed from network matches the id on this side(only take effect for JDK serialization), for security purpose.
+
+
+        // 出于安全的目的，针对 JDK 的序列化方式（对应编号为 3、4、7），检查连接到服务器的 URL 和实际传输的数据，协议是否一致。
+        // https://github.com/apache/incubator-dubbo/issues/1138
+        // Check if "serialization id" passed from network matches the id on this side(only take effect for JDK serialization), for security purpose.
+
         if (serialization == null
                 || ((id == 3 || id == 7 || id == 4) && !(serializationName.equals(ID_SERIALIZATIONNAME_MAP.get(id))))) {
             throw new IOException("Unexpected serialization id:" + id + " received from network, please check if the peer send the right id.");

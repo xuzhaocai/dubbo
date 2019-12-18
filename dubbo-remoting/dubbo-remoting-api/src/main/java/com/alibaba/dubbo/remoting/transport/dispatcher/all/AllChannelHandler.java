@@ -30,12 +30,24 @@ import com.alibaba.dubbo.remoting.transport.dispatcher.WrappedChannelHandler;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 
+
+/**
+ * all 所有消息都派发到线程池，包括请求，响应，连接事件，断开事件，心跳等。
+ * direct 所有消息都不派发到线程池，全部在 IO 线程上直接执行。
+ * message 只有请求响应消息派发到线程池，其它连接断开事件，心跳等消息，直接在 IO 线程上执行。
+ * execution 只请求消息派发到线程池，不含响应，响应和其它连接断开事件，心跳等消息，直接在 IO 线程上执行。
+ * connection 在 IO 线程上，将连接断开事件放入队列，有序逐个执行，其它消息派发到线程池。
+ *
+ *
+ *
+ * 该handler将所有的请求交由线程池执行
+ */
 public class AllChannelHandler extends WrappedChannelHandler {
 
     public AllChannelHandler(ChannelHandler handler, URL url) {
         super(handler, url);
     }
-
+    // 连接事件
     @Override
     public void connected(Channel channel) throws RemotingException {
         ExecutorService cexecutor = getExecutorService();
@@ -45,7 +57,7 @@ public class AllChannelHandler extends WrappedChannelHandler {
             throw new ExecutionException("connect event", channel, getClass() + " error when process connected event .", t);
         }
     }
-
+    // 断开事件
     @Override
     public void disconnected(Channel channel) throws RemotingException {
         ExecutorService cexecutor = getExecutorService();
@@ -78,7 +90,7 @@ public class AllChannelHandler extends WrappedChannelHandler {
             throw new ExecutionException(message, channel, getClass() + " error when process received event .", t);
         }
     }
-
+    //
     @Override
     public void caught(Channel channel, Throwable exception) throws RemotingException {
         ExecutorService cexecutor = getExecutorService();

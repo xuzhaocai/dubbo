@@ -99,7 +99,7 @@ public class ChannelEventRunnable implements Runnable {
 
     /**
      * ChannelState
-     *
+     * 通道状态
      *
      */
     public enum ChannelState {
