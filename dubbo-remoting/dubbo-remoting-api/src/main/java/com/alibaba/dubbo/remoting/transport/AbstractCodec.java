@@ -30,6 +30,13 @@ import java.net.InetSocketAddress;
 
 /**
  * AbstractCodec
+ *
+ * 提供了
+ *  1.检验消息长度
+ *  2.判断客户端还是服务端
+ *  3.获取序列化对象
+ *
+ *  的功能
  */
 public abstract class AbstractCodec implements Codec2 {
 

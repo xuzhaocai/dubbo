@@ -47,11 +47,11 @@ public class HeaderExchangeClient implements ExchangeClient {
     private static final ScheduledThreadPoolExecutor scheduled = new ScheduledThreadPoolExecutor(2, new NamedThreadFactory("dubbo-remoting-client-heartbeat", true));
     private final Client client;
     private final ExchangeChannel channel;
-    // heartbeat timer
+    // heartbeat timer  心跳定时器
     private ScheduledFuture<?> heartbeatTimer;
     // heartbeat(ms), default value is 0 , won't execute a heartbeat.
-    private int heartbeat;
-    private int heartbeatTimeout;
+    private int heartbeat; // 是否心跳
+    private int heartbeatTimeout; // 心跳间隔时间
 
     public HeaderExchangeClient(Client client, boolean needHeartbeat) {
         if (client == null) {
@@ -60,13 +60,18 @@ public class HeaderExchangeClient implements ExchangeClient {
         this.client = client;
         this.channel = new HeaderExchangeChannel(client);
         String dubbo = client.getUrl().getParameter(Constants.DUBBO_VERSION_KEY);
+
+        //获取心跳
         this.heartbeat = client.getUrl().getParameter(Constants.HEARTBEAT_KEY, dubbo != null && dubbo.startsWith("1.0.") ? Constants.DEFAULT_HEARTBEAT : 0);
+
+
         this.heartbeatTimeout = client.getUrl().getParameter(Constants.HEARTBEAT_TIMEOUT_KEY, heartbeat * 3);
-        if (heartbeatTimeout < heartbeat * 2) {
+
+        if (heartbeatTimeout < heartbeat * 2) {// 避免间隔太短
             throw new IllegalStateException("heartbeatTimeout < heartbeatInterval * 2");
         }
-        if (needHeartbeat) {
-            startHeartbeatTimer();
+        if (needHeartbeat) {// 是否启动心跳
+            startHeartbeatTimer();//启动心跳
         }
     }
 
@@ -180,8 +185,11 @@ public class HeaderExchangeClient implements ExchangeClient {
         return channel.hasAttribute(key);
     }
 
+    /**
+     * 启动心跳定时器
+     */
     private void startHeartbeatTimer() {
-        stopHeartbeatTimer();
+        stopHeartbeatTimer();// 先关闭心跳定时器
         if (heartbeat > 0) {
             heartbeatTimer = scheduled.scheduleWithFixedDelay(
                     new HeartBeatTask(new HeartBeatTask.ChannelProvider() {
@@ -194,6 +202,9 @@ public class HeaderExchangeClient implements ExchangeClient {
         }
     }
 
+    /**
+     * 关闭心跳定时器
+     */
     private void stopHeartbeatTimer() {
         if (heartbeatTimer != null && !heartbeatTimer.isCancelled()) {
             try {

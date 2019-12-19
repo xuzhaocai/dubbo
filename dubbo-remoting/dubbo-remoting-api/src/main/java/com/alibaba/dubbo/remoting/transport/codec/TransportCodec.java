@@ -41,6 +41,8 @@ public class TransportCodec extends AbstractCodec {
         ObjectOutput objectOutput = getSerialization(channel).serialize(channel.getUrl(), output);
         encodeData(channel, objectOutput, message);
         objectOutput.flushBuffer();
+
+        //释放
         if (objectOutput instanceof Cleanable) {
             ((Cleanable) objectOutput).cleanup();
         }
@@ -51,6 +53,7 @@ public class TransportCodec extends AbstractCodec {
         InputStream input = new ChannelBufferInputStream(buffer);
         ObjectInput objectInput = getSerialization(channel).deserialize(channel.getUrl(), input);
         Object object = decodeData(channel, objectInput);
+        //释放
         if (objectInput instanceof Cleanable) {
             ((Cleanable) objectInput).cleanup();
         }

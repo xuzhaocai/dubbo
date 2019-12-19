@@ -40,10 +40,12 @@ final class HeaderExchangeChannel implements ExchangeChannel {
 
     private static final Logger logger = LoggerFactory.getLogger(HeaderExchangeChannel.class);
 
-    private static final String CHANNEL_KEY = HeaderExchangeChannel.class.getName() + ".CHANNEL";
+    private static final String CHANNEL_KEY = HeaderExchangeChannel.class.getName() + ".CHANNEL"; //HeaderExchangeChannel.CHANNEL
 
     private final Channel channel;
-
+    /**
+     * 是否关闭
+     */
     private volatile boolean closed = false;
 
     HeaderExchangeChannel(Channel channel) {
@@ -52,7 +54,7 @@ final class HeaderExchangeChannel implements ExchangeChannel {
         }
         this.channel = channel;
     }
-
+    //创建 HeaderExchangeChannel方法
     static HeaderExchangeChannel getOrAddChannel(Channel ch) {
         if (ch == null) {
             return null;
@@ -80,7 +82,7 @@ final class HeaderExchangeChannel implements ExchangeChannel {
 
     @Override
     public void send(Object message, boolean sent) throws RemotingException {
-        if (closed) {
+        if (closed) {// 已经关闭 抛出异常
             throw new RemotingException(this.getLocalAddress(), null, "Failed to send message " + message + ", cause: The channel " + this + " is closed!");
         }
         if (message instanceof Request
@@ -95,27 +97,28 @@ final class HeaderExchangeChannel implements ExchangeChannel {
             channel.send(request, sent);
         }
     }
-
+    // 发送消息
     @Override
     public ResponseFuture request(Object request) throws RemotingException {
         return request(request, channel.getUrl().getPositiveParameter(Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT));
     }
-
+    // 发送消息
     @Override
     public ResponseFuture request(Object request, int timeout) throws RemotingException {
         if (closed) {
             throw new RemotingException(this.getLocalAddress(), null, "Failed to send request " + request + ", cause: The channel " + this + " is closed!");
         }
-        // create request.
+        // create request.  创建请求对象
         Request req = new Request();
         req.setVersion(Version.getProtocolVersion());
         req.setTwoWay(true);
         req.setData(request);
         DefaultFuture future = new DefaultFuture(channel, req, timeout);
         try {
+            // 发送请求
             channel.send(req);
         } catch (RemotingException e) {
-            future.cancel();
+            future.cancel(); // 出现异常 future 取消
             throw e;
         }
         return future;
@@ -128,14 +131,14 @@ final class HeaderExchangeChannel implements ExchangeChannel {
 
     @Override
     public void close() {
-        try {
+        try {//关闭通道
             channel.close();
         } catch (Throwable e) {
             logger.warn(e.getMessage(), e);
         }
     }
 
-    // graceful close
+    // graceful close  优雅关闭
     @Override
     public void close(int timeout) {
         if (closed) {
@@ -144,6 +147,7 @@ final class HeaderExchangeChannel implements ExchangeChannel {
         closed = true;
         if (timeout > 0) {
             long start = System.currentTimeMillis();
+            //就是判断还有没有任务，然后时间有没有超
             while (DefaultFuture.hasFuture(channel)
                     && System.currentTimeMillis() - start < timeout) {
                 try {
