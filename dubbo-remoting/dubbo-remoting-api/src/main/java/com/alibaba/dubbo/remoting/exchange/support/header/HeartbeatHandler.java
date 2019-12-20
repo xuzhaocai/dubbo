@@ -27,6 +27,10 @@ import com.alibaba.dubbo.remoting.exchange.Request;
 import com.alibaba.dubbo.remoting.exchange.Response;
 import com.alibaba.dubbo.remoting.transport.AbstractChannelHandlerDelegate;
 
+
+/**
+ * 心跳处理器类
+ */
 public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
 
     private static final Logger logger = LoggerFactory.getLogger(HeartbeatHandler.class);
@@ -61,13 +65,13 @@ public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
 
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
-        setReadTimestamp(channel);
-        if (isHeartbeatRequest(message)) {
+        setReadTimestamp(channel);//设置读时间戳
+        if (isHeartbeatRequest(message)) {// 判断是不是心跳请求
             Request req = (Request) message;
-            if (req.isTwoWay()) {
+            if (req.isTwoWay()) {// 判断是不是需要响应
                 Response res = new Response(req.getId(), req.getVersion());
-                res.setEvent(Response.HEARTBEAT_EVENT);
-                channel.send(res);
+                res.setEvent(Response.HEARTBEAT_EVENT);// 设置心跳事件
+                channel.send(res);// 发送
                 if (logger.isInfoEnabled()) {
                     int heartbeat = channel.getUrl().getParameter(Constants.HEARTBEAT_KEY, 0);
                     if (logger.isDebugEnabled()) {
@@ -79,7 +83,7 @@ public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
             }
             return;
         }
-        if (isHeartbeatResponse(message)) {
+        if (isHeartbeatResponse(message)) {// 判断是不是心跳响应
             if (logger.isDebugEnabled()) {
                 logger.debug("Receive heartbeat response in thread " + Thread.currentThread().getName());
             }
@@ -93,6 +97,8 @@ public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
     }
 
     private void setWriteTimestamp(Channel channel) {
+
+        //设置写时间戳
         channel.setAttribute(KEY_WRITE_TIMESTAMP, System.currentTimeMillis());
     }
 

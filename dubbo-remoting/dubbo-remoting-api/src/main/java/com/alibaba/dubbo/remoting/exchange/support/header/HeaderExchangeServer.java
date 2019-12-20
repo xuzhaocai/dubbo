@@ -138,12 +138,18 @@ public class HeaderExchangeServer implements ExchangeServer {
         server.startClose();
     }
 
+    /**
+     * 广播客户端
+     *
+     * 发送readonly事件
+     */
     private void sendChannelReadOnlyEvent() {
+        //封装request请求
         Request request = new Request();
         request.setEvent(Request.READONLY_EVENT);
         request.setTwoWay(false);
         request.setVersion(Version.getProtocolVersion());
-
+        // 循环发送给所有客户端
         Collection<Channel> channels = getChannels();
         for (Channel channel : channels) {
             try {
@@ -155,7 +161,7 @@ public class HeaderExchangeServer implements ExchangeServer {
         }
     }
 
-    private void doClose() {
+    private void doClose() {// 关闭心跳定时器
         if (!closed.compareAndSet(false, true)) {
             return;
         }
@@ -217,7 +223,7 @@ public class HeaderExchangeServer implements ExchangeServer {
     }
 
     @Override
-    public void reset(URL url) {
+    public void reset(URL url) {//重置心跳的配置，心跳参数发生变化，重启心跳定时器
         server.reset(url);
         try {
             if (url.hasParameter(Constants.HEARTBEAT_KEY)

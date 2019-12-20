@@ -29,11 +29,11 @@ import java.util.Collection;
 final class HeartBeatTask implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(HeartBeatTask.class);
-
+    // 用于查询获得需要的通道数组
     private ChannelProvider channelProvider;
-
+    // 心跳间隔时间
     private int heartbeat;
-
+    // 心跳超时时间
     private int heartbeatTimeout;
 
     HeartBeatTask(ChannelProvider provider, int heartbeat, int heartbeatTimeout) {
@@ -67,17 +67,18 @@ final class HeartBeatTask implements Runnable {
                                     + ", cause: The channel has no data-transmission exceeds a heartbeat period: " + heartbeat + "ms");
                         }
                     }
+                    // 最后读的时间，超过心跳超时时间
                     if (lastRead != null && now - lastRead > heartbeatTimeout) {
                         logger.warn("Close channel " + channel
                                 + ", because heartbeat read idle time out: " + heartbeatTimeout + "ms");
-                        if (channel instanceof Client) {
+                        if (channel instanceof Client) {// 是客户端直接重新连接
                             try {
                                 ((Client) channel).reconnect();
                             } catch (Exception e) {
                                 //do nothing
                             }
                         } else {
-                            channel.close();
+                            channel.close(); // 服务端断开连接
                         }
                     }
                 } catch (Throwable t) {
