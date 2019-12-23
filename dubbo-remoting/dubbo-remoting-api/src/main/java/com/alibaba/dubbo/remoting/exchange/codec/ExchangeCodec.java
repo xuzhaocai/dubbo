@@ -49,7 +49,7 @@ import java.io.InputStream;
  */
 public class ExchangeCodec extends TelnetCodec {
 
-    // header length. 长度  字节 128bit
+    // header length. 长度  字节 128bit  16个字节
     protected static final int HEADER_LENGTH = 16;
     // magic header.
     protected static final short MAGIC = (short) 0xdabb;  // 2字节

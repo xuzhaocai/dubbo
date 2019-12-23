@@ -30,7 +30,7 @@ public class ChannelBufferOutputStream extends OutputStream {
             throw new NullPointerException("buffer");
         }
         this.buffer = buffer;
-        startIndex = buffer.writerIndex();
+        startIndex = buffer.writerIndex();// write  开始位置
     }
 
     public int writtenBytes() {

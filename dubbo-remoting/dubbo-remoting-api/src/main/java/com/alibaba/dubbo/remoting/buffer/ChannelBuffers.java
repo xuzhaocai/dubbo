@@ -90,6 +90,12 @@ public final class ChannelBuffers {
         return buffer;
     }
 
+    /**
+     * 判断是否相等
+     * @param bufferA
+     * @param bufferB
+     * @return
+     */
     public static boolean equals(ChannelBuffer bufferA, ChannelBuffer bufferB) {
         final int aLen = bufferA.readableBytes();
         if (aLen != bufferB.readableBytes()) {
@@ -112,6 +118,12 @@ public final class ChannelBuffers {
         return true;
     }
 
+    /**
+     * 比较
+     * @param bufferA
+     * @param bufferB
+     * @return
+     */
     public static int compare(ChannelBuffer bufferA, ChannelBuffer bufferB) {
         final int aLen = bufferA.readableBytes();
         final int bLen = bufferB.readableBytes();

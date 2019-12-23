@@ -23,9 +23,9 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 public class ByteBufferBackedChannelBuffer extends AbstractChannelBuffer {
-
+    //java  nio
     private final ByteBuffer buffer;
-
+    // 容量
     private final int capacity;
 
     public ByteBufferBackedChannelBuffer(ByteBuffer buffer) {

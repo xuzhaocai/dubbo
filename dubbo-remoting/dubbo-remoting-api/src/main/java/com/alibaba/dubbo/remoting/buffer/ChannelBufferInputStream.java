@@ -27,7 +27,7 @@ public class ChannelBufferInputStream extends InputStream {
     private final int endIndex;
 
     public ChannelBufferInputStream(ChannelBuffer buffer) {
-        this(buffer, buffer.readableBytes());
+        this(buffer, buffer.readableBytes());// 可读字节数
     }
 
     public ChannelBufferInputStream(ChannelBuffer buffer, int length) {
@@ -37,13 +37,13 @@ public class ChannelBufferInputStream extends InputStream {
         if (length < 0) {
             throw new IllegalArgumentException("length: " + length);
         }
-        if (length > buffer.readableBytes()) {
+        if (length > buffer.readableBytes()) {// 判断可读字节数
             throw new IndexOutOfBoundsException();
         }
 
         this.buffer = buffer;
-        startIndex = buffer.readerIndex();
-        endIndex = startIndex + length;
+        startIndex = buffer.readerIndex();// 开始
+        endIndex = startIndex + length;// 结束
         buffer.markReaderIndex();
     }
 
@@ -71,7 +71,7 @@ public class ChannelBufferInputStream extends InputStream {
         if (!buffer.readable()) {
             return -1;
         }
-        return buffer.readByte() & 0xff;
+        return buffer.readByte() & 0xff;// &0xff 获取低8位
     }
 
     @Override
