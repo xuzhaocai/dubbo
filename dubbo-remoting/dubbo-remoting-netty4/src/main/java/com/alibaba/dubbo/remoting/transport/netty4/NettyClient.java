@@ -49,7 +49,7 @@ public class NettyClient extends AbstractClient {
 
     private Bootstrap bootstrap;
 
-    private volatile Channel channel; // volatile, please copy reference to use
+    private volatile Channel channel; // volatile, please copy reference to use  有 volatile 修饰符。因为客户端可能会断开重连，需要保证多线程的可见性。
 
     public NettyClient(final URL url, final ChannelHandler handler) throws RemotingException {
         super(url, wrapChannelHandler(url, handler));
@@ -65,10 +65,12 @@ public class NettyClient extends AbstractClient {
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 //.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getTimeout())
                 .channel(NioSocketChannel.class);
-
+        //连接超时    小于3000 设置成3000
         if (getConnectTimeout() < 3000) {
             bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000);
         } else {
+
+            // 使用用户设置的超时时间
             bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getConnectTimeout());
         }
 
@@ -85,6 +87,10 @@ public class NettyClient extends AbstractClient {
         });
     }
 
+    /**
+     * 进行连接
+     * @throws Throwable
+     */
     @Override
     protected void doConnect() throws Throwable {
         long start = System.currentTimeMillis();
@@ -95,7 +101,7 @@ public class NettyClient extends AbstractClient {
             if (ret && future.isSuccess()) {
                 Channel newChannel = future.channel();
                 try {
-                    // Close old channel
+                    // Close old channel   如果有以前的channel存在，
                     Channel oldChannel = NettyClient.this.channel; // copy reference
                     if (oldChannel != null) {
                         try {

@@ -33,12 +33,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * NettyClientHandler
  */
 @io.netty.channel.ChannelHandler.Sharable
+//Sharable 注解主要是用来标示一个 ChannelHandler 可以被安全地共享，
+// 即可以在多个Channel 的 ChannelPipeline 中使用同一个ChannelHandler ，
+// 而不必每一个ChannelPipeline 都重新 new 一个新的 ChannelHandler 。
 public class NettyServerHandler extends ChannelDuplexHandler {
-
+    // dubbo channel 集合
     private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>(); // <ip:port, channel>
-
+    // url
     private final URL url;
-
+    //dubbo channelHandler
     private final ChannelHandler handler;
 
     public NettyServerHandler(URL url, ChannelHandler handler) {
@@ -55,18 +58,23 @@ public class NettyServerHandler extends ChannelDuplexHandler {
     public Map<String, Channel> getChannels() {
         return channels;
     }
-
+    // 服务端与客户端连接成功的时候进行触发
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        ctx.fireChannelActive();
 
+        // 交给下一个节点处理。 实际上NettyServerHandler是最后一个节点
+        ctx.fireChannelActive();
+        // 根据netty 自己的channel来创建dubbo  的NettyChannel
         NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
         try {
             if (channel != null) {
                 channels.put(NetUtils.toAddressString((InetSocketAddress) ctx.channel().remoteAddress()), channel);
             }
+            // 提交给handler处理器
             handler.connected(channel);
         } finally {
+
+            //如果已经断开就移除这个channel
             NettyChannel.removeChannelIfDisconnected(ctx.channel());
         }
     }
@@ -89,17 +97,30 @@ public class NettyServerHandler extends ChannelDuplexHandler {
 
     }
 
+    /**
+     * 读取
+     * @param ctx
+     * @param msg
+     * @throws Exception
+     */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
         try {
+            //调用handler处理器的接收
             handler.received(channel, msg);
         } finally {
             NettyChannel.removeChannelIfDisconnected(ctx.channel());
         }
     }
 
-
+    /**
+     * 写操作
+     * @param ctx
+     * @param msg
+     * @param promise
+     * @throws Exception
+     */
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         super.write(ctx, msg, promise);
@@ -111,6 +132,12 @@ public class NettyServerHandler extends ChannelDuplexHandler {
         }
     }
 
+    /**
+     * 异常操作
+     * @param ctx
+     * @param cause
+     * @throws Exception
+     */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
             throws Exception {

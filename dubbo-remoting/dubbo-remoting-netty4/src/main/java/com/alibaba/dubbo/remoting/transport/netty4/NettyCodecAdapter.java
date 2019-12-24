@@ -35,15 +35,23 @@ import java.util.List;
  * 适配器
  */
 final class NettyCodecAdapter {
-
+    /**
+     * netty编码器
+     */
     private final ChannelHandler encoder = new InternalEncoder();
-
+    /**
+     * netty解码器
+     */
     private final ChannelHandler decoder = new InternalDecoder();
-
+    /**
+     *dubbo编解码
+     */
     private final Codec2 codec;
 
     private final URL url;
-
+    /**
+     *  Dubbo ChannelHandler
+     */
     private final com.alibaba.dubbo.remoting.ChannelHandler handler;
 
     public NettyCodecAdapter(Codec2 codec, URL url, com.alibaba.dubbo.remoting.ChannelHandler handler) {
@@ -59,11 +67,16 @@ final class NettyCodecAdapter {
     public ChannelHandler getDecoder() {
         return decoder;
     }
-
+    /**
+     * encode
+     */
     private class InternalEncoder extends MessageToByteEncoder {
 
         @Override
         protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
+
+
+            // 封装netty 的ByteBuf
             com.alibaba.dubbo.remoting.buffer.ChannelBuffer buffer = new NettyBackedChannelBuffer(out);
             Channel ch = ctx.channel();
             NettyChannel channel = NettyChannel.getOrAddChannel(ch, url, handler);
@@ -75,6 +88,11 @@ final class NettyCodecAdapter {
         }
     }
 
+
+    /**
+     * decode
+     * netty 解码器
+     */
     private class InternalDecoder extends ByteToMessageDecoder {
 
         @Override
