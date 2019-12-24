@@ -32,6 +32,7 @@ import java.util.List;
 
 /**
  * NettyCodecAdapter.
+ * 适配器
  */
 final class NettyCodecAdapter {
 
