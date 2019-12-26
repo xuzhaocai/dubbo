@@ -27,13 +27,15 @@ import java.net.InetSocketAddress;
  */
 public abstract class AbstractHttpServer implements HttpServer {
 
-    private final URL url;
+    private final URL url;//url
 
-    private final HttpHandler handler;
-
-    private volatile boolean closed;
+    private final HttpHandler handler;//handler 处理器
+    // volatile
+    private volatile boolean closed;//是否关闭
 
     public AbstractHttpServer(URL url, HttpHandler handler) {
+
+        //参数判断，成员赋值
         if (url == null) {
             throw new IllegalArgumentException("url == null");
         }
@@ -68,6 +70,9 @@ public abstract class AbstractHttpServer implements HttpServer {
         return url.toInetSocketAddress();
     }
 
+    /**
+     * 标记关闭s
+     */
     @Override
     public void close() {
         closed = true;

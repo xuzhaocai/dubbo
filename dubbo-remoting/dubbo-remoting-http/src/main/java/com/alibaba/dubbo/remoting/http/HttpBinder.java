@@ -24,7 +24,7 @@ import com.alibaba.dubbo.common.extension.SPI;
 /**
  * HttpBinder
  */
-@SPI("jetty")
+@SPI("jetty")//默认是jetty
 public interface HttpBinder {
 
     /**

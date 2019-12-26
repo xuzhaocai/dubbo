@@ -315,6 +315,10 @@ public class DubboProtocol extends AbstractProtocol {
         return server;
     }
 
+    /**
+     * @param url
+     * @throws RpcException
+     */
     private void optimizeSerialization(URL url) throws RpcException {
         String className = url.getParameter(Constants.OPTIMIZER_KEY, "");
         if (StringUtils.isEmpty(className) || optimizers.contains(className)) {

@@ -31,13 +31,19 @@ import org.apache.catalina.startup.Tomcat;
 
 import java.io.File;
 
+
+/**
+ * tomcat http server
+ */
 public class TomcatHttpServer extends AbstractHttpServer {
 
     private static final Logger logger = LoggerFactory.getLogger(TomcatHttpServer.class);
-
+    /**
+     * 内嵌tomcat对象
+     */
     private final Tomcat tomcat;
 
-    private final URL url;
+    private final URL url;//url
 
     public TomcatHttpServer(URL url, final HttpHandler handler) {
         super(url, handler);
@@ -63,8 +69,13 @@ public class TomcatHttpServer extends AbstractHttpServer {
         tomcat.getConnector().setProtocol("org.apache.coyote.http11.Http11NioProtocol");
 
         Context context = tomcat.addContext("/", baseDir);
+
+        // 将dispatcher servlet 设置到tomcat中
         Tomcat.addServlet(context, "dispatcher", new DispatcherServlet());
         context.addServletMapping("/*", "dispatcher");
+
+
+        // 添加到servletManger 中
         ServletManager.getInstance().addServletContext(url.getPort(), context.getServletContext());
 
         try {
@@ -77,10 +88,14 @@ public class TomcatHttpServer extends AbstractHttpServer {
     @Override
     public void close() {
         super.close();
-
+        // 移除
         ServletManager.getInstance().removeServletContext(url.getPort());
 
-        try {
+        //这里应该把DispatcherServlet 中绑定的handler 去除掉。。。
+
+
+
+        try {//停止tomcat
             tomcat.stop();
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);

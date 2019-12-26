@@ -28,10 +28,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Service dispatcher Servlet.
+ *
+ *
  */
 public class DispatcherServlet extends HttpServlet {
 
     private static final long serialVersionUID = 5766349180380479888L;
+
+    /**
+     * 处理器集合
+     * port：handler
+     */
     private static final Map<Integer, HttpHandler> handlers = new ConcurrentHashMap<Integer, HttpHandler>();
     private static DispatcherServlet INSTANCE;
 
@@ -54,10 +61,12 @@ public class DispatcherServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        //根据端口获取handler
         HttpHandler handler = handlers.get(request.getLocalPort());
-        if (handler == null) {// service not found.
+        if (handler == null) {//如果handler不存在 就返回 service not found.
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Service not found.");
         } else {
+            //交由handler处理
             handler.handle(request, response);
         }
     }

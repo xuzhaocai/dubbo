@@ -50,15 +50,17 @@ public class JettyHttpServer extends AbstractHttpServer {
         // we must disable the debug logging for production use
         Log.setLog(new StdErrLog());
         Log.getLog().setDebugEnabled(false);
-
+        // 添加handler
         DispatcherServlet.addHttpHandler(url.getParameter(Constants.BIND_PORT_KEY, url.getPort()), handler);
+        // 获取线程数， 默认是200
 
         int threads = url.getParameter(Constants.THREADS_KEY, Constants.DEFAULT_THREADS);
+        // 创建线程池
         QueuedThreadPool threadPool = new QueuedThreadPool();
         threadPool.setDaemon(true);
         threadPool.setMaxThreads(threads);
         threadPool.setMinThreads(threads);
-
+        //创建jetty connector对象
         SelectChannelConnector connector = new SelectChannelConnector();
 
         String bindIp = url.getParameter(Constants.BIND_IP_KEY, url.getHost());
@@ -66,11 +68,11 @@ public class JettyHttpServer extends AbstractHttpServer {
             connector.setHost(bindIp);
         }
         connector.setPort(url.getParameter(Constants.BIND_PORT_KEY, url.getPort()));
-
+        //创建服务器对象
         server = new Server();
         server.setThreadPool(threadPool);
         server.addConnector(connector);
-
+        //创建servlet handler  设置dispatcher
         ServletHandler servletHandler = new ServletHandler();
         ServletHolder servletHolder = servletHandler.addServletWithMapping(DispatcherServlet.class, "/*");
         servletHolder.setInitOrder(2);
@@ -80,9 +82,11 @@ public class JettyHttpServer extends AbstractHttpServer {
         // TODO Context.SESSIONS is the best option here?
         Context context = new Context(server, "/", Context.SESSIONS);
         context.setServletHandler(servletHandler);
+
+        //缓存servlet context
         ServletManager.getInstance().addServletContext(url.getParameter(Constants.BIND_PORT_KEY, url.getPort()), context.getServletContext());
 
-        try {
+        try {//启动jetty
             server.start();
         } catch (Exception e) {
             throw new IllegalStateException("Failed to start jetty server on " + url.getParameter(Constants.BIND_IP_KEY) + ":" + url.getParameter(Constants.BIND_PORT_KEY) + ", cause: "
@@ -94,11 +98,11 @@ public class JettyHttpServer extends AbstractHttpServer {
     public void close() {
         super.close();
 
-        //
+        //移除
         ServletManager.getInstance().removeServletContext(url.getParameter(Constants.BIND_PORT_KEY, url.getPort()));
 
         if (server != null) {
-            try {
+            try {//关闭jetty
                 server.stop();
             } catch (Exception e) {
                 logger.warn(e.getMessage(), e);
