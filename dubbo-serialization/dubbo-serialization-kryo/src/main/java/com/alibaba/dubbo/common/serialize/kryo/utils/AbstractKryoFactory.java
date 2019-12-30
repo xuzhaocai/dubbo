@@ -135,7 +135,7 @@ public abstract class AbstractKryoFactory implements KryoFactory {
         for (Class clazz : registrations) {
             kryo.register(clazz);
         }
-
+        // 注册自己定义的
         for (Map.Entry<Class, Object> entry : SerializableClassRegistry.getRegisteredClasses().entrySet()) {
             if (entry.getValue() == null) {
                 kryo.register(entry.getKey());
@@ -154,4 +154,6 @@ public abstract class AbstractKryoFactory implements KryoFactory {
     public abstract void returnKryo(Kryo kryo);
 
     public abstract Kryo getKryo();
+
 }
+

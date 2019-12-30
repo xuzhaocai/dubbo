@@ -174,7 +174,7 @@ public class ConfigUtils {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static String getProperty(String key, String defaultValue) {
-        String value = System.getProperty(key);
+        String value = System.getProperty(key);// 首先从系统参数中获取value
         if (value != null && value.length() > 0) {
             return value;
         }

@@ -27,33 +27,42 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * SpringContainer. (SPI, Singleton, ThreadSafe)
  */
 public class SpringContainer implements Container {
-
+    //spring 配置
     public static final String SPRING_CONFIG = "dubbo.spring.config";
+
+    //默认配置文件地址
     public static final String DEFAULT_SPRING_CONFIG = "classpath*:META-INF/spring/*.xml";
     private static final Logger logger = LoggerFactory.getLogger(SpringContainer.class);
-    static ClassPathXmlApplicationContext context;
+    static ClassPathXmlApplicationContext context;///全局唯一
 
     public static ClassPathXmlApplicationContext getContext() {
         return context;
     }
 
+    /**
+     * 启动
+     */
     @Override
     public void start() {
         String configPath = ConfigUtils.getProperty(SPRING_CONFIG);
         if (configPath == null || configPath.length() == 0) {
-            configPath = DEFAULT_SPRING_CONFIG;
+            configPath = DEFAULT_SPRING_CONFIG;// 使用默认配置文件地址
         }
+        // 创建 Spring Context 对象
         context = new ClassPathXmlApplicationContext(configPath.split("[,\\s]+"));
-        context.start();
+        context.start();//启动
     }
 
+    /**
+     * 停止
+     */
     @Override
     public void stop() {
         try {
             if (context != null) {
-                context.stop();
-                context.close();
-                context = null;
+                context.stop();// 停止
+                context.close(); // 关闭
+                context = null;//释放链接
             }
         } catch (Throwable e) {
             logger.error(e.getMessage(), e);

@@ -20,17 +20,22 @@ import com.alibaba.dubbo.common.extension.SPI;
 
 /**
  * Container. (SPI, Singleton, ThreadSafe)
+ *
+ *
+ * 服务容器，默认是spring的
  */
 @SPI("spring")
 public interface Container {
 
     /**
      * start.
+     * 启动
      */
     void start();
 
     /**
      * stop.
+     * 停止
      */
     void stop();
 

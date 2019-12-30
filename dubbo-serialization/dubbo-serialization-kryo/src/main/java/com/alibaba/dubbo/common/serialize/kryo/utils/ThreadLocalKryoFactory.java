@@ -22,7 +22,7 @@ public class ThreadLocalKryoFactory extends AbstractKryoFactory {
 
     private final ThreadLocal<Kryo> holder = new ThreadLocal<Kryo>() {
         @Override
-        protected Kryo initialValue() {
+        protected Kryo initialValue() {//初始值
             return create();
         }
     };

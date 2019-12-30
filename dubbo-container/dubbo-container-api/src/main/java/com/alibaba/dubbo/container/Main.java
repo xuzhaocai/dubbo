@@ -35,11 +35,15 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class Main {
 
-    public static final String CONTAINER_KEY = "dubbo.container";
 
+
+    // container 配置
+    public static final String CONTAINER_KEY = "dubbo.container";
+    //ShutdownHook 是否开启配置 KEY
     public static final String SHUTDOWN_HOOK_KEY = "dubbo.shutdown.hook";
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
+    //spi 获得container 扩展实现
 
     private static final ExtensionLoader<Container> loader = ExtensionLoader.getExtensionLoader(Container.class);
 
@@ -49,17 +53,17 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            if (args == null || args.length == 0) {
+            if (args == null || args.length == 0) {//如果main参数是空的
                 String config = ConfigUtils.getProperty(CONTAINER_KEY, loader.getDefaultExtensionName());
                 args = Constants.COMMA_SPLIT_PATTERN.split(config);
             }
-
+            // 加载容器组
             final List<Container> containers = new ArrayList<Container>();
             for (int i = 0; i < args.length; i++) {
                 containers.add(loader.getExtension(args[i]));
             }
             logger.info("Use container type(" + Arrays.toString(args) + ") to run dubbo serivce.");
-
+            //判断 dubbo.shutdown.hook系统选项
             if ("true".equals(System.getProperty(SHUTDOWN_HOOK_KEY))) {
                 Runtime.getRuntime().addShutdownHook(new Thread("dubbo-container-shutdown-hook") {
                     @Override
