@@ -31,7 +31,7 @@ public class FailoverCluster implements Cluster {
     // 实现接口join方法 ，创建 对应invoker处理
     @Override
     public <T> Invoker<T> join(Directory<T> directory) throws RpcException {
-        return new FailoverClusterInvoker<T>(directory);
+        return new FailoverClusterInvoker<T>(directory); /// new 一个失败重试的invoker
     }
 
 }

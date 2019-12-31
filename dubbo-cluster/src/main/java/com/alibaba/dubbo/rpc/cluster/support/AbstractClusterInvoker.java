@@ -188,8 +188,11 @@ public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
     }
 
     /**
-     * Reselect, use invokers not in `selected` first, if all invokers are in `selected`, just pick an available one using loadbalance policy.
-     *
+     * Reselect, use invokers not in `selected` first,
+     * if all invokers are in `selected`,
+     * just pick an available one using loadbalance policy.
+     * 重新选择， 首先使用invokers 中没有在selected 里面的，
+     * 如果所有的invokers 中都在selected 中，就根据负载均衡策略选择一个
      * @param loadbalance
      * @param invocation
      * @param invokers
@@ -204,38 +207,39 @@ public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
         //Allocating one in advance, this list is certain to be used.
         List<Invoker<T>> reselectInvokers = new ArrayList<Invoker<T>>(invokers.size() > 1 ? (invokers.size() - 1) : invokers.size());
 
-        //First, try picking a invoker not in `selected`.
-        if (availablecheck) { // invoker.isAvailable() should be checked
-            for (Invoker<T> invoker : invokers) {
+        //First, try picking a invoker not in `selected`.  只要没有选择过的。
+        if (availablecheck) { // invoker.isAvailable() should be checked  检测是否可用
+            for (Invoker<T> invoker : invokers) {    // 找出所有可用并且没有在selected 中的 invoker， 然后添加到reselectInvokers 中
                 if (invoker.isAvailable()) {
                     if (selected == null || !selected.contains(invoker)) {
                         reselectInvokers.add(invoker);
                     }
                 }
             }
+            // 如果 reselectInvokers 不是空的， 就根据负载均衡的策略选择一个invoker
             if (!reselectInvokers.isEmpty()) {
                 return loadbalance.select(reselectInvokers, getUrl(), invocation);
             }
-        } else { // do not check invoker.isAvailable()
-            for (Invoker<T> invoker : invokers) {
+        } else { // do not check invoker.isAvailable()  不检测可用性
+            for (Invoker<T> invoker : invokers) {   // 遍历invokers ，找出不在selected 中的invoker 添加到reselectInvokers中
                 if (selected == null || !selected.contains(invoker)) {
                     reselectInvokers.add(invoker);
                 }
-            }
+            }// 不是空的话，就使用负载均衡策略 选择一个
             if (!reselectInvokers.isEmpty()) {
                 return loadbalance.select(reselectInvokers, getUrl(), invocation);
             }
         }
-        // Just pick an available invoker using loadbalance policy
+        // Just pick an available invoker using loadbalance policy    只要可用就可以了
         {
-            if (selected != null) {
+            if (selected != null) {  // 这个只选择可用的就行了， 在没在selected 列表中的就不管了。。。
                 for (Invoker<T> invoker : selected) {
                     if ((invoker.isAvailable()) // available first
                             && !reselectInvokers.contains(invoker)) {
                         reselectInvokers.add(invoker);
                     }
                 }
-            }
+            }// 使用负载均衡策略 选择一个
             if (!reselectInvokers.isEmpty()) {
                 return loadbalance.select(reselectInvokers, getUrl(), invocation);
             }
@@ -245,7 +249,7 @@ public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
     // 实现接口的invoker方法
     @Override
     public Result invoke(final Invocation invocation) throws RpcException {
-        checkWhetherDestroyed();
+        checkWhetherDestroyed();   // 检验是否销毁
         LoadBalance loadbalance = null;
 
         // binding attachments into invocation.
@@ -253,18 +257,22 @@ public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
         if (contextAttachments != null && contextAttachments.size() != 0) {
             ((RpcInvocation) invocation).addAttachments(contextAttachments);
         }
-
+        // 获取所有服务提供者的集合
         List<Invoker<T>> invokers = list(invocation);
         if (invokers != null && !invokers.isEmpty()) {
+
+            // invokers 不是空  根据dubbo spi 获取负载均衡策略  默认是random
             loadbalance = ExtensionLoader.getExtensionLoader(LoadBalance.class).getExtension(invokers.get(0).getUrl()
                     .getMethodParameter(RpcUtils.getMethodName(invocation), Constants.LOADBALANCE_KEY, Constants.DEFAULT_LOADBALANCE));
         }
+
+        // 如果是异步调用，就设置调用编号
         RpcUtils.attachInvocationIdIfAsync(getUrl(), invocation);
 
         // 具体实现是由子类实现的
         return doInvoke(invocation, invokers, loadbalance);
     }
-
+    // 检测是否已经销毁
     protected void checkWhetherDestroyed() {
 
         if (destroyed.get()) {
@@ -279,6 +287,11 @@ public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
         return getInterface() + " -> " + getUrl().toString();
     }
 
+    /**
+     * 检验invokers    主要是判断是否为空
+     * @param invokers
+     * @param invocation
+     */
     protected void checkInvokers(List<Invoker<T>> invokers, Invocation invocation) {
         if (invokers == null || invokers.isEmpty()) {
             throw new RpcException("Failed to invoke the method "
