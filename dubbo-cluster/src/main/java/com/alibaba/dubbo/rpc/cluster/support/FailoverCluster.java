@@ -28,7 +28,7 @@ import com.alibaba.dubbo.rpc.cluster.Directory;
 public class FailoverCluster implements Cluster {
 
     public final static String NAME = "failover";
-
+    // 实现接口join方法 ，创建 对应invoker处理
     @Override
     public <T> Invoker<T> join(Directory<T> directory) throws RpcException {
         return new FailoverClusterInvoker<T>(directory);

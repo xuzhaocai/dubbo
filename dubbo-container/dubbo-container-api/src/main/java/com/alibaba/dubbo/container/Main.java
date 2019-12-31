@@ -64,6 +64,7 @@ public class Main {
             }
             logger.info("Use container type(" + Arrays.toString(args) + ") to run dubbo serivce.");
             //判断 dubbo.shutdown.hook系统选项
+            //当配置 JVM 启动参数带有 Ddubbo.shutdown.hook=true 时，添加关闭的 ShutdownHook
             if ("true".equals(System.getProperty(SHUTDOWN_HOOK_KEY))) {
                 Runtime.getRuntime().addShutdownHook(new Thread("dubbo-container-shutdown-hook") {
                     @Override
@@ -77,7 +78,7 @@ public class Main {
                             }
                             try {
                                 LOCK.lock();
-                                STOP.signal();
+                                STOP.signal();//唤醒操作
                             } finally {
                                 LOCK.unlock();
                             }
@@ -85,7 +86,7 @@ public class Main {
                     }
                 });
             }
-
+            //启动容器
             for (Container container : containers) {
                 container.start();
                 logger.info("Dubbo " + container.getClass().getSimpleName() + " started!");
@@ -96,13 +97,15 @@ public class Main {
             logger.error(e.getMessage(), e);
             System.exit(1);
         }
+
+        // 这地方是起到进程常驻的作用。。如果没有下面这段，jvm运行到此处就会执行完毕，然后容器也就会停止
         try {
-            LOCK.lock();
-            STOP.await();
+            LOCK.lock();//获得锁
+            STOP.await();//释放锁进行等待
         } catch (InterruptedException e) {
             logger.warn("Dubbo service server stopped, interrupted by other thread!", e);
         } finally {
-            LOCK.unlock();
+            LOCK.unlock(); //释放
         }
     }
 
