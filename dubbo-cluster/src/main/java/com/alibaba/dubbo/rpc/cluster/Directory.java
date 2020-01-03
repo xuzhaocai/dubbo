@@ -27,21 +27,21 @@ import java.util.List;
  * Directory. (SPI, Prototype, ThreadSafe)
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Directory_service">Directory Service</a>
- *
+ * 一个Directory 之对应一个服务类型
  * @see com.alibaba.dubbo.rpc.cluster.Cluster#join(Directory)
  */
 public interface Directory<T> extends Node {
 
     /**
      * get service type.
-     *
+     * 获取服务类型
      * @return service type.
      */
     Class<T> getInterface();
 
     /**
      * list invokers.
-     *
+     * 获得所有invoker 列表
      * @return invokers
      */
     List<Invoker<T>> list(Invocation invocation) throws RpcException;

@@ -570,7 +570,7 @@ public class RegistryDirectoryTest {
         List<URL> overrideUrls = new ArrayList<URL>();
         overrideUrls.add(URL.valueOf("override://0.0.0.0?timeout=1&connections=5"));
         registryDirectory.notify(overrideUrls);
-        //The registry is initially pushed to override only, and the dirctory state should be false because there is no invoker.
+        //The registry is initially pushed to override only, and the tory state should be false because there is no invoker.
         Assert.assertEquals(false, registryDirectory.isAvailable());
 
         //After pushing two provider, the directory state is restored to true

@@ -60,40 +60,66 @@ import java.util.Set;
 public class RegistryDirectory<T> extends AbstractDirectory<T> implements NotifyListener {
 
     private static final Logger logger = LoggerFactory.getLogger(RegistryDirectory.class);
-
+    // cluster
     private static final Cluster cluster = ExtensionLoader.getExtensionLoader(Cluster.class).getAdaptiveExtension();
-
+    // routerFactory
     private static final RouterFactory routerFactory = ExtensionLoader.getExtensionLoader(RouterFactory.class).getAdaptiveExtension();
-
+    // configurator
     private static final ConfiguratorFactory configuratorFactory = ExtensionLoader.getExtensionLoader(ConfiguratorFactory.class).getAdaptiveExtension();
-    private final String serviceKey; // Initialization at construction time, assertion not null
-    private final Class<T> serviceType; // Initialization at construction time, assertion not null
-    private final Map<String, String> queryMap; // Initialization at construction time, assertion not null
-    private final URL directoryUrl; // Initialization at construction time, assertion not null, and always assign non null value
-    private final String[] serviceMethods;
-    private final boolean multiGroup;
-    private Protocol protocol; // Initialization at the time of injection, the assertion is not null
-    private Registry registry; // Initialization at the time of injection, the assertion is not null
-    private volatile boolean forbidden = false;
 
+
+
+
+    private final String serviceKey; // Initialization at construction time, assertion not null
+    // 服务类型
+    private final Class<T> serviceType; // Initialization at construction time, assertion not null
+    // consumer url 配置项url
+    private final Map<String, String> queryMap; // Initialization at construction time, assertion not null
+
+
+    // 原始目录url
+    private final URL directoryUrl; // Initialization at construction time, assertion not null, and always assign non null value
+    // 服务方法数组
+    private final String[] serviceMethods;
+    // 是否引用多分组
+    private final boolean multiGroup;
+
+
+
+
+    // 注册中心 protocol
+    private Protocol protocol; // Initialization at the time of injection, the assertion is not null
+
+    //注册中心
+    private Registry registry; // Initialization at the time of injection, the assertion is not null
+
+
+    /**
+     * 是否禁止访问
+     *  1. 没有服务提供者
+     *  2. 服务提供者被禁用
+     */
+    private volatile boolean forbidden = false;
+    //覆写的目录 URL ，结合配置规则
     private volatile URL overrideDirectoryUrl; // Initialization at construction time, assertion not null, and always assign non null value
 
     private volatile URL registeredConsumerUrl;
 
     /**
+     * 配置规则数组
      * override rules
      * Priority: override>-D>consumer>provider
      * Rule one: for a certain provider <ip:port,timeout=100>
      * Rule two: for all providers <* ,timeout=5000>
      */
     private volatile List<Configurator> configurators; // The initial value is null and the midway may be assigned to null, please use the local variable reference
-
+    // URl  与 服务提供者invoker 的映射
     // Map<url, Invoker> cache service url to invoker mapping.
     private volatile Map<String, Invoker<T>> urlInvokerMap; // The initial value is null and the midway may be assigned to null, please use the local variable reference
-
+    // 方法名 与 服务提供者invoker的映射
     // Map<methodName, Invoker> cache service method to invokers mapping.
     private volatile Map<String, List<Invoker<T>>> methodInvokerMap; // The initial value is null and the midway may be assigned to null, please use the local variable reference
-
+    //服务提供者url缓存
     // Set<invokerUrls> cache invokeUrls to invokers mapping.
     private volatile Set<URL> cachedInvokerUrls; // The initial value is null and the midway may be assigned to null, please use the local variable reference
 
@@ -109,6 +135,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
         this.overrideDirectoryUrl = this.directoryUrl = url.setPath(url.getServiceInterface()).clearParameters().addParameters(queryMap).removeParameter(Constants.MONITOR_KEY);
         String group = directoryUrl.getParameter(Constants.GROUP_KEY, "");
         this.multiGroup = group != null && ("*".equals(group) || group.contains(","));
+
+        //取得methods
         String methods = queryMap.get(Constants.METHODS_KEY);
         this.serviceMethods = methods == null ? null : Constants.COMMA_SPLIT_PATTERN.split(methods);
     }
@@ -156,8 +184,16 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
         this.registry = registry;
     }
 
+    /**
+     * 订阅
+     * @param url
+     */
     public void subscribe(URL url) {
+
+        // 向父类设置consumerUrl
         setConsumerUrl(url);
+
+        // 向注册中心， 发起订阅
         registry.subscribe(url, this);
     }
 
