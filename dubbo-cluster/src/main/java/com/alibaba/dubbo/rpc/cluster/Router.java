@@ -35,14 +35,14 @@ public interface Router extends Comparable<Router>{
 
     /**
      * get the router url.
-     *
+     * 获得url
      * @return url
      */
     URL getUrl();
 
     /**
      * route.
-     *
+     * 根据规则筛选invoker
      * @param invokers
      * @param url        refer url
      * @param invocation

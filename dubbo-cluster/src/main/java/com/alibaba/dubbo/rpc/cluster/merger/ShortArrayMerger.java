@@ -24,6 +24,7 @@ public class ShortArrayMerger implements Merger<short[]> {
     @Override
     public short[] merge(short[]... items) {
         int total = 0;
+        // 长度
         for (short[] array : items) {
             total += array.length;
         }

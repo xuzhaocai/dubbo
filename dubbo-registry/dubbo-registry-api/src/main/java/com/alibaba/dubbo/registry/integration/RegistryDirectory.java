@@ -229,7 +229,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
     }
 
     /**
-     * 通知接口
+     * 通知接口，订阅了注册中心，url有变动就会通知
      * @param urls The list of registered information , is always not empty. The meaning is the same as the return value of {@link com.alibaba.dubbo.registry.RegistryService#lookup(URL)}.
      */
     @Override
@@ -263,9 +263,10 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
             this.configurators = toConfigurators(configuratorUrls);
         }
         //处理路由规则url集合
+        // 当url 有变化的时候，重新设置router
         // routers
         if (routerUrls != null && !routerUrls.isEmpty()) {
-            List<Router> routers = toRouters(routerUrls);
+            List<Router> routers = toRouters(routerUrls);//将routerUrl转换成url
             if (routers != null) { // null - do nothing
                 setRouters(routers);
             }
@@ -370,28 +371,34 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
     }
 
     /**
+     *
+     * 将urls 转换成 routers
      * @param urls
      * @return null : no routers ,do nothing
      * else :routers list
      */
     private List<Router> toRouters(List<URL> urls) {
         List<Router> routers = new ArrayList<Router>();
-        if (urls == null || urls.isEmpty()) {
+        if (urls == null || urls.isEmpty()) {  // 判断
             return routers;
         }
         if (urls != null && !urls.isEmpty()) {
             for (URL url : urls) {
+
+                //如果empty://打头  一般情况下，所有路由规则被删除时，有且仅有一条协议为 "empty://" 的路由规则 URL
                 if (Constants.EMPTY_PROTOCOL.equals(url.getProtocol())) {
                     continue;
                 }
+                // 获取router
                 String routerType = url.getParameter(Constants.ROUTER_KEY);
                 if (routerType != null && routerType.length() > 0) {
-                    url = url.setProtocol(routerType);
+                    url = url.setProtocol(routerType);// 设置route 协议
                 }
                 try {
+                    //使用dubbo spi  获得Router
                     Router router = routerFactory.getRouter(url);
                     if (!routers.contains(router))
-                        routers.add(router);
+                        routers.add(router);//如果list没有这个router， 添加
                 } catch (Throwable t) {
                     logger.error("convert router url to router error, url: " + url, t);
                 }
@@ -511,12 +518,18 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
         return providerUrl;
     }
 
+    /**
+     * 使用route 过滤 invoker
+     * @param invokers
+     * @param method
+     * @return
+     */
     private List<Invoker<T>> route(List<Invoker<T>> invokers, String method) {
         Invocation invocation = new RpcInvocation(method, new Class<?>[0], new Object[0]);
-        List<Router> routers = getRouters();
+        List<Router> routers = getRouters();///获取routers
         if (routers != null) {
             for (Router router : routers) {
-                // If router's url not null and is not route by runtime,we filter invokers here
+                // If router's url not null and is not route by runtime,we filter invokers here  router url不是null  && runtime属性是false 的时候过滤
                 if (router.getUrl() != null && !router.getUrl().getParameter(Constants.RUNTIME_KEY, false)) {
                     invokers = router.route(invokers, getConsumerUrl(), invocation);
                 }
@@ -557,6 +570,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
                 invokersList.add(invoker);
             }
         }
+        // 通过router进行路由过滤
         List<Invoker<T>> newInvokersList = route(invokersList, null);
         newMethodInvokerMap.put(Constants.ANY_VALUE, newInvokersList);
         if (serviceMethods != null && serviceMethods.length > 0) {

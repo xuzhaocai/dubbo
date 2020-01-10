@@ -30,11 +30,13 @@ import java.util.Set;
  *
  */
 public abstract class AbstractConfigurator implements Configurator {
-
+    /**
+     * 配置规则url
+     */
     private final URL configuratorUrl;
 
     public AbstractConfigurator(URL url) {
-        if (url == null) {
+        if (url == null) { // 判断null
             throw new IllegalArgumentException("configurator url == null");
         }
         this.configuratorUrl = url;
@@ -51,11 +53,17 @@ public abstract class AbstractConfigurator implements Configurator {
 
     @Override
     public URL configure(URL url) {
+
+
+        // 都是null 就返回
         if (configuratorUrl == null || configuratorUrl.getHost() == null
                 || url == null || url.getHost() == null) {
             return url;
         }
         // If override url has port, means it is a provider address. We want to control a specific provider with this override url, it may take effect on the specific provider instance or on consumers holding this provider instance.
+
+
+        // 配置规则，URL 带有端口( port )，意图是控制提供者机器。可以在提供端生效 也可以在消费端生效
         if (configuratorUrl.getPort() != 0) {
             if (url.getPort() == configuratorUrl.getPort()) {
                 return configureIfMatch(url.getHost(), url);
@@ -63,6 +71,9 @@ public abstract class AbstractConfigurator implements Configurator {
         } else {// override url don't have a port, means the ip override url specify is a consumer address or 0.0.0.0
             // 1.If it is a consumer ip address, the intention is to control a specific consumer instance, it must takes effect at the consumer side, any provider received this override url should ignore;
             // 2.If the ip is 0.0.0.0, this override url can be used on consumer, and also can be used on provider
+
+            //配置规则，URL 没有端口，override 输入消费端地址 或者 0.0.0.0
+
             if (url.getParameter(Constants.SIDE_KEY, Constants.PROVIDER).equals(Constants.CONSUMER)) {
                 return configureIfMatch(NetUtils.getLocalHost(), url);// NetUtils.getLocalHost is the ip address consumer registered to registry.
             } else if (url.getParameter(Constants.SIDE_KEY, Constants.CONSUMER).equals(Constants.PROVIDER)) {

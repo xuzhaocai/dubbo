@@ -84,6 +84,12 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
         if (localRouters != null && !localRouters.isEmpty()) {
             for (Router router : localRouters) {
                 try {
+
+
+                    /**判断 "runtime" 为 true 才执行：是否在每次调用时执行路由规则，
+                     * 否则只在提供者地址列表变更时预先执行并缓存结果，调用时直接从缓存中获取路由结果。
+                     * 如果用了参数路由，必须设为 true，需要注意设置会影响调用的性能，可不填 ，缺省为 flase。
+                     */
                     if (router.getUrl() == null || router.getUrl().getParameter(Constants.RUNTIME_KEY, false)) {
                         invokers = router.route(invokers, getConsumerUrl(), invocation);
                     }
@@ -104,18 +110,24 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
         return routers;
     }
 
+    /**
+     * 设置路由规则
+     * @param routers
+     */
     protected void setRouters(List<Router> routers) {
         // copy list
         routers = routers == null ? new ArrayList<Router>() : new ArrayList<Router>(routers);
-        // append url router
+        // append url router   获取router参数
         String routerkey = url.getParameter(Constants.ROUTER_KEY);
         if (routerkey != null && routerkey.length() > 0) {
             RouterFactory routerFactory = ExtensionLoader.getExtensionLoader(RouterFactory.class).getExtension(routerkey);
             routers.add(routerFactory.getRouter(url));
         }
-        // append mock invoker selector
+        // append mock invoker selector  添加几个系统自带的路由处理
         routers.add(new MockInvokersSelector());
         routers.add(new TagRouter());
+
+        //排序
         Collections.sort(routers);
         this.routers = routers;
     }

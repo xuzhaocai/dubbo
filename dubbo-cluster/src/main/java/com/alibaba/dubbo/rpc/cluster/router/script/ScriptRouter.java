@@ -46,7 +46,9 @@ public class ScriptRouter extends AbstractRouter {
     private static final Logger logger = LoggerFactory.getLogger(ScriptRouter.class);
 
     private static final int DEFAULT_PRIORITY = 1;
-
+    /**
+     * 脚本类型与脚本引擎
+     */
     private static final Map<String, ScriptEngine> engines = new ConcurrentHashMap<String, ScriptEngine>();
 
     private final ScriptEngine engine;
@@ -55,27 +57,45 @@ public class ScriptRouter extends AbstractRouter {
 
     public ScriptRouter(URL url) {
         this.url = url;
+
+        //获得type
         String type = url.getParameter(Constants.TYPE_KEY);
+
+        //获取优先级 ， 默认是1
         this.priority = url.getParameter(Constants.PRIORITY_KEY, DEFAULT_PRIORITY);
+
+        // rule
         String rule = url.getParameterAndDecoded(Constants.RULE_KEY);
-        if (type == null || type.length() == 0) {
+        if (type == null || type.length() == 0) {// 类型是空  默认是javascript
             type = Constants.DEFAULT_SCRIPT_TYPE_KEY;
         }
-        if (rule == null || rule.length() == 0) {
+        if (rule == null || rule.length() == 0) {// rule不能为空
             throw new IllegalStateException(new IllegalStateException("route rule can not be empty. rule:" + rule));
         }
-        ScriptEngine engine = engines.get(type);
+        ScriptEngine engine = engines.get(type); // 从缓存中获取
         if (engine == null) {
+
+            // 使用java 自带script引擎管理器获得相应的脚本引擎
             engine = new ScriptEngineManager().getEngineByName(type);
-            if (engine == null) {
+            if (engine == null) {  // 没有找到相应的脚本引擎
                 throw new IllegalStateException(new IllegalStateException("Unsupported route rule type: " + type + ", rule: " + rule));
             }
+            // 缓存
             engines.put(type, engine);
         }
         this.engine = engine;
         this.rule = rule;
     }
 
+    /**
+     * 根据规则筛选invokers
+     * @param invokers
+     * @param url        refer url
+     * @param invocation
+     * @param <T>
+     * @return
+     * @throws RpcException
+     */
     @Override
     @SuppressWarnings("unchecked")
     public <T> List<Invoker<T>> route(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
@@ -88,6 +108,8 @@ public class ScriptRouter extends AbstractRouter {
             bindings.put("context", RpcContext.getContext());
             CompiledScript function = compilable.compile(rule);
             Object obj = function.eval(bindings);
+
+            // 判断返回值类型
             if (obj instanceof Invoker[]) {
                 invokersCopy = Arrays.asList((Invoker<T>[]) obj);
             } else if (obj instanceof Object[]) {
@@ -100,9 +122,13 @@ public class ScriptRouter extends AbstractRouter {
             }
             return invokersCopy;
         } catch (ScriptException e) {
+            // 执行错误只进行打印
             //fail then ignore rule .invokers.
             logger.error("route error , rule has been ignored. rule: " + rule + ", method:" + invocation.getMethodName() + ", url: " + RpcContext.getContext().getUrl(), e);
+
+            //返回全部invoker
             return invokers;
+
         }
     }
 

@@ -41,6 +41,8 @@ import java.util.regex.Pattern;
 
 /**
  * ConditionRouter
+ * 如 ：host = 10.20.153.10 => host = 10.20.153.11
+ * 基于条件表达式的路由规则
  */
 public class ConditionRouter extends AbstractRouter {
 

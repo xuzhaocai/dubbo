@@ -26,21 +26,30 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class MergerFactory {
-
+    /**
+     *merge缓存
+     */
     private static final ConcurrentMap<Class<?>, Merger<?>> mergerCache =
             new ConcurrentHashMap<Class<?>, Merger<?>>();
 
+
+    /**
+     * 根据类型获得merge类
+     * @param returnType
+     * @param <T>
+     * @return
+     */
     public static <T> Merger<T> getMerger(Class<T> returnType) {
         Merger result;
-        if (returnType.isArray()) {
-            Class type = returnType.getComponentType();
+        if (returnType.isArray()) {// 是array
+            Class type = returnType.getComponentType();// 获得类型
             result = mergerCache.get(type);
             if (result == null) {
                 loadMergers();
                 result = mergerCache.get(type);
             }
-            if (result == null && !type.isPrimitive()) {
-                result = ArrayMerger.INSTANCE;
+            if (result == null && !type.isPrimitive()) { // 如果没有找到， 并且不是自带类型
+                result = ArrayMerger.INSTANCE;  // 返回通用数组merge
             }
         } else {
             result = mergerCache.get(returnType);
@@ -52,10 +61,13 @@ public class MergerFactory {
         return result;
     }
 
+    /**
+     * 使用spi技术加载merge
+     */
     static void loadMergers() {
         Set<String> names = ExtensionLoader.getExtensionLoader(Merger.class)
                 .getSupportedExtensions();
-        for (String name : names) {
+        for (String name : names) {// 将所有的merge缓存到map中
             Merger m = ExtensionLoader.getExtensionLoader(Merger.class).getExtension(name);
             mergerCache.putIfAbsent(ReflectUtils.getGenericClass(m.getClass()), m);
         }
