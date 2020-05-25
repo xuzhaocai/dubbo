@@ -98,7 +98,7 @@ public class ServiceAnnotationBeanPostProcessor implements BeanDefinitionRegistr
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-
+        // 扫描包
         Set<String> resolvedPackagesToScan = resolvePackagesToScan(packagesToScan);
 
         if (!CollectionUtils.isEmpty(resolvedPackagesToScan)) {
@@ -119,21 +119,21 @@ public class ServiceAnnotationBeanPostProcessor implements BeanDefinitionRegistr
      * @param registry       {@link BeanDefinitionRegistry}
      */
     private void registerServiceBeans(Set<String> packagesToScan, BeanDefinitionRegistry registry) {
-
+        // 定义扫描对象
         DubboClassPathBeanDefinitionScanner scanner =
                 new DubboClassPathBeanDefinitionScanner(registry, environment, resourceLoader);
-
+        //beanname 解析器
         BeanNameGenerator beanNameGenerator = resolveBeanNameGenerator(registry);
 
         scanner.setBeanNameGenerator(beanNameGenerator);
-
+        // 注解过滤器
         scanner.addIncludeFilter(new AnnotationTypeFilter(Service.class));
 
         for (String packageToScan : packagesToScan) {
 
             // Registers @Service Bean first
             scanner.scan(packageToScan);
-
+            //开始查找添加了@Service注解的类
             // Finds all BeanDefinitionHolders of @Service whether @ComponentScan scans or not.
             Set<BeanDefinitionHolder> beanDefinitionHolders =
                     findServiceBeanDefinitionHolders(scanner, packageToScan, registry, beanNameGenerator);
@@ -141,6 +141,7 @@ public class ServiceAnnotationBeanPostProcessor implements BeanDefinitionRegistr
             if (!CollectionUtils.isEmpty(beanDefinitionHolders)) {
 
                 for (BeanDefinitionHolder beanDefinitionHolder : beanDefinitionHolders) {
+                    //注册serviceBean
                     registerServiceBean(beanDefinitionHolder, registry, scanner);
                 }
 
@@ -235,7 +236,7 @@ public class ServiceAnnotationBeanPostProcessor implements BeanDefinitionRegistr
 
     /**
      * Registers {@link ServiceBean} from new annotated {@link Service} {@link BeanDefinition}
-     *
+     * 注册ServiceBean
      * @param beanDefinitionHolder
      * @param registry
      * @param scanner
@@ -244,19 +245,19 @@ public class ServiceAnnotationBeanPostProcessor implements BeanDefinitionRegistr
      */
     private void registerServiceBean(BeanDefinitionHolder beanDefinitionHolder, BeanDefinitionRegistry registry,
                                      DubboClassPathBeanDefinitionScanner scanner) {
-
+        // 服务接口类对象
         Class<?> beanClass = resolveClass(beanDefinitionHolder);
 
         Service service = findAnnotation(beanClass, Service.class);
 
         Class<?> interfaceClass = resolveServiceInterfaceClass(beanClass, service);
-
+        // 获取bean名字
         String annotatedServiceBeanName = beanDefinitionHolder.getBeanName();
 
         AbstractBeanDefinition serviceBeanDefinition =
                 buildServiceBeanDefinition(service, interfaceClass, annotatedServiceBeanName);
 
-        // ServiceBean Bean name
+        // ServiceBean Bean name  接口全类名
         String beanName = generateServiceBeanName(service, interfaceClass, annotatedServiceBeanName);
 
         if (scanner.checkCandidate(beanName, serviceBeanDefinition)) { // check duplicated candidate bean

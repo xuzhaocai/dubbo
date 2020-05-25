@@ -531,12 +531,19 @@ public class ExtensionLoader<T> {
                             && Modifier.isPublic(method.getModifiers())) {
                         /**
                          * Check {@link DisableInject} to see if we need auto injection for this property
+                         * 方法上面有@DisableInject注解， 表示不想自动注入
                          */
                         if (method.getAnnotation(DisableInject.class) != null) {
                             continue;
                         }
                         Class<?> pt = method.getParameterTypes()[0];
                         try {
+                            /**
+                             * 判断 方法名的长度 >3
+                             * 然后将第4个字符转成小写然后拼接后面的字符
+                             * 比如说setName
+                             * 获取到的property就是 name
+                             */
                             String property = method.getName().length() > 3 ? method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4) : "";
                             Object object = objectFactory.getExtension(pt, property);
                             if (object != null) {
@@ -667,11 +674,16 @@ public class ExtensionLoader<T> {
                             if (i > 0) {
 
                                 //分割 name 跟实现类
-                                name = line.substring(0, i).trim();
-                                line = line.substring(i + 1).trim();
+                                name = line.substring(0, i).trim();//名字
+                                line = line.substring(i + 1).trim();//实现类
                             }
                             if (line.length() > 0) {
-
+                                /**
+                                 * extensionClasses ： 存储扩展的map， 整个查找扩展这块就是使用这个map
+                                 * resourceURL：资源url
+                                 * Class.forName(line, true, classLoader)： 实现类class
+                                 * name：实现类的名字
+                                 */
                                 loadClass(extensionClasses, resourceURL, Class.forName(line, true, classLoader), name);
                             }
                         } catch (Throwable t) {
@@ -708,16 +720,16 @@ public class ExtensionLoader<T> {
         if (clazz.isAnnotationPresent(Adaptive.class)) {//   Adaptive 注解是否在该类上面
             if (cachedAdaptiveClass == null) {
                 cachedAdaptiveClass = clazz;
-            } else if (!cachedAdaptiveClass.equals(clazz)) {
+            } else if (!cachedAdaptiveClass.equals(clazz)) {// Adaptive 注解在类上面的时候，只允许一个实现类上面有@Adaptive注解
                 throw new IllegalStateException("More than 1 adaptive class found: "
                         + cachedAdaptiveClass.getClass().getName()
                         + ", " + clazz.getClass().getName());
             }
         } else if (isWrapperClass(clazz)) {// 该类是否是wapper (包装类)类 , 其实就是判断构造方法有没有传入扩展的这个类class
 
-            Set<Class<?>> wrappers = cachedWrapperClasses;  // 缓存
+            Set<Class<?>> wrappers = cachedWrapperClasses;  // 获取缓存wrapper set
             if (wrappers == null) {
-                cachedWrapperClasses = new ConcurrentHashSet<Class<?>>();
+                cachedWrapperClasses = new ConcurrentHashSet<Class<?>>();//没有的创建wrapper set
                 wrappers = cachedWrapperClasses;
             }
             wrappers.add(clazz);
@@ -751,7 +763,7 @@ public class ExtensionLoader<T> {
             }
         }
     }
-    /// 是否是wapper类型
+    /// 是否是wapper类型，判断有没有一个构造是传入自身类型的，
     private boolean isWrapperClass(Class<?> clazz) {
         try {
             clazz.getConstructor(type);
@@ -761,13 +773,18 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * 根据实现类来  获取name
+     * @param clazz 实现类
+     * @return
+     */
     @SuppressWarnings("deprecation")
     private String findAnnotationName(Class<?> clazz) {
-        //获取Extension 注解
+        //获取@Extension 注解
         com.alibaba.dubbo.common.Extension extension = clazz.getAnnotation(com.alibaba.dubbo.common.Extension.class);
-        if (extension == null) {
+        if (extension == null) {//如果没有extension注解的话
             String name = clazz.getSimpleName();// 类名
-            if (name.endsWith(type.getSimpleName())) {
+            if (name.endsWith(type.getSimpleName())) {//如果实现类是以接口的名字结尾的话，就去取前面的字符串
                 //实现类的类名是以接口名结尾的，就取实现类类名的前一段
                 name = name.substring(0, name.length() - type.getSimpleName().length());
             }
@@ -821,6 +838,7 @@ public class ExtensionLoader<T> {
 
     /**
      * 拼装代理类的java 代码
+     * 创建自适应的扩展类
      * @return
      */
     private String createAdaptiveExtensionClassCode() {

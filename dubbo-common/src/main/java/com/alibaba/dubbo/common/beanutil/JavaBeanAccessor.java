@@ -16,6 +16,8 @@
  */
 package com.alibaba.dubbo.common.beanutil;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public enum JavaBeanAccessor {
 
     /**
