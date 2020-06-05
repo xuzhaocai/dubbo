@@ -541,12 +541,26 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void exportLocal(URL url) {  // 本地服务暴露
+
+        // 如果protocol不是injvm
         if (!Constants.LOCAL_PROTOCOL.equalsIgnoreCase(url.getProtocol())) {
+
+            // 设置protolol是injvm
             URL local = URL.valueOf(url.toFullString())
                     .setProtocol(Constants.LOCAL_PROTOCOL)
-                    .setHost(LOCALHOST)
+                    .setHost(LOCALHOST)  // host 是127.0.0.1
                     .setPort(0);
+
+
+            //service.classimpl
             StaticContext.getContext(Constants.SERVICE_IMPL_CLASS).put(url.getServiceKey(), getServiceClass(ref));
+
+
+            /**
+             * ref： 接口实现类
+             * interfaceClass： 接口class
+             * local ： URL
+             */
             Exporter<?> exporter = protocol.export(
                     proxyFactory.getInvoker(ref, (Class) interfaceClass, local));
             exporters.add(exporter);

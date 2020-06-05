@@ -30,7 +30,7 @@ public class StaticContext extends ConcurrentHashMap<Object, Object> {
     private static final long serialVersionUID = 1L;
     private static final String SYSTEMNAME = "system";
     private static final ConcurrentMap<String, StaticContext> context_map = new ConcurrentHashMap<String, StaticContext>();
-    private String name;
+    private String name;  // name
 
     private StaticContext(String name) {
         super();
@@ -42,8 +42,11 @@ public class StaticContext extends ConcurrentHashMap<Object, Object> {
     }
 
     public static StaticContext getContext(String name) {
+
+
+        // 从context中获取appContext
         StaticContext appContext = context_map.get(name);
-        if (appContext == null) {
+        if (appContext == null) { // 如果没有创建
             appContext = context_map.putIfAbsent(name, new StaticContext(name));
             if (appContext == null) {
                 appContext = context_map.get(name);

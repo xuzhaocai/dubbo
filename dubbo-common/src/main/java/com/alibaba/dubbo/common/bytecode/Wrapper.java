@@ -106,7 +106,7 @@ public abstract class Wrapper {
 
         Wrapper ret = WRAPPER_MAP.get(c);
         if (ret == null) {
-            ret = makeWrapper(c);// 创建mapper
+            ret = makeWrapper(c);// 创建warpper
 
 
             WRAPPER_MAP.put(c, ret);
@@ -136,16 +136,21 @@ public abstract class Wrapper {
 
         // get all public field.
         for (Field f : c.getFields()) {
-            String fn = f.getName();
-            Class<?> ft = f.getType();
+            String fn = f.getName();// 字段名
+            Class<?> ft = f.getType();// 类型
+
+            //如果是静态 或者是transient 修饰符修饰的 直接跳过
             if (Modifier.isStatic(f.getModifiers()) || Modifier.isTransient(f.getModifiers()))
                 continue;
+
+
+
 
             c1.append(" if( $2.equals(\"").append(fn).append("\") ){ w.").append(fn).append("=").append(arg(ft, "$3")).append("; return; }");
             c2.append(" if( $2.equals(\"").append(fn).append("\") ){ return ($w)w.").append(fn).append("; }");
             pts.put(fn, ft);
         }
-
+        //获取所有method
         Method[] methods = c.getMethods();
         // get all public method.
         boolean hasMethod = hasMethods(methods);
@@ -153,14 +158,20 @@ public abstract class Wrapper {
             c3.append(" try{");
         }
         for (Method m : methods) {
+
+            // 忽略掉Object的方法
             if (m.getDeclaringClass() == Object.class) //ignore Object's method.
                 continue;
-
+            // 方法名
             String mn = m.getName();
+            //拼装 判断方法名相等
             c3.append(" if( \"").append(mn).append("\".equals( $2 ) ");
+
+
+            // 方法参数个数  拼装 判断参数个数相等
             int len = m.getParameterTypes().length;
             c3.append(" && ").append(" $3.length == ").append(len);
-
+            // 判断这个方法是不是重载
             boolean override = false;
             for (Method m2 : methods) {
                 if (m != m2 && m.getName().equals(m2.getName())) {
@@ -168,9 +179,9 @@ public abstract class Wrapper {
                     break;
                 }
             }
-            if (override) {
+            if (override) {// 如果是重载的话
                 if (len > 0) {
-                    for (int l = 0; l < len; l++) {
+                    for (int l = 0; l < len; l++) {  //拼装  判断参数类型相等的
                         c3.append(" && ").append(" $3[").append(l).append("].getName().equals(\"")
                                 .append(m.getParameterTypes()[l].getName()).append("\")");
                     }
@@ -178,6 +189,9 @@ public abstract class Wrapper {
             }
 
             c3.append(" ) { ");
+
+
+
 
             if (m.getReturnType() == Void.TYPE)
                 c3.append(" w.").append(mn).append('(').append(args(m.getParameterTypes(), "$4")).append(");").append(" return null;");
@@ -246,7 +260,6 @@ public abstract class Wrapper {
         cc.addMethod(c3.toString());
 
         try {
-
             Class<?> wc = cc.toClass();
             // setup static field.
             wc.getField("pts").set(null, pts);

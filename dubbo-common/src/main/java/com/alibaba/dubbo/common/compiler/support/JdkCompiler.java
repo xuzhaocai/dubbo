@@ -54,11 +54,11 @@ import java.util.Set;
  * JdkCompiler. (SPI, Singleton, ThreadSafe)
  */
 public class JdkCompiler extends AbstractCompiler {
-
+    // 获取java的编译器
     private final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-
+    //存放编译过程中输出的信息
     private final DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<JavaFileObject>();
-
+    // classloader
     private final ClassLoaderImpl classLoader;
 
     private final JavaFileManagerImpl javaFileManager;
@@ -71,7 +71,11 @@ public class JdkCompiler extends AbstractCompiler {
         options.add("1.6");
         options.add("-target");
         options.add("1.6");
+
+        //标准的内容管理器
         StandardJavaFileManager manager = compiler.getStandardFileManager(diagnosticCollector, null, null);
+
+        //获取当前线程的classloader
         final ClassLoader loader = Thread.currentThread().getContextClassLoader();
         if (loader instanceof URLClassLoader
                 && (!loader.getClass().getName().equals("sun.misc.Launcher$AppClassLoader"))) {
