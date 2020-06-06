@@ -38,6 +38,7 @@ import java.util.regex.Matcher;
  * Wrapper.
  */
 public abstract class Wrapper {
+    // 缓存warpper的
     private static final Map<Class<?>, Wrapper> WRAPPER_MAP = new ConcurrentHashMap<Class<?>, Wrapper>(); //class wrapper map
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
     private static final String[] OBJECT_METHODS = new String[]{"getClass", "hashCode", "toString", "equals"};
@@ -100,7 +101,7 @@ public abstract class Wrapper {
     public static Wrapper getWrapper(Class<?> c) {
         while (ClassGenerator.isDynamicClass(c)) // can not wrapper on dynamic class.
             c = c.getSuperclass();
-
+        // 如果是Object ，则返回 OBJECT_WRAPPER
         if (c == Object.class)
             return OBJECT_WRAPPER;
 
@@ -192,16 +193,17 @@ public abstract class Wrapper {
 
 
 
-
+            //如果方法返回值是void
             if (m.getReturnType() == Void.TYPE)
+
                 c3.append(" w.").append(mn).append('(').append(args(m.getParameterTypes(), "$4")).append(");").append(" return null;");
             else
                 c3.append(" return ($w)w.").append(mn).append('(').append(args(m.getParameterTypes(), "$4")).append(");");
 
             c3.append(" }");
-
+            // 将method name
             mns.add(mn);
-            if (m.getDeclaringClass() == c)
+            if (m.getDeclaringClass() == c)  // 是这个类自身的方法
                 dmns.add(mn);
             ms.put(ReflectUtils.getDesc(m), m);
         }
@@ -213,20 +215,20 @@ public abstract class Wrapper {
 
         c3.append(" throw new " + NoSuchMethodException.class.getName() + "(\"Not found method \\\"\"+$2+\"\\\" in class " + c.getName() + ".\"); }");
 
-        // deal with get/set method.
+        // deal with get/set method.  处理get /set 方法
         Matcher matcher;
         for (Map.Entry<String, Method> entry : ms.entrySet()) {
-            String md = entry.getKey();
+            String md = entry.getKey();// method的描述
             Method method = (Method) entry.getValue();
-            if ((matcher = ReflectUtils.GETTER_METHOD_DESC_PATTERN.matcher(md)).matches()) {
+            if ((matcher = ReflectUtils.GETTER_METHOD_DESC_PATTERN.matcher(md)).matches()) {  // get方法
+                String pn = propertyName(matcher.group(1));  // 第一个括号里面的东西
+                c2.append(" if( $2.equals(\"").append(pn).append("\") ){ return ($w)w.").append(method.getName()).append("(); }");
+                pts.put(pn, method.getReturnType());
+            } else if ((matcher = ReflectUtils.IS_HAS_CAN_METHOD_DESC_PATTERN.matcher(md)).matches()) {   //is|has|can 方法
                 String pn = propertyName(matcher.group(1));
                 c2.append(" if( $2.equals(\"").append(pn).append("\") ){ return ($w)w.").append(method.getName()).append("(); }");
                 pts.put(pn, method.getReturnType());
-            } else if ((matcher = ReflectUtils.IS_HAS_CAN_METHOD_DESC_PATTERN.matcher(md)).matches()) {
-                String pn = propertyName(matcher.group(1));
-                c2.append(" if( $2.equals(\"").append(pn).append("\") ){ return ($w)w.").append(method.getName()).append("(); }");
-                pts.put(pn, method.getReturnType());
-            } else if ((matcher = ReflectUtils.SETTER_METHOD_DESC_PATTERN.matcher(md)).matches()) {
+            } else if ((matcher = ReflectUtils.SETTER_METHOD_DESC_PATTERN.matcher(md)).matches()) {  // set方法
                 Class<?> pt = method.getParameterTypes()[0];
                 String pn = propertyName(matcher.group(1));
                 c1.append(" if( $2.equals(\"").append(pn).append("\") ){ w.").append(method.getName()).append("(").append(arg(pt, "$3")).append("); return; }");
@@ -244,11 +246,11 @@ public abstract class Wrapper {
 
         cc.addDefaultConstructor();
         cc.addField("public static String[] pns;"); // property name array.
-        cc.addField("public static " + Map.class.getName() + " pts;"); // property type map.
+        cc.addField("public static " + Map.class.getName() + " pts;"); // property type map.   <字段名,字段类型>
         cc.addField("public static String[] mns;"); // all method name array.
         cc.addField("public static String[] dmns;"); // declared method name array.
         for (int i = 0, len = ms.size(); i < len; i++)
-            cc.addField("public static Class[] mts" + i + ";");
+            cc.addField("public static Class[] mts" + i + ";");  // 自己方法的参数类型
 
         cc.addMethod("public String[] getPropertyNames(){ return pns; }");
         cc.addMethod("public boolean hasProperty(String n){ return pts.containsKey($1); }");
@@ -262,10 +264,10 @@ public abstract class Wrapper {
         try {
             Class<?> wc = cc.toClass();
             // setup static field.
-            wc.getField("pts").set(null, pts);
-            wc.getField("pns").set(null, pts.keySet().toArray(new String[0]));
-            wc.getField("mns").set(null, mns.toArray(new String[0]));
-            wc.getField("dmns").set(null, dmns.toArray(new String[0]));
+            wc.getField("pts").set(null, pts);  // <字段名,字段类型>
+            wc.getField("pns").set(null, pts.keySet().toArray(new String[0]));// 字段名
+            wc.getField("mns").set(null, mns.toArray(new String[0])); /// 方法名
+            wc.getField("dmns").set(null, dmns.toArray(new String[0]));  // 自己方法的名字
             int ix = 0;
             for (Method m : ms.values())
                 wc.getField("mts" + ix++).set(null, m.getParameterTypes());
@@ -306,7 +308,7 @@ public abstract class Wrapper {
     }
 
     private static String args(Class<?>[] cs, String name) {
-        int len = cs.length;
+        int len = cs.length;  // 参数个数
         if (len == 0) return "";
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < len; i++) {
@@ -317,6 +319,11 @@ public abstract class Wrapper {
         return sb.toString();
     }
 
+    /**
+     * 获取属性名  User----》user
+     * @param pn
+     * @return
+     */
     private static String propertyName(String pn) {
         return pn.length() == 1 || Character.isLowerCase(pn.charAt(1)) ? Character.toLowerCase(pn.charAt(0)) + pn.substring(1) : pn;
     }

@@ -37,12 +37,18 @@ public abstract class AbstractProxyInvoker<T> implements Invoker<T> {
     private final URL url;
 
     public AbstractProxyInvoker(T proxy, Class<T> type, URL url) {
+
+        // 参数验证  proxy !=null
         if (proxy == null) {
             throw new IllegalArgumentException("proxy == null");
         }
+
+        //type !=null
         if (type == null) {
             throw new IllegalArgumentException("interface == null");
         }
+
+        // proxy 需要是实现type
         if (!type.isInstance(proxy)) {
             throw new IllegalArgumentException(proxy.getClass().getName() + " not implement interface " + type);
         }
@@ -70,6 +76,12 @@ public abstract class AbstractProxyInvoker<T> implements Invoker<T> {
     public void destroy() {
     }
 
+    /**
+     * 调用
+     * @param invocation 调用实体
+     * @return 结果实体
+     * @throws RpcException
+     */
     @Override
     public Result invoke(Invocation invocation) throws RpcException {
         try {
@@ -80,8 +92,8 @@ public abstract class AbstractProxyInvoker<T> implements Invoker<T> {
             throw new RpcException("Failed to invoke remote proxy method " + invocation.getMethodName() + " to " + getUrl() + ", cause: " + e.getMessage(), e);
         }
     }
-
-    protected abstract Object doInvoke(T proxy, String methodName, Class<?>[] parameterTypes, Object[] arguments) throws Throwable;
+    //实际调用子类实现
+    protected  abstract Object doInvoke(T proxy, String methodName, Class<?>[] parameterTypes, Object[] arguments) throws Throwable;
 
     @Override
     public String toString() {

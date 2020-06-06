@@ -51,6 +51,17 @@ public class JavassistProxyFactory extends AbstractProxyFactory {
         // 这里是如果，接口实现类中有$符号，就是用接口类型，没有$符号，就用实现类的类型
         final Wrapper wrapper = Wrapper.getWrapper(proxy.getClass().getName().indexOf('$') < 0 ? proxy.getClass() : type);
         return new AbstractProxyInvoker<T>(proxy, type, url) {
+
+
+            /**
+             * 进行调用
+             * @param proxy 实现类
+             * @param methodName 方法名
+             * @param parameterTypes  参数类型们
+             * @param arguments  参数
+             * @return
+             * @throws Throwable
+             */
             @Override
             protected Object doInvoke(T proxy, String methodName,
                                       Class<?>[] parameterTypes,

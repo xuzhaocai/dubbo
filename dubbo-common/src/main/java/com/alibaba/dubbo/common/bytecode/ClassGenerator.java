@@ -49,10 +49,12 @@ import java.util.concurrent.atomic.AtomicLong;
 public final class ClassGenerator {
     private static final AtomicLong CLASS_NAME_COUNTER = new AtomicLong(0);
     private static final String SIMPLE_NAME_TAG = "<init>";
+
+    // 一个classloader 然后一个classpool
     private static final Map<ClassLoader, ClassPool> POOL_MAP = new ConcurrentHashMap<ClassLoader, ClassPool>(); //ClassLoader - ClassPool
     private ClassPool mPool;
     private CtClass mCtc;
-    private String mClassName, mSuperClass;
+    private String mClassName, mSuperClass; // class name 与 父类name
     private Set<String> mInterfaces;
     private List<String> mFields, mConstructors, mMethods;
     private Map<String, Method> mCopyMethods; // <method desc,method instance>
@@ -79,11 +81,11 @@ public final class ClassGenerator {
     }
 
     public static ClassPool getClassPool(ClassLoader loader) {
-        if (loader == null)
-            return ClassPool.getDefault();
+        if (loader == null) //如果classloader是null
+            return ClassPool.getDefault();  // 使用默认的classloader
 
         ClassPool pool = POOL_MAP.get(loader);
-        if (pool == null) {
+        if (pool == null) {// 没有就创建
             pool = new ClassPool(true);
             pool.appendClassPath(new LoaderClassPath(loader));
             POOL_MAP.put(loader, pool);
@@ -128,6 +130,11 @@ public final class ClassGenerator {
         return this;
     }
 
+    /**
+     * 添加字段（成员）
+     * @param code  代码
+     * @return ClassGenerator
+     */
     public ClassGenerator addField(String code) {
         if (mFields == null)
             mFields = new ArrayList<String>();
@@ -151,6 +158,11 @@ public final class ClassGenerator {
         return addField(sb.toString());
     }
 
+    /**
+     * 添加方法
+     * @param code  方法代码
+     * @return ClassGenerator
+     */
     public ClassGenerator addMethod(String code) {
         if (mMethods == null)
             mMethods = new ArrayList<String>();
@@ -302,6 +314,7 @@ public final class ClassGenerator {
         }
     }
 
+    //释放资源
     public void release() {
         if (mCtc != null) mCtc.detach();
         if (mInterfaces != null) mInterfaces.clear();

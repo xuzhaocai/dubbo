@@ -52,6 +52,11 @@ public abstract class Proxy {
     };
     private static final AtomicLong PROXY_CLASS_COUNTER = new AtomicLong(0);
     private static final String PACKAGE_NAME = Proxy.class.getPackage().getName();
+
+
+
+
+    // ClassLoader ， map
     private static final Map<ClassLoader, Map<String, Object>> ProxyCacheMap = new WeakHashMap<ClassLoader, Map<String, Object>>();
 
     private static final Object PendingGenerationMarker = new Object();
@@ -83,8 +88,8 @@ public abstract class Proxy {
         StringBuilder sb = new StringBuilder();
         //拼接接口名
         for (int i = 0; i < ics.length; i++) {
-            String itf = ics[i].getName();
-            if (!ics[i].isInterface())
+            String itf = ics[i].getName(); //接口名
+            if (!ics[i].isInterface())//不是接口 抛出异常
                 throw new RuntimeException(itf + " is not a interface.");
 
             Class<?> tmp = null;

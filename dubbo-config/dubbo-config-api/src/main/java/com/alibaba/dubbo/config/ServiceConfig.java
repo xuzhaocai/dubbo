@@ -263,6 +263,9 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 monitor = application.getMonitor();
             }
         }
+
+
+
         if (ref instanceof GenericService) {
             interfaceClass = GenericService.class;
             if (StringUtils.isEmpty(generic)) {
@@ -551,9 +554,9 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                     .setHost(LOCALHOST)  // host 是127.0.0.1
                     .setPort(0);
 
-
+            String serviceKey = url.getServiceKey();
             //service.classimpl
-            StaticContext.getContext(Constants.SERVICE_IMPL_CLASS).put(url.getServiceKey(), getServiceClass(ref));
+            StaticContext.getContext(Constants.SERVICE_IMPL_CLASS).put(serviceKey, getServiceClass(ref));
 
 
             /**
@@ -561,8 +564,9 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
              * interfaceClass： 接口class
              * local ： URL
              */
-            Exporter<?> exporter = protocol.export(
-                    proxyFactory.getInvoker(ref, (Class) interfaceClass, local));
+
+            Invoker invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, local);
+            Exporter<?> exporter = protocol.export(invoker);
             exporters.add(exporter);
             logger.info("Export dubbo service " + interfaceClass.getName() + " to local registry");
         }
