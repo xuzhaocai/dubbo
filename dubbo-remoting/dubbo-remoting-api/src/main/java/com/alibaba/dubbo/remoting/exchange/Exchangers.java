@@ -62,15 +62,13 @@ public class Exchangers {
     }
     // bind
     public static ExchangeServer bind(URL url, ExchangeHandler handler) throws RemotingException {
-               //验证
+         //验证
         if (url == null) {
             throw new IllegalArgumentException("url == null");
         }
         if (handler == null) {
             throw new IllegalArgumentException("handler == null");
         }
-
-
         url = url.addParameterIfAbsent(Constants.CODEC_KEY, "exchange"); // 如果没有codec  的话 就设置为exchange
         // exchanger.bind()
         return getExchanger(url).bind(url, handler);

@@ -203,7 +203,11 @@ public abstract class Proxy {
             ccm.addDefaultConstructor();
             ccm.setSuperClass(Proxy.class);
             ccm.addMethod("public Object newInstance(" + InvocationHandler.class.getName() + " h){ return new " + pcn + "($1); }");
+
+
             Class<?> pc = ccm.toClass();
+            System.out.println(pc.toString());
+
             proxy = (Proxy) pc.newInstance();
         } catch (RuntimeException e) {
             throw e;

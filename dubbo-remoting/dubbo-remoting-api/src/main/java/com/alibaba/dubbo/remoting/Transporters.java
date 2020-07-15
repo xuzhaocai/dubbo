@@ -54,7 +54,6 @@ public class Transporters {
         } else {   // 多个channal  对 Channel分发   ChannelHandlerDispatcher 循环
             handler = new ChannelHandlerDispatcher(handlers);
         }
-
         // 真正服务器 进行bind
         return getTransporter().bind(url, handler);
     }

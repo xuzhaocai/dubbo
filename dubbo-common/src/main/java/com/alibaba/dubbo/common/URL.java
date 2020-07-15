@@ -654,7 +654,7 @@ public final class URL implements Serializable {
     }
 
     public String getMethodParameter(String method, String key) {
-        String value = parameters.get(method + "." + key);
+        String value = parameters.get(method + "." + key);// 先是获取方法级别的
         if (value == null || value.length() == 0) {
             return getParameter(key);
         }

@@ -316,11 +316,13 @@ public class RegistryProtocol implements Protocol {
         directory.setProtocol(protocol);
         // all attributes of REFER_KEY
         Map<String, String> parameters = new HashMap<String, String>(directory.getUrl().getParameters());
+
         URL subscribeUrl = new URL(Constants.CONSUMER_PROTOCOL, parameters.remove(Constants.REGISTER_IP_KEY), 0, type.getName(), parameters);
-        if (!Constants.ANY_VALUE.equals(url.getServiceInterface())
-                && url.getParameter(Constants.REGISTER_KEY, true)) {
+        if (!Constants.ANY_VALUE.equals(url.getServiceInterface())  // service interface 不是*
+                && url.getParameter(Constants.REGISTER_KEY, true)) {// register 不是false ，默认是true
+
             URL registeredConsumerUrl = getRegisteredConsumerUrl(subscribeUrl, url);
-            registry.register(registeredConsumerUrl);
+            registry.register(registeredConsumerUrl);// 注册
             directory.setRegisteredConsumerUrl(registeredConsumerUrl);
         }
         directory.subscribe(subscribeUrl.addParameter(Constants.CATEGORY_KEY,
@@ -334,6 +336,7 @@ public class RegistryProtocol implements Protocol {
     }
 
     public URL getRegisteredConsumerUrl(final URL consumerUrl, URL registryUrl) {
+        // 添加 category==》consumer  ， check==》false
         return consumerUrl.addParameters(CATEGORY_KEY, CONSUMERS_CATEGORY,
                 CHECK_KEY, String.valueOf(false));
     }
@@ -376,8 +379,8 @@ public class RegistryProtocol implements Protocol {
      */
     private class OverrideListener implements NotifyListener {
 
-        private final URL subscribeUrl;
-        private final Invoker originInvoker;
+        private final URL subscribeUrl;//订阅url
+        private final Invoker originInvoker;//原始的invoker
 
         public OverrideListener(URL subscribeUrl, Invoker originalInvoker) {
             this.subscribeUrl = subscribeUrl;

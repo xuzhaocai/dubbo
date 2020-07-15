@@ -125,7 +125,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
 
     public RegistryDirectory(Class<T> serviceType, URL url) {
         super(url);
-        if (serviceType == null)
+        if (serviceType == null)//判断接口类型
             throw new IllegalArgumentException("service type is null.");
         if (url.getServiceKey() == null || url.getServiceKey().length() == 0)
             throw new IllegalArgumentException("registry serviceKey is null.");
@@ -371,7 +371,6 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
     }
 
     /**
-     *
      * 将urls 转换成 routers
      * @param urls
      * @return null : no routers ,do nothing
@@ -657,6 +656,9 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
 
     @Override
     public List<Invoker<T>> doList(Invocation invocation) {
+
+
+        // forbiden  出现的情况 没有服务提供者或者是服务提供者都不能用
         if (forbidden) {
             // 1. No service provider 2. Service providers are disabled
             throw new RpcException(RpcException.FORBIDDEN_EXCEPTION,

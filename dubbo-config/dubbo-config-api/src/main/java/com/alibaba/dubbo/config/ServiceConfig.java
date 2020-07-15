@@ -519,11 +519,6 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                         // 创建  DelegateProvoderMetaInvoker 对象
                         DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
                         //  registryURL.getProtocol= registry
-
-
-
-
-
                         //   filter ---->listener --->registryProtocol   ( 这里使用了wapper 包装机制)
                         //  filter ----> listener ----> dubboProtocol    服务暴露
                         Exporter<?> exporter = protocol.export(wrapperInvoker);

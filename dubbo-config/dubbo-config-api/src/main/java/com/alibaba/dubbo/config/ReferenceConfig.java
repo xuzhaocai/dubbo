@@ -348,7 +348,6 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
             throw new IllegalArgumentException("Specified invalid registry ip from property:" + Constants.DUBBO_IP_TO_REGISTRY + ", value:" + hostToRegistry);
         }
         map.put(Constants.REGISTER_IP_KEY, hostToRegistry);
-
         //attributes are stored by system context.
         StaticContext.getSystemContext().putAll(attributes);
         // 创建代理
@@ -406,13 +405,13 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
                 if (us != null && !us.isEmpty()) {
                     for (URL u : us) {
                         URL monitorUrl = loadMonitor(u);
-                        if (monitorUrl != null) {
+                        if (monitorUrl != null) {// 如果监控url存在的话，就将 monitor 塞到map中
                             map.put(Constants.MONITOR_KEY, URL.encode(monitorUrl.toFullString()));
-                        }
+                        }/// 将url添加到urls， refer= k=v&k1=v1&k2=v2
                         urls.add(u.addParameterAndEncoded(Constants.REFER_KEY, StringUtils.toQueryString(map)));
                     }
                 }
-                if (urls.isEmpty()) {
+                if (urls.isEmpty()) {// urls
                     throw new IllegalStateException("No such any registry to reference " + interfaceName + " on the consumer " + NetUtils.getLocalHost() + " use dubbo version " + Version.getVersion() + ", please config <dubbo:registry address=\"...\" /> to your spring config.");
                 }
             }

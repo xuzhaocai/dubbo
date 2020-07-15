@@ -46,7 +46,7 @@ public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
 
     private static final Logger logger = LoggerFactory
             .getLogger(AbstractClusterInvoker.class);
-    protected final Directory<T> directory;
+    protected final Directory<T> directory;//服务提供者的一个目录
 
     protected final boolean availablecheck; //集群中是否排除不可用的invoker
     // 判断是否已经销毁
@@ -250,11 +250,11 @@ public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
     @Override
     public Result invoke(final Invocation invocation) throws RpcException {
         checkWhetherDestroyed();   // 检验是否销毁
-        LoadBalance loadbalance = null;
+        LoadBalance loadbalance = null;  //定义负载均衡
 
         // binding attachments into invocation.
         Map<String, String> contextAttachments = RpcContext.getContext().getAttachments();
-        if (contextAttachments != null && contextAttachments.size() != 0) {
+        if (contextAttachments != null && contextAttachments.size() != 0) {// 就是将一些公共的kv 设置到invocation中
             ((RpcInvocation) invocation).addAttachments(contextAttachments);
         }
         // 获取所有服务提供者的集合
@@ -314,6 +314,7 @@ public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
      * @throws RpcException
      */
     protected List<Invoker<T>> list(Invocation invocation) throws RpcException {
+        // 获取所有的invokers
         List<Invoker<T>> invokers = directory.list(invocation);
         return invokers;
     }

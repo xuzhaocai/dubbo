@@ -35,24 +35,18 @@ import java.util.concurrent.ConcurrentHashMap;
  * abstract ProtocolSupport.
  */
 public abstract class AbstractProtocol implements Protocol {
-
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-
     protected final Map<String, Exporter<?>> exporterMap = new ConcurrentHashMap<String, Exporter<?>>();
-
     //TODO SOFEREFENCE
     protected final Set<Invoker<?>> invokers = new ConcurrentHashSet<Invoker<?>>();
-
     protected static String serviceKey(URL url) {
         int port = url.getParameter(Constants.BIND_PORT_KEY, url.getPort());
         return serviceKey(port, url.getPath(), url.getParameter(Constants.VERSION_KEY),
                 url.getParameter(Constants.GROUP_KEY));
     }
-
     protected static String serviceKey(int port, String serviceName, String serviceVersion, String serviceGroup) {
         return ProtocolUtils.serviceKey(port, serviceName, serviceVersion, serviceGroup);
     }
-
     @Override
     public void destroy() {
         for (Invoker<?> invoker : invokers) {

@@ -26,13 +26,10 @@ import java.lang.reflect.Method;
  * InvokerHandler
  */
 public class InvokerInvocationHandler implements InvocationHandler {
-
     private final Invoker<?> invoker;
-
     public InvokerInvocationHandler(Invoker<?> handler) {
         this.invoker = handler;
     }
-
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String methodName = method.getName();
@@ -51,5 +48,4 @@ public class InvokerInvocationHandler implements InvocationHandler {
         }
         return invoker.invoke(new RpcInvocation(method, args)).recreate();
     }
-
 }

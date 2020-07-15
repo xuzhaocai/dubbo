@@ -36,7 +36,7 @@ public class MockClusterInvoker<T> implements Invoker<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(MockClusterInvoker.class);
 
-    private final Directory<T> directory;
+    private final Directory<T> directory;// directory
 
     private final Invoker<T> invoker;
 
@@ -68,11 +68,11 @@ public class MockClusterInvoker<T> implements Invoker<T> {
     @Override
     public Result invoke(Invocation invocation) throws RpcException {
         Result result = null;
-
+        // 获取方法中的  mock属性
         String value = directory.getUrl().getMethodParameter(invocation.getMethodName(), Constants.MOCK_KEY, Boolean.FALSE.toString()).trim();
         if (value.length() == 0 || value.equalsIgnoreCase("false")) {
-            //no mock
-            result = this.invoker.invoke(invocation);
+            //no mock ，不需要mock
+            result = this.invoker.invoke(invocation);// 直接调往下一个
         } else if (value.startsWith("force")) {
             if (logger.isWarnEnabled()) {
                 logger.info("force-mock: " + invocation.getMethodName() + " force-mock enabled , url : " + directory.getUrl());
@@ -96,7 +96,7 @@ public class MockClusterInvoker<T> implements Invoker<T> {
         }
         return result;
     }
-
+    // 进行mock
     @SuppressWarnings({"unchecked", "rawtypes"})
     private Result doMockInvoke(Invocation invocation, RpcException e) {
         Result result = null;

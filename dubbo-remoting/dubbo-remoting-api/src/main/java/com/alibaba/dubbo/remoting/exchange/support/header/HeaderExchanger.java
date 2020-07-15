@@ -27,13 +27,9 @@ import com.alibaba.dubbo.remoting.transport.DecodeHandler;
 
 /**
  * DefaultMessenger
- *
- *
  */
 public class HeaderExchanger implements Exchanger {
-
     public static final String NAME = "header";
-
     /**
      * connect 连接
      * @param url

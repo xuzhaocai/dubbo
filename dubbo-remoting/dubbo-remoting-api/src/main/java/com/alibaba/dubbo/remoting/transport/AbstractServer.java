@@ -57,8 +57,8 @@ public abstract class AbstractServer extends AbstractEndpoint implements Server 
     public AbstractServer(URL url, ChannelHandler handler) throws RemotingException {
         super(url, handler);
         localAddress = getUrl().toInetSocketAddress();
-        String bindIp = getUrl().getParameter(Constants.BIND_IP_KEY, getUrl().getHost());
-        int bindPort = getUrl().getParameter(Constants.BIND_PORT_KEY, getUrl().getPort());
+        String bindIp = getUrl().getParameter(Constants.BIND_IP_KEY, getUrl().getHost());//ip
+        int bindPort = getUrl().getParameter(Constants.BIND_PORT_KEY, getUrl().getPort()); //port
         if (url.getParameter(Constants.ANYHOST_KEY, false) || NetUtils.isInvalidLocalHost(bindIp)) {
             bindIp = NetUtils.ANYHOST;
         }

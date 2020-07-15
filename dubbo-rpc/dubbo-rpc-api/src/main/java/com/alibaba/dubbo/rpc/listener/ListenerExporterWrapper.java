@@ -28,25 +28,21 @@ import java.util.List;
  * ListenerExporter
  */
 public class ListenerExporterWrapper<T> implements Exporter<T> {
-
     private static final Logger logger = LoggerFactory.getLogger(ListenerExporterWrapper.class);
-
     private final Exporter<T> exporter;
-
     private final List<ExporterListener> listeners;
-
     public ListenerExporterWrapper(Exporter<T> exporter, List<ExporterListener> listeners) {
-        if (exporter == null) {
+        if (exporter == null) {// 判断null
             throw new IllegalArgumentException("exporter == null");
         }
         this.exporter = exporter;
         this.listeners = listeners;
         if (listeners != null && !listeners.isEmpty()) {
             RuntimeException exception = null;
-            for (ExporterListener listener : listeners) {
+            for (ExporterListener listener : listeners) {//遍历通知
                 if (listener != null) {
                     try {
-                        listener.exported(this);
+                        listener.exported(this);//通知
                     } catch (RuntimeException t) {
                         logger.error(t.getMessage(), t);
                         exception = t;
@@ -58,12 +54,10 @@ public class ListenerExporterWrapper<T> implements Exporter<T> {
             }
         }
     }
-
     @Override
     public Invoker<T> getInvoker() {
         return exporter.getInvoker();
     }
-
     @Override
     public void unexport() {
         try {
@@ -87,5 +81,4 @@ public class ListenerExporterWrapper<T> implements Exporter<T> {
             }
         }
     }
-
 }

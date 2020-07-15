@@ -65,17 +65,14 @@ public class ProtocolFilterWrapper implements Protocol {
                 final Filter filter = filters.get(i);
                 final Invoker<T> next = last;
                 last = new Invoker<T>() {
-
                     @Override
                     public Class<T> getInterface() {
                         return invoker.getInterface();
                     }
-
                     @Override
                     public URL getUrl() {
                         return invoker.getUrl();
                     }
-
                     @Override
                     public boolean isAvailable() {
                         return invoker.isAvailable();
@@ -85,7 +82,6 @@ public class ProtocolFilterWrapper implements Protocol {
                     public Result invoke(Invocation invocation) throws RpcException {
                         return filter.invoke(next, invocation);
                     }
-
                     @Override
                     public void destroy() {
                         invoker.destroy();

@@ -70,19 +70,27 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
         setRouters(routers);
     }
 
+    /**
+     * 根据invocation信息获取invoker列表
+     * @param invocation  调用信息
+     * @return
+     * @throws RpcException
+     */
     @Override
     public List<Invoker<T>> list(Invocation invocation) throws RpcException {
         if (destroyed) { //判断是否销毁
             throw new RpcException("Directory already destroyed .url: " + getUrl());
         }
 
-
+        // 调用子类实现
         List<Invoker<T>> invokers = doList(invocation);
+
+
         List<Router> localRouters = this.routers; // local reference
 
         // 根据路由规则筛选 router
         if (localRouters != null && !localRouters.isEmpty()) {
-            for (Router router : localRouters) {
+            for (Router router : localRouters) {// 根据路由将 invoker过滤一遍
                 try {
 
 
@@ -135,7 +143,7 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
     public URL getConsumerUrl() {
         return consumerUrl;
     }
-
+    // 设置consumerUrl
     public void setConsumerUrl(URL consumerUrl) {
         this.consumerUrl = consumerUrl;
     }

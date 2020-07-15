@@ -131,7 +131,7 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
         }
 
         RpcInvocation invocation = (RpcInvocation) inv;
-        invocation.setInvoker(this);
+        invocation.setInvoker(this);//设置invoker ，将自己设置进去
         if (attachment != null && attachment.size() > 0) {
             invocation.addAttachmentsIfAbsent(attachment);
         }
