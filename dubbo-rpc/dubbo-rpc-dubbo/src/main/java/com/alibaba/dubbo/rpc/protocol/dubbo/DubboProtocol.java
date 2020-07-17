@@ -352,7 +352,7 @@ public class DubboProtocol extends AbstractProtocol {
             throw new RpcException("Cannot instantiate the serialization optimizer class: " + className, e);
         }
     }
-
+    //dubbo refer
     @Override
     public <T> Invoker<T> refer(Class<T> serviceType, URL url) throws RpcException {
         optimizeSerialization(url);
@@ -361,22 +361,22 @@ public class DubboProtocol extends AbstractProtocol {
         invokers.add(invoker);
         return invoker;
     }
-
+    // 获取客户端们
     private ExchangeClient[] getClients(URL url) {
-        // whether to share connection
+        // whether to share connection  是否共享连接
         boolean service_share_connect = false;
-        int connections = url.getParameter(Constants.CONNECTIONS_KEY, 0);
+        int connections = url.getParameter(Constants.CONNECTIONS_KEY, 0);// 获取connections参数，缺省就是0
         // if not configured, connection is shared, otherwise, one connection for one service
-        if (connections == 0) {
+        if (connections == 0) { //connections  是0 ，开启共享连接 ，然后设置连接数是1
             service_share_connect = true;
             connections = 1;
         }
 
         ExchangeClient[] clients = new ExchangeClient[connections];
         for (int i = 0; i < clients.length; i++) {
-            if (service_share_connect) {
-                clients[i] = getSharedClient(url);
-            } else {
+            if (service_share_connect) {// 共享连接的时候
+                clients[i] = getSharedClient(url);// 获取共享连接客户端
+            } else {// 初始化一个连接
                 clients[i] = initClient(url);
             }
         }
@@ -387,19 +387,20 @@ public class DubboProtocol extends AbstractProtocol {
      * Get shared connection
      */
     private ExchangeClient getSharedClient(URL url) {
-        String key = url.getAddress();
-        ReferenceCountExchangeClient client = referenceClientMap.get(key);
-        if (client != null) {
-            if (!client.isClosed()) {
-                client.incrementAndGetCount();
+        String key = url.getAddress();// 获取服务提供者的ip+port  172.30.1.26:18108
+        ReferenceCountExchangeClient client = referenceClientMap.get(key);// 通过服务提供者的地址从缓存里面找
+        if (client != null) {// 如果找到的话
+            if (!client.isClosed()) {// 判断该连接有没有关闭
+                client.incrementAndGetCount();  // 这个是一个client使用的计数器，就是看看有哪些引用这个client的
                 return client;
-            } else {
+            } else {//这里是关闭了，然后从 clientmap 缓存中移除
                 referenceClientMap.remove(key);
             }
         }
 
         locks.putIfAbsent(key, new Object());
-        synchronized (locks.get(key)) {
+        synchronized (locks.get(key)) {// 这里的锁粒度就变小了
+            //这里再判断一下，如果client 缓存map中
             if (referenceClientMap.containsKey(key)) {
                 return referenceClientMap.get(key);
             }

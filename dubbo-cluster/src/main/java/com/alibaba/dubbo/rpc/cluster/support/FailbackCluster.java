@@ -33,5 +33,4 @@ public class FailbackCluster implements Cluster {
     public <T> Invoker<T> join(Directory<T> directory) throws RpcException {
         return new FailbackClusterInvoker<T>(directory);
     }
-
 }

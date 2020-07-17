@@ -26,7 +26,6 @@ import com.alibaba.dubbo.common.extension.SPI;
  */
 @SPI("javassist")
 public interface ProxyFactory {
-
     /**
      * create proxy.
      *
@@ -35,7 +34,6 @@ public interface ProxyFactory {
      */
     @Adaptive({Constants.PROXY_KEY})
     <T> T getProxy(Invoker<T> invoker) throws RpcException;
-
     /**
      * create proxy.
      *
@@ -44,7 +42,6 @@ public interface ProxyFactory {
      */
     @Adaptive({Constants.PROXY_KEY})
     <T> T getProxy(Invoker<T> invoker, boolean generic) throws RpcException;
-
     /**
      * create invoker.
      *
@@ -56,5 +53,4 @@ public interface ProxyFactory {
      */
     @Adaptive({Constants.PROXY_KEY})
     <T> Invoker<T> getInvoker(T proxy, Class<T> type, URL url) throws RpcException;
-
 }

@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class RpcUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcUtils.class);
-    private static final AtomicLong INVOKE_ID = new AtomicLong(0);
+    private static final AtomicLong INVOKE_ID = new AtomicLong(0);//调用id
 
     public static Class<?> getReturnType(Invocation invocation) {
         try {
@@ -90,6 +90,8 @@ public class RpcUtils {
      * @param inv
      */
     public static void attachInvocationIdIfAsync(URL url, Invocation inv) {
+
+
         if (isAttachInvocationId(url, inv) && getInvocationId(inv) == null && inv instanceof RpcInvocation) {
             ((RpcInvocation) inv).setAttachment(Constants.ID_KEY, String.valueOf(INVOKE_ID.getAndIncrement()));
         }
@@ -145,12 +147,20 @@ public class RpcUtils {
         return invocation.getParameterTypes();
     }
 
+    /**
+     * 判断是否异步调用
+     * @param url  url
+     * @param inv 调用信息
+     * @return
+     */
     public static boolean isAsync(URL url, Invocation inv) {
+
+        // 是否是异步
         boolean isAsync;
-        if (Boolean.TRUE.toString().equals(inv.getAttachment(Constants.ASYNC_KEY))) {
+        if (Boolean.TRUE.toString().equals(inv.getAttachment(Constants.ASYNC_KEY))) {// 异步
             isAsync = true;
         } else {
-            isAsync = url.getMethodParameter(getMethodName(inv), Constants.ASYNC_KEY, false);
+            isAsync = url.getMethodParameter(getMethodName(inv), Constants.ASYNC_KEY, false);//缺省是同步
         }
         return isAsync;
     }

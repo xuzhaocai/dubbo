@@ -27,7 +27,7 @@ import java.util.Map;
 
 /**
  * RPC Invocation.
- *
+ * rpc 调用信息
  * @serial Don't change the class name and properties.
  */
 public class RpcInvocation implements Invocation, Serializable {
@@ -80,7 +80,12 @@ public class RpcInvocation implements Invocation, Serializable {
                 invocation.getArguments(), invocation.getAttachments(), invocation.getInvoker());
     }
 
+    /**
+     * @param method  方法对象
+     * @param arguments 请求参数
+     */
     public RpcInvocation(Method method, Object[] arguments) {
+
         this(method.getName(), method.getParameterTypes(), arguments, null, null);
     }
 
@@ -96,6 +101,13 @@ public class RpcInvocation implements Invocation, Serializable {
         this(methodName, parameterTypes, arguments, attachments, null);
     }
 
+    /**
+     * @param methodName 方法名
+     * @param parameterTypes  方法参数类型们
+     * @param arguments  方法参数们
+     * @param attachments  附加信息
+     * @param invoker  invoker
+     */
     public RpcInvocation(String methodName, Class<?>[] parameterTypes, Object[] arguments, Map<String, String> attachments, Invoker<?> invoker) {
         this.methodName = methodName;
         this.parameterTypes = parameterTypes == null ? new Class<?>[0] : parameterTypes;

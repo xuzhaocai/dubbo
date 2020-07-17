@@ -39,6 +39,7 @@ public abstract class AbstractProxyFactory implements ProxyFactory {
         Class<?>[] interfaces = null;
         String config = invoker.getUrl().getParameter("interfaces");
         if (config != null && config.length() > 0) {
+            // 使用逗号分割
             String[] types = Constants.COMMA_SPLIT_PATTERN.split(config);
             if (types != null && types.length > 0) {
                 interfaces = new Class<?>[types.length + 2];
@@ -52,7 +53,6 @@ public abstract class AbstractProxyFactory implements ProxyFactory {
         if (interfaces == null) {
             interfaces = new Class<?>[]{invoker.getInterface(), EchoService.class};
         }
-
         if (!invoker.getInterface().equals(GenericService.class) && generic) {
             int len = interfaces.length;
             Class<?>[] temp = interfaces;

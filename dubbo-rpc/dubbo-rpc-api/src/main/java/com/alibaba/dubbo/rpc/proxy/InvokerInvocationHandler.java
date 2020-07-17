@@ -32,11 +32,17 @@ public class InvokerInvocationHandler implements InvocationHandler {
     }
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        //获取方法名
         String methodName = method.getName();
+        //获取方法参数类型们
         Class<?>[] parameterTypes = method.getParameterTypes();
+
+        // 就是这个方法是Object类型的方法的时候
         if (method.getDeclaringClass() == Object.class) {
             return method.invoke(invoker, args);
         }
+
+        /// 下面都是调用了些Object的方法
         if ("toString".equals(methodName) && parameterTypes.length == 0) {
             return invoker.toString();
         }
@@ -46,6 +52,7 @@ public class InvokerInvocationHandler implements InvocationHandler {
         if ("equals".equals(methodName) && parameterTypes.length == 1) {
             return invoker.equals(args[0]);
         }
+        // 执行调用
         return invoker.invoke(new RpcInvocation(method, args)).recreate();
     }
 }
