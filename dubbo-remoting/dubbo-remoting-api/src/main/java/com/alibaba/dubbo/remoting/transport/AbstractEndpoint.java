@@ -34,17 +34,19 @@ public abstract class AbstractEndpoint extends AbstractPeer implements Resetable
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractEndpoint.class);
 
-    private Codec2 codec;
+    private Codec2 codec;// 编解码
 
-    private int timeout;
+    private int timeout;  // 超时
 
-    private int connectTimeout;
+    private int connectTimeout;  // 连接超时
 
     public AbstractEndpoint(URL url, ChannelHandler handler) {
         super(url, handler);
         // 获取codec
         this.codec = getChannelCodec(url);
+        // 获取timeout 默认是1s
         this.timeout = url.getPositiveParameter(Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT);
+        // 连接超时默认是3s
         this.connectTimeout = url.getPositiveParameter(Constants.CONNECT_TIMEOUT_KEY, Constants.DEFAULT_CONNECT_TIMEOUT);
     }
 
@@ -55,11 +57,11 @@ public abstract class AbstractEndpoint extends AbstractPeer implements Resetable
      */
     protected static Codec2 getChannelCodec(URL url) {
 
-        //codec 类型  dubbo协议的话设置的是  dubbo
+        //codec 类型  dubbo协议的话设置的是  dubbo， 没有的话默认telnet
         String codecName = url.getParameter(Constants.CODEC_KEY, "telnet");
 
         // 判断codec 2代中有没有这个类的实现
-        if (ExtensionLoader.getExtensionLoader(Codec2.class).hasExtension(codecName)) {//如果扩展中有，就
+        if (ExtensionLoader.getExtensionLoader(Codec2.class).hasExtension(codecName)) {//如果扩展中有，就使用Codec2里面
             return ExtensionLoader.getExtensionLoader(Codec2.class).getExtension(codecName);
         } else {
             //基本已经废弃，是codec一代的适配器类

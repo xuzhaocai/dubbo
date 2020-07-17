@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * NettyCodecAdapter.
- * 适配器
+ * netty的一个编解码适配器
  */
 final class NettyCodecAdapter {
     /**
@@ -69,6 +69,10 @@ final class NettyCodecAdapter {
     }
     /**
      * encode
+     *
+     * 编码器
+     *
+     * 将message 变成byte
      */
     private class InternalEncoder extends MessageToByteEncoder {
 

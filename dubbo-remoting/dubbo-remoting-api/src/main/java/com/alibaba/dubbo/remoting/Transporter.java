@@ -29,7 +29,7 @@ import com.alibaba.dubbo.common.extension.SPI;
  *
  * @see com.alibaba.dubbo.remoting.Transporters
  */
-@SPI("netty") // 默认是netty3的
+@SPI("netty") // 默认是netty4的
 public interface Transporter {
 
     /**

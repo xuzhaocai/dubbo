@@ -66,12 +66,15 @@ public class Transporters {
         if (url == null) {
             throw new IllegalArgumentException("url == null");
         }
+
+
+
         ChannelHandler handler;
         if (handlers == null || handlers.length == 0) {
-            handler = new ChannelHandlerAdapter();
+            handler = new ChannelHandlerAdapter();// handler 是null的情况
         } else if (handlers.length == 1) {
-            handler = handlers[0];
-        } else {
+            handler = handlers[0];//一个handler的情况
+        } else {///多个的情况
             handler = new ChannelHandlerDispatcher(handlers);
         }
         return getTransporter().connect(url, handler);

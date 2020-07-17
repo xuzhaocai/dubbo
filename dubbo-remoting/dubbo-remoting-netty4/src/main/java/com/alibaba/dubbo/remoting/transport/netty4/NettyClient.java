@@ -45,6 +45,8 @@ public class NettyClient extends AbstractClient {
 
     private static final Logger logger = LoggerFactory.getLogger(NettyClient.class);
 
+
+    // 线程数是cup核心数+1 与32 比较最小的
     private static final NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup(Constants.DEFAULT_IO_THREADS, new DefaultThreadFactory("NettyClientWorker", true));
 
     private Bootstrap bootstrap;
@@ -57,19 +59,23 @@ public class NettyClient extends AbstractClient {
 
     @Override
     protected void doOpen() throws Throwable {
+
+
         final NettyClientHandler nettyClientHandler = new NettyClientHandler(getUrl(), this);
+
+
+
         bootstrap = new Bootstrap();
         bootstrap.group(nioEventLoopGroup)
                 .option(ChannelOption.SO_KEEPALIVE, true)
-                .option(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.TCP_NODELAY, true)// 不使用这个算法，防止延迟
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 //.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getTimeout())
                 .channel(NioSocketChannel.class);
-        //连接超时    小于3000 设置成3000
+        //连接超时时间最小是3000 ，如果用户设置了的这个时间小于3000    设置成3000
         if (getConnectTimeout() < 3000) {
             bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000);
         } else {
-
             // 使用用户设置的超时时间
             bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getConnectTimeout());
         }
@@ -94,37 +100,41 @@ public class NettyClient extends AbstractClient {
     @Override
     protected void doConnect() throws Throwable {
         long start = System.currentTimeMillis();
+
+        // 连接
         ChannelFuture future = bootstrap.connect(getConnectAddress());
         try {
             boolean ret = future.awaitUninterruptibly(getConnectTimeout(), TimeUnit.MILLISECONDS);
 
-            if (ret && future.isSuccess()) {
-                Channel newChannel = future.channel();
+            if (ret && future.isSuccess()) {// 连接成功的时候
+                Channel newChannel = future.channel();/// 获取channel
                 try {
                     // Close old channel   如果有以前的channel存在，
                     Channel oldChannel = NettyClient.this.channel; // copy reference
-                    if (oldChannel != null) {
+                    if (oldChannel != null) {  //如果老的channel不是null，然后就会将老得channel关闭
                         try {
                             if (logger.isInfoEnabled()) {
                                 logger.info("Close old netty channel " + oldChannel + " on create new netty channel " + newChannel);
                             }
-                            oldChannel.close();
+                            oldChannel.close();// 关闭老得连接
                         } finally {
                             NettyChannel.removeChannelIfDisconnected(oldChannel);
                         }
                     }
                 } finally {
-                    if (NettyClient.this.isClosed()) {
+                    if (NettyClient.this.isClosed()) {// 判断netty client 关闭状态值
                         try {
                             if (logger.isInfoEnabled()) {
                                 logger.info("Close new netty channel " + newChannel + ", because the client closed.");
                             }
-                            newChannel.close();
+                            newChannel.close();//关闭新连接
                         } finally {
                             NettyClient.this.channel = null;
                             NettyChannel.removeChannelIfDisconnected(newChannel);
                         }
                     } else {
+
+                        // 将新生成的channel  设置成channel
                         NettyClient.this.channel = newChannel;
                     }
                 }

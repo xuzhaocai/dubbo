@@ -68,7 +68,7 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
     // Reconnection error log has been called before?
     private final AtomicBoolean reconnect_error_log_flag = new AtomicBoolean(false);
     // reconnect warning period. Reconnect warning interval (log warning after how many times) //for test
-    private final int reconnect_warning_period;
+    private final int reconnect_warning_period;  //重连警告间隔
     private final long shutdown_timeout;
     protected volatile ExecutorService executor;
     // 重连执行任务
@@ -79,6 +79,9 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
 
     public AbstractClient(URL url, ChannelHandler handler) throws RemotingException {
         super(url, handler);
+
+
+
         // 发送消息的时候断开了是否重连接    默认是false的
         send_reconnect = url.getParameter(Constants.SEND_RECONNECT_KEY, false);
         // shutdown 超时时间  15分钟
@@ -91,6 +94,7 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
         reconnect_warning_period = url.getParameter("reconnect.waring.period", 1800);
 
         try {
+            // 具体打开代码交给 子类实现
             doOpen(); // 调用具体实现类的doOpen方法  。 模板方法  ， 初始化客户端
         } catch (Throwable t) {
             close();// 异常 关闭
@@ -148,6 +152,8 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
      */
     private static int getReconnectParam(URL url) {
         int reconnect;
+
+        // 获取reconnect
         String param = url.getParameter(Constants.RECONNECT_KEY);
         if (param == null || param.length() == 0 || "true".equalsIgnoreCase(param)) { // 默认是开启重连的  频率是2s
             reconnect = Constants.DEFAULT_RECONNECT_PERIOD;
@@ -371,6 +377,9 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
         connect();
     }
 
+    /**
+     * 关闭
+     */
     @Override
     public void close() {
         try {
