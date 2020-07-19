@@ -160,19 +160,19 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
         if (getUrl().getMethodParameter(invocation.getMethodName(), Constants.ASYNC_KEY, false)) {// 异步，缺省是false
             invocation.setAttachment(Constants.ASYNC_KEY, Boolean.TRUE.toString());
         }
-        //
+        //这里异步的话设置invocationId
         RpcUtils.attachInvocationIdIfAsync(getUrl(), invocation);
 
 
-        try {
+        try {// 调用子类
             return doInvoke(invocation);
         } catch (InvocationTargetException e) { // biz exception
             Throwable te = e.getTargetException();
             if (te == null) {
                 return new RpcResult(e);
             } else {
-                if (te instanceof RpcException) {
-                    ((RpcException) te).setCode(RpcException.BIZ_EXCEPTION);
+                if (te instanceof RpcException) {// 如果是RpcException的话
+                    ((RpcException) te).setCode(RpcException.BIZ_EXCEPTION);// 设置成biz_exception
                 }
                 return new RpcResult(te);
             }
@@ -186,7 +186,7 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
             return new RpcResult(e);
         }
     }
-
+    // 子类实现
     protected abstract Result doInvoke(Invocation invocation) throws Throwable;
 
 }

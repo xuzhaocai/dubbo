@@ -40,11 +40,12 @@ final class ReferenceCountExchangeClient implements ExchangeClient {
 
     //    private final ExchangeHandler handler;
     private final ConcurrentMap<String, LazyConnectExchangeClient> ghostClientMap;
-    private ExchangeClient client;
+    private ExchangeClient client;// 客户端
 
 
     public ReferenceCountExchangeClient(ExchangeClient client, ConcurrentMap<String, LazyConnectExchangeClient> ghostClientMap) {
         this.client = client;
+        // 引用+1
         refenceCount.incrementAndGet();
         this.url = client.getUrl();
         if (ghostClientMap == null) {
@@ -78,6 +79,13 @@ final class ReferenceCountExchangeClient implements ExchangeClient {
         return client.getChannelHandler();
     }
 
+    /**
+     * 发送请求
+     * @param request
+     * @param timeout
+     * @return
+     * @throws RemotingException
+     */
     @Override
     public ResponseFuture request(Object request, int timeout) throws RemotingException {
         return client.request(request, timeout);
@@ -146,6 +154,10 @@ final class ReferenceCountExchangeClient implements ExchangeClient {
         close(0);
     }
 
+    /**
+     * 关闭
+     * @param timeout
+     */
     @Override
     public void close(int timeout) {
         if (refenceCount.decrementAndGet() <= 0) {

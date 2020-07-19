@@ -392,6 +392,7 @@ public class DubboProtocol extends AbstractProtocol {
 
     /**
      * Get shared connection
+     * 获取共享连接
      */
     private ExchangeClient getSharedClient(URL url) {
         String key = url.getAddress();// 获取服务提供者的ip+port  172.30.1.26:18108
@@ -416,6 +417,8 @@ public class DubboProtocol extends AbstractProtocol {
 
             client = new ReferenceCountExchangeClient(exchangeClient, ghostClientMap);
             referenceClientMap.put(key, client);
+
+            // 这个属于懒加载
             ghostClientMap.remove(key);
             locks.remove(key);
             return client;

@@ -71,45 +71,58 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
     @Override
     protected Result doInvoke(final Invocation invocation) throws Throwable {
         RpcInvocation inv = (RpcInvocation) invocation;
+        // 获取调用的methodname
         final String methodName = RpcUtils.getMethodName(invocation);
         inv.setAttachment(Constants.PATH_KEY, getUrl().getPath());
         inv.setAttachment(Constants.VERSION_KEY, version);
 
         ExchangeClient currentClient;
+        // 多个连接的话轮询取
         if (clients.length == 1) {
             currentClient = clients[0];
         } else {
             currentClient = clients[index.getAndIncrement() % clients.length];
         }
         try {
+            //是否是异步调用
             boolean isAsync = RpcUtils.isAsync(getUrl(), invocation);
+            // 是否是单向调用
             boolean isOneway = RpcUtils.isOneway(getUrl(), invocation);
+            // 获取timeout 默认是1s
             int timeout = getUrl().getMethodParameter(methodName, Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT);
-            if (isOneway) {
+            if (isOneway) {// 如果单向的话
                 boolean isSent = getUrl().getMethodParameter(methodName, Constants.SENT_KEY, false);
                 currentClient.send(inv, isSent);
                 RpcContext.getContext().setFuture(null);
+                // 直接返回参数，不需要返回结果
                 return new RpcResult();
-            } else if (isAsync) {
+            } else if (isAsync) {// 是异步调用 发送带有超时时间的
+                // 返回future
                 ResponseFuture future = currentClient.request(inv, timeout);
+
                 RpcContext.getContext().setFuture(new FutureAdapter<Object>(future));
                 return new RpcResult();
-            } else {
+            } else {// 普通调用
                 RpcContext.getContext().setFuture(null);
+                // 直接等着回结果
                 return (Result) currentClient.request(inv, timeout).get();
             }
-        } catch (TimeoutException e) {
+        } catch (TimeoutException e) {// timeout异常
             throw new RpcException(RpcException.TIMEOUT_EXCEPTION, "Invoke remote method timeout. method: " + invocation.getMethodName() + ", provider: " + getUrl() + ", cause: " + e.getMessage(), e);
-        } catch (RemotingException e) {
+        } catch (RemotingException e) {//远程调用异常
             throw new RpcException(RpcException.NETWORK_EXCEPTION, "Failed to invoke remote method: " + invocation.getMethodName() + ", provider: " + getUrl() + ", cause: " + e.getMessage(), e);
         }
     }
 
     @Override
     public boolean isAvailable() {
-        if (!super.isAvailable())
+        if (!super.isAvailable())// 先调用父类的可不可用
             return false;
+
+        // 然后在判断这些client们
         for (ExchangeClient client : clients) {
+
+            // 1.连接着 2.不能有只读功能，还需要写。
             if (client.isConnected() && !client.hasAttribute(Constants.CHANNEL_ATTRIBUTE_READONLY_KEY)) {
                 //cannot write == not Available ?
                 return true;

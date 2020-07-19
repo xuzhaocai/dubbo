@@ -97,6 +97,8 @@ public class RpcUtils {
     }
 
     private static boolean isAttachInvocationId(URL url, Invocation invocation) {
+
+        // 获取方法的参数invocationid.autoattach
         String value = url.getMethodParameter(invocation.getMethodName(), Constants.AUTO_ATTACH_INVOCATIONID_KEY);
         if (value == null) {
             // add invocationid in async operation by default
@@ -108,6 +110,13 @@ public class RpcUtils {
         }
     }
 
+    /**
+     * 获取调用方法
+     * 是泛化调用的话，取真实调用的方法
+     * 不是泛化调用的话，直接就是invocation里面的methodname
+     * @param invocation
+     * @return
+     */
     public static String getMethodName(Invocation invocation) {
         if (Constants.$INVOKE.equals(invocation.getMethodName())
                 && invocation.getArguments() != null
