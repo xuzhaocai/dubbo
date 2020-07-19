@@ -42,24 +42,28 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class DubboInvoker<T> extends AbstractInvoker<T> {
 
-    private final ExchangeClient[] clients;
+    private final ExchangeClient[] clients;  // clients
 
     private final AtomicPositiveInteger index = new AtomicPositiveInteger();
 
-    private final String version;
+    private final String version; //dubbo 版本
 
     private final ReentrantLock destroyLock = new ReentrantLock();
 
-    private final Set<Invoker<?>> invokers;
+    private final Set<Invoker<?>> invokers; //所有的invoker
 
     public DubboInvoker(Class<T> serviceType, URL url, ExchangeClient[] clients) {
         this(serviceType, url, clients, null);
     }
 
     public DubboInvoker(Class<T> serviceType, URL url, ExchangeClient[] clients, Set<Invoker<?>> invokers) {
+
+
+
+
         super(serviceType, url, new String[]{Constants.INTERFACE_KEY, Constants.GROUP_KEY, Constants.TOKEN_KEY, Constants.TIMEOUT_KEY});
         this.clients = clients;
-        // get version.
+        // get version. 获取version 如果没有的话使用0.0.0
         this.version = url.getParameter(Constants.VERSION_KEY, "0.0.0");
         this.invokers = invokers;
     }

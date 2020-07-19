@@ -90,8 +90,7 @@ public class RpcUtils {
      * @param inv
      */
     public static void attachInvocationIdIfAsync(URL url, Invocation inv) {
-
-
+        //如果是异步 而且没有设置这个invocationId
         if (isAttachInvocationId(url, inv) && getInvocationId(inv) == null && inv instanceof RpcInvocation) {
             ((RpcInvocation) inv).setAttachment(Constants.ID_KEY, String.valueOf(INVOKE_ID.getAndIncrement()));
         }

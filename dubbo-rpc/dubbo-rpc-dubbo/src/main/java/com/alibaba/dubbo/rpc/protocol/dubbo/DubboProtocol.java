@@ -356,7 +356,14 @@ public class DubboProtocol extends AbstractProtocol {
     @Override
     public <T> Invoker<T> refer(Class<T> serviceType, URL url) throws RpcException {
         optimizeSerialization(url);
-        // create rpc invoker.
+        // create rpc invoker.创建一个invoker 然后返回
+
+        /**
+         * serviceType：接口类型
+         * url： 这个url是merge出来的
+         * getClients ： 获得的ExchangeClient ，如果是connections >0 这时候就会有多个，然后connections=0 的话就是使用共享的一个
+         * invokers： 缓存这所有的invoker
+         */
         DubboInvoker<T> invoker = new DubboInvoker<T>(serviceType, url, getClients(url), invokers);
         invokers.add(invoker);
         return invoker;

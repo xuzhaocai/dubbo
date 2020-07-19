@@ -35,25 +35,27 @@ import java.util.concurrent.Executors;
 public class WrappedChannelHandler implements ChannelHandlerDelegate {
 
     protected static final Logger logger = LoggerFactory.getLogger(WrappedChannelHandler.class);
-
+    // 共享的线程池
     protected static final ExecutorService SHARED_EXECUTOR = Executors.newCachedThreadPool(new NamedThreadFactory("DubboSharedHandler", true));
 
-    protected final ExecutorService executor;
+    protected final ExecutorService executor;  // 线程池
 
-    protected final ChannelHandler handler;
+    protected final ChannelHandler handler;  // handler
 
-    protected final URL url;
+    protected final URL url;  //url
 
     public WrappedChannelHandler(ChannelHandler handler, URL url) {
-        this.handler = handler;
-        this.url = url;
-        //获取线程池
+        this.handler = handler;  // handler
+        this.url = url;  //url
+        //获取线程池 ，如果是客户端的话，默认是CachedThreadPool
         executor = (ExecutorService) ExtensionLoader.getExtensionLoader(ThreadPool.class).getAdaptiveExtension().getExecutor(url);
-
+        //ExecutorService
         String componentKey = Constants.EXECUTOR_SERVICE_COMPONENT_KEY;
         if (Constants.CONSUMER_SIDE.equalsIgnoreCase(url.getParameter(Constants.SIDE_KEY))) {
-            componentKey = Constants.CONSUMER_SIDE;
+            componentKey = Constants.CONSUMER_SIDE;  // 如果是consumer的话 就使用 consumer
         }
+
+        // 获取到SimpleDataStore
         DataStore dataStore = ExtensionLoader.getExtensionLoader(DataStore.class).getDefaultExtension();
 
         // 将线程池设置到datastore中
@@ -62,7 +64,7 @@ public class WrappedChannelHandler implements ChannelHandlerDelegate {
 
     public void close() {
         try {
-            if (executor != null) {
+            if (executor != null) {  // 关闭线程池
                 executor.shutdown();
             }
         } catch (Throwable t) {

@@ -71,7 +71,7 @@ public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
             if (req.isTwoWay()) {// 判断是不是需要响应
                 Response res = new Response(req.getId(), req.getVersion());
                 res.setEvent(Response.HEARTBEAT_EVENT);// 设置心跳事件
-                channel.send(res);// 发送
+                channel.send(res);// 发送心跳响应
                 if (logger.isInfoEnabled()) {
                     int heartbeat = channel.getUrl().getParameter(Constants.HEARTBEAT_KEY, 0);
                     if (logger.isDebugEnabled()) {
@@ -84,7 +84,7 @@ public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
             return;
         }
         if (isHeartbeatResponse(message)) {// 判断是不是心跳响应
-            if (logger.isDebugEnabled()) {
+            if (logger.isDebugEnabled()) { //如果是debug级别的  ，打印收到响应
                 logger.debug("Receive heartbeat response in thread " + Thread.currentThread().getName());
             }
             return;
@@ -110,10 +110,20 @@ public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
         channel.removeAttribute(KEY_WRITE_TIMESTAMP);
     }
 
+    /**
+     * 判断是不是心跳请求
+     * @param message 消息
+     * @return
+     */
     private boolean isHeartbeatRequest(Object message) {
         return message instanceof Request && ((Request) message).isHeartbeat();
     }
 
+    /**
+     * 判断是不是心跳响应
+     * @param message 消息
+     * @return
+     */
     private boolean isHeartbeatResponse(Object message) {
         return message instanceof Response && ((Response) message).isHeartbeat();
     }

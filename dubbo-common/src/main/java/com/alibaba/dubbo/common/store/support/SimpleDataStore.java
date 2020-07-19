@@ -38,6 +38,11 @@ public class SimpleDataStore implements DataStore {
         return new HashMap<String, Object>(value);
     }
 
+    /**
+     * @param componentName  consumer
+     * @param key  端口
+     * @return
+     */
     @Override
     public Object get(String componentName, String key) {
         if (!data.containsKey(componentName)) {

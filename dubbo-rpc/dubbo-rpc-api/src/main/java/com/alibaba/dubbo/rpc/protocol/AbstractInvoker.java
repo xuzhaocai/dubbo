@@ -59,6 +59,9 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
     }
 
     public AbstractInvoker(Class<T> type, URL url, String[] keys) {
+
+
+
         this(type, url, convertAttachment(url, keys));
     }
 
@@ -69,9 +72,15 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
             throw new IllegalArgumentException("service url == null");
         this.type = type;
         this.url = url;
-        this.attachment = attachment == null ? null : Collections.unmodifiableMap(attachment);
+        this.attachment = attachment == null ? null : Collections.unmodifiableMap(attachment);// 附带参数
     }
 
+    /**
+     * 从url 获取这些参数的值
+     * @param url
+     * @param keys
+     * @return
+     */
     private static Map<String, String> convertAttachment(URL url, String[] keys) {
         if (keys == null || keys.length == 0) {
             return null;
@@ -125,6 +134,7 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
     @Override
     public Result invoke(Invocation inv) throws RpcException {
         // if invoker is destroyed due to address refresh from registry, let's allow the current invoke to proceed
+        /// 如果invoker 是因为注册中心地址刷新销毁，允许通过当前这次调用
         if (destroyed.get()) {
             logger.warn("Invoker for service " + this + " on consumer " + NetUtils.getLocalHost() + " is destroyed, "
                     + ", dubbo version is " + Version.getVersion() + ", this invoker should not be used any longer");
@@ -132,9 +142,11 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
 
         RpcInvocation invocation = (RpcInvocation) inv;
         invocation.setInvoker(this);//设置invoker ，将自己设置进去
-        if (attachment != null && attachment.size() > 0) {
+        if (attachment != null && attachment.size() > 0) { //如果是dubboinvoker的话设置了Constants.INTERFACE_KEY, Constants.GROUP_KEY, Constants.TOKEN_KEY, Constants.TIMEOUT_KEY
             invocation.addAttachmentsIfAbsent(attachment);
         }
+
+        // 再从rpccontext 中获取附带参数
         Map<String, String> contextAttachments = RpcContext.getContext().getAttachments();
         if (contextAttachments != null && contextAttachments.size() != 0) {
             /**
@@ -145,9 +157,10 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
              */
             invocation.addAttachments(contextAttachments);
         }
-        if (getUrl().getMethodParameter(invocation.getMethodName(), Constants.ASYNC_KEY, false)) {
+        if (getUrl().getMethodParameter(invocation.getMethodName(), Constants.ASYNC_KEY, false)) {// 异步，缺省是false
             invocation.setAttachment(Constants.ASYNC_KEY, Boolean.TRUE.toString());
         }
+        //
         RpcUtils.attachInvocationIdIfAsync(getUrl(), invocation);
 
 

@@ -38,14 +38,15 @@ public class CachedThreadPool implements ThreadPool {
 
     @Override
     public Executor getExecutor(URL url) {
+
         String name = url.getParameter(Constants.THREAD_NAME_KEY, Constants.DEFAULT_THREAD_NAME);
-        int cores = url.getParameter(Constants.CORE_THREADS_KEY, Constants.DEFAULT_CORE_THREADS);
-        int threads = url.getParameter(Constants.THREADS_KEY, Integer.MAX_VALUE);
-        int queues = url.getParameter(Constants.QUEUES_KEY, Constants.DEFAULT_QUEUES);
-        int alive = url.getParameter(Constants.ALIVE_KEY, Constants.DEFAULT_ALIVE);
+        int cores = url.getParameter(Constants.CORE_THREADS_KEY, Constants.DEFAULT_CORE_THREADS);//0
+        int threads = url.getParameter(Constants.THREADS_KEY, Integer.MAX_VALUE);//int 最大值
+        int queues = url.getParameter(Constants.QUEUES_KEY, Constants.DEFAULT_QUEUES);//0
+        int alive = url.getParameter(Constants.ALIVE_KEY, Constants.DEFAULT_ALIVE); //1分钟
         //带有keepalive的
         return new ThreadPoolExecutor(cores, threads, alive, TimeUnit.MILLISECONDS,
-                queues == 0 ? new SynchronousQueue<Runnable>() :
+                queues == 0 ? new SynchronousQueue<Runnable>() :  /// 这个SynchronousQueue 内部是一个元素的
                         (queues < 0 ? new LinkedBlockingQueue<Runnable>()
                                 : new LinkedBlockingQueue<Runnable>(queues)),
                 new NamedInternalThreadFactory(name, true), new AbortPolicyWithReport(name, url));

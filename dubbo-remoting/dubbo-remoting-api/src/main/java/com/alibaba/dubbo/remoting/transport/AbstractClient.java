@@ -127,19 +127,26 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
         //从datastore中获取线程池， 此处的线程池说的就是dubbo的线程模型
         executor = (ExecutorService) ExtensionLoader.getExtensionLoader(DataStore.class)
                 .getDefaultExtension().get(Constants.CONSUMER_SIDE, Integer.toString(url.getPort()));
+
+
+
+
+        // 移除了
         ExtensionLoader.getExtensionLoader(DataStore.class)
                 .getDefaultExtension().remove(Constants.CONSUMER_SIDE, Integer.toString(url.getPort()));
     }
 
     /**
-     * 包装通道处理器
+     * 包装channel
      * @param url
      * @param handler
      * @return
      */
     protected static ChannelHandler wrapChannelHandler(URL url, ChannelHandler handler) {
+
+        // 默认的线程名是    DubboClientHandler
         url = ExecutorUtil.setThreadName(url, CLIENT_THREAD_POOL_NAME);//设置线程名
-        //  threadpool
+        //  threadpool  默认的线程类型是cached
         url = url.addParameterIfAbsent(Constants.THREADPOOL_KEY, Constants.DEFAULT_CLIENT_THREADPOOL);// 设置使用的线程池类型
         return ChannelHandlers.wrap(handler, url);
     }

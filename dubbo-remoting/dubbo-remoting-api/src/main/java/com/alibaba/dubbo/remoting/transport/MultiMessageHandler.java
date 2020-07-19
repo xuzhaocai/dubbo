@@ -36,12 +36,12 @@ public class MultiMessageHandler extends AbstractChannelHandlerDelegate {
     @SuppressWarnings("unchecked")
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
-        if (message instanceof MultiMessage) {
+        if (message instanceof MultiMessage) { //判断是否是多消息对象
             MultiMessage list = (MultiMessage) message;
-            for (Object obj : list) {
+            for (Object obj : list) {// 循环让 handler处理
                 handler.received(channel, obj);
             }
-        } else {
+        } else {// 否则交给下一个处理
             handler.received(channel, message);
         }
     }
