@@ -149,6 +149,12 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         }
     }
 
+    /**
+     * 发送消息完成
+     * @param channel channel.
+     * @param message message.
+     * @throws RemotingException
+     */
     @Override
     public void sent(Channel channel, Object message) throws RemotingException {
         Throwable exception = null;
