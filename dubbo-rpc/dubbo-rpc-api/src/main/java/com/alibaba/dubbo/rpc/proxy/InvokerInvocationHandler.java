@@ -36,12 +36,10 @@ public class InvokerInvocationHandler implements InvocationHandler {
         String methodName = method.getName();
         //获取方法参数类型们
         Class<?>[] parameterTypes = method.getParameterTypes();
-
         // 就是这个方法是Object类型的方法的时候
         if (method.getDeclaringClass() == Object.class) {
             return method.invoke(invoker, args);
         }
-
         /// 下面都是调用了些Object的方法
         if ("toString".equals(methodName) && parameterTypes.length == 0) {
             return invoker.toString();
