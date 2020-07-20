@@ -56,6 +56,13 @@ final class NettyChannel extends AbstractChannel {
         this.channel = channel;
     }
 
+    /**
+     * 这里其实是将 将netty的channel 转成 dubbo 的channel
+     * @param ch
+     * @param url
+     * @param handler
+     * @return
+     */
     static NettyChannel getOrAddChannel(Channel ch, URL url, ChannelHandler handler) {
         if (ch == null) {
             return null;
@@ -65,7 +72,7 @@ final class NettyChannel extends AbstractChannel {
         NettyChannel ret = channelMap.get(ch);
         if (ret == null) {// 没有存在就创建
             NettyChannel nettyChannel = new NettyChannel(ch, url, handler);
-            if (ch.isActive()) {// channel 是活的 就进行缓存
+            if (ch.isActive()) {// channel 是活的 就进行缓存 key 是channel 然后value是 nettychannel
                 ret = channelMap.putIfAbsent(ch, nettyChannel);
             }
             if (ret == null) {
@@ -120,11 +127,11 @@ final class NettyChannel extends AbstractChannel {
      */
     @Override
     public void send(Object message, boolean sent) throws RemotingException {
-        super.send(message, sent);
+        super.send(message, sent);// 这里调用父类就是为了判断 这个channel有没有关闭
 
         boolean success = true;
         int timeout = 0;
-        try {
+        try {// netty channel 发送 得到一个channelfuture
             ChannelFuture future = channel.writeAndFlush(message);
             if (sent) {
                 // 默认超时时间 1s

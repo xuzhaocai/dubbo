@@ -54,22 +54,31 @@ public class HeaderExchangeClient implements ExchangeClient {
     private int heartbeatTimeout; // 心跳间隔时间
 
     public HeaderExchangeClient(Client client, boolean needHeartbeat) {
+
+
+
+        // 判断client
         if (client == null) {
             throw new IllegalArgumentException("client == null");
         }
         this.client = client;
+
+
+        // channel
         this.channel = new HeaderExchangeChannel(client);
+        // dubbo版本
         String dubbo = client.getUrl().getParameter(Constants.DUBBO_VERSION_KEY);
 
-        //获取心跳
+        //获取心跳  这个前面已经设置了1m ，可以直接取出来
         this.heartbeat = client.getUrl().getParameter(Constants.HEARTBEAT_KEY, dubbo != null && dubbo.startsWith("1.0.") ? Constants.DEFAULT_HEARTBEAT : 0);
 
-
+        //心跳超时时间
         this.heartbeatTimeout = client.getUrl().getParameter(Constants.HEARTBEAT_TIMEOUT_KEY, heartbeat * 3);
 
         if (heartbeatTimeout < heartbeat * 2) {// 避免间隔太短
             throw new IllegalStateException("heartbeatTimeout < heartbeatInterval * 2");
         }
+
         if (needHeartbeat) {// 是否启动心跳
             startHeartbeatTimer();//启动心跳
         }
@@ -90,6 +99,13 @@ public class HeaderExchangeClient implements ExchangeClient {
         return channel.getRemoteAddress();
     }
 
+    /**
+     * 发起请求
+     * @param request 消息 invocation
+     * @param timeout  超时时间
+     * @return
+     * @throws RemotingException
+     */
     @Override
     public ResponseFuture request(Object request, int timeout) throws RemotingException {
         return channel.request(request, timeout);
@@ -190,7 +206,7 @@ public class HeaderExchangeClient implements ExchangeClient {
      */
     private void startHeartbeatTimer() {
         stopHeartbeatTimer();// 先关闭心跳定时器
-        if (heartbeat > 0) {
+        if (heartbeat > 0) {// 心跳时间>0
             heartbeatTimer = scheduled.scheduleWithFixedDelay(
                     new HeartBeatTask(new HeartBeatTask.ChannelProvider() {
                         @Override

@@ -28,6 +28,11 @@ import io.netty.channel.ChannelPromise;
 
 /**
  * NettyClientHandler
+ *
+ *
+ *
+ * ChannelDuplexHandler  这个是input 与output并存的的
+ *
  */
 @io.netty.channel.ChannelHandler.Sharable
 public class NettyClientHandler extends ChannelDuplexHandler {
@@ -79,11 +84,17 @@ public class NettyClientHandler extends ChannelDuplexHandler {
         }
     }
 
-
+    /**
+     * 写操作
+     * @param ctx
+     * @param msg
+     * @param promise
+     * @throws Exception
+     */
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         super.write(ctx, msg, promise);
-        NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
+        NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);// 这里还是设置这个
         try {
             // if error happens from write, mock a BAD_REQUEST response so that invoker can return immediately without
             // waiting until timeout. FIXME: not sure if this is the right approach, but exceptionCaught doesn't work
@@ -97,7 +108,7 @@ public class NettyClientHandler extends ChannelDuplexHandler {
             } else {
             handler.sent(channel, msg);
             }
-        } finally {
+        } finally {//最终移除
             NettyChannel.removeChannelIfDisconnected(ctx.channel());
         }
     }

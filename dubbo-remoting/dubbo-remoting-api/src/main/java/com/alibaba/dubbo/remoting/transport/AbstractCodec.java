@@ -49,7 +49,7 @@ public abstract class AbstractCodec implements Codec2 {
      * @throws IOException
      */
     protected static void checkPayload(Channel channel, long size) throws IOException {
-        int payload = Constants.DEFAULT_PAYLOAD;  //8 * 1024 * 1024
+        int payload = Constants.DEFAULT_PAYLOAD;  //8 * 1024 * 1024  8m
         if (channel != null && channel.getUrl() != null) {
             payload = channel.getUrl().getParameter(Constants.PAYLOAD_KEY, Constants.DEFAULT_PAYLOAD);
         }

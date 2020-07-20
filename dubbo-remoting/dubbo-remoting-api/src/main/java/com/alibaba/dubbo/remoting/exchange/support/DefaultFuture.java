@@ -44,7 +44,7 @@ public class DefaultFuture implements ResponseFuture {
     private static final Logger logger = LoggerFactory.getLogger(DefaultFuture.class);
 
     private static final Map<Long, Channel> CHANNELS = new ConcurrentHashMap<Long, Channel>();
-
+    //缓存的 请求id  与 future
     private static final Map<Long, DefaultFuture> FUTURES = new ConcurrentHashMap<Long, DefaultFuture>();
 
     static {
@@ -134,8 +134,9 @@ public class DefaultFuture implements ResponseFuture {
 
     public static void received(Channel channel, Response response) {
         try {
+            //从futures 缓存中将这个 请求id移除
             DefaultFuture future = FUTURES.remove(response.getId());
-                if (future != null) {
+            if (future != null) {
                 future.doReceived(response);
             } else {
                 logger.warn("The timeout response finally returned at "
@@ -144,7 +145,7 @@ public class DefaultFuture implements ResponseFuture {
                         + (channel == null ? "" : ", channel: " + channel.getLocalAddress()
                         + " -> " + channel.getRemoteAddress()));
             }
-        } finally {
+        } finally {// 最终将 channels缓存中将请求id 移除
             CHANNELS.remove(response.getId());
         }
     }
@@ -239,11 +240,13 @@ public class DefaultFuture implements ResponseFuture {
         }
 
         if (res.getStatus() == Response.OK) {// 正常的时候
-            try {
+            try { /// 进行回调处理
                 callbackCopy.done(res.getResult());
             } catch (Exception e) {
                 logger.error("callback invoke error .reasult:" + res.getResult() + ",url:" + channel.getUrl(), e);
             }
+
+            // 超时的时候
         } else if (res.getStatus() == Response.CLIENT_TIMEOUT || res.getStatus() == Response.SERVER_TIMEOUT) {
             try {// 超时回调
                 TimeoutException te = new TimeoutException(res.getStatus() == Response.SERVER_TIMEOUT, channel, res.getErrorMessage());

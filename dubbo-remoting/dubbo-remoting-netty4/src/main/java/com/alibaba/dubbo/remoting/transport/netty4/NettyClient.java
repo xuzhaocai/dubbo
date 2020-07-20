@@ -80,6 +80,8 @@ public class NettyClient extends AbstractClient {
             bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getConnectTimeout());
         }
 
+
+
         bootstrap.handler(new ChannelInitializer() {
 
             @Override

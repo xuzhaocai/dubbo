@@ -222,7 +222,7 @@ public class ExchangeCodec extends TelnetCodec {
     }
 
     protected void encodeRequest(Channel channel, ChannelBuffer buffer, Request req) throws IOException {
-        Serialization serialization = getSerialization(channel);
+        Serialization serialization = getSerialization(channel);// 缺省hessian2
         // header.  创建一个header的字节数组  16 byte
         byte[] header = new byte[HEADER_LENGTH];
         // set magic number.
@@ -232,7 +232,7 @@ public class ExchangeCodec extends TelnetCodec {
 
         // set request and serialization flag.
         header[2] = (byte) (FLAG_REQUEST | serialization.getContentTypeId());
-
+        // 设置是单向还是多项
         if (req.isTwoWay()) header[2] |= FLAG_TWOWAY;
         if (req.isEvent()) header[2] |= FLAG_EVENT;
 
@@ -244,9 +244,9 @@ public class ExchangeCodec extends TelnetCodec {
         buffer.writerIndex(savedWriteIndex + HEADER_LENGTH);
         ChannelBufferOutputStream bos = new ChannelBufferOutputStream(buffer);
         ObjectOutput out = serialization.serialize(channel.getUrl(), bos);
-        if (req.isEvent()) {
+        if (req.isEvent()) {// 是否是个事件
             encodeEventData(channel, out, req.getData());
-        } else {
+        } else {// 不是事件
             encodeRequestData(channel, out, req.getData(), req.getVersion());
         }
         out.flushBuffer();
@@ -256,7 +256,7 @@ public class ExchangeCodec extends TelnetCodec {
         bos.flush();
         bos.close();
         int len = bos.writtenBytes();
-        checkPayload(channel, len);
+        checkPayload(channel, len);//检验有没有超长
         Bytes.int2bytes(len, header, 12);
 
         // write

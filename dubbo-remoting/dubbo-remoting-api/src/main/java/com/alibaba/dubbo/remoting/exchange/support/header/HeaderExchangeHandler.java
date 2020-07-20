@@ -165,7 +165,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         }
         if (message instanceof Request) {
             Request request = (Request) message;
-            DefaultFuture.sent(channel, request);
+            DefaultFuture.sent(channel, request);// 这里表示已经发送了
         }
         if (exception != null) {
             if (exception instanceof RuntimeException) {

@@ -85,9 +85,9 @@ final class NettyCodecAdapter {
             Channel ch = ctx.channel();
             NettyChannel channel = NettyChannel.getOrAddChannel(ch, url, handler);
             try {
-                codec.encode(channel, buffer, msg);
+                codec.encode(channel, buffer, msg);// 进行编码
             } finally {
-                NettyChannel.removeChannelIfDisconnected(ch);
+                NettyChannel.removeChannelIfDisconnected(ch);//如果这个channel关闭了，删除这个
             }
         }
     }

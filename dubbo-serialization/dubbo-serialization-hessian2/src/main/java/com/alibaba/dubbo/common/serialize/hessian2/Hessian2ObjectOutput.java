@@ -29,8 +29,8 @@ public class Hessian2ObjectOutput implements ObjectOutput {
     private final Hessian2Output mH2o;
 
     public Hessian2ObjectOutput(OutputStream os) {
-        mH2o = new Hessian2Output(os);
-        mH2o.setSerializerFactory(Hessian2SerializerFactory.SERIALIZER_FACTORY);
+        mH2o = new Hessian2Output(os);// 创建 HessianOutput对象
+        mH2o.setSerializerFactory(Hessian2SerializerFactory.SERIALIZER_FACTORY);// 设置一个Hessian序列化工厂
     }
 
     @Override

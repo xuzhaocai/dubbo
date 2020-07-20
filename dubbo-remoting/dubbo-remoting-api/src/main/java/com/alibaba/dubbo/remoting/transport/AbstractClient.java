@@ -300,6 +300,12 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
         return channel.hasAttribute(key);
     }
 
+    /**
+     * 发送消息
+     * @param message  消息
+     * @param sent    already sent to socket?
+     * @throws RemotingException
+     */
     @Override
     public void send(Object message, boolean sent) throws RemotingException {
         //发送断开重连 true  &&  没有连接
