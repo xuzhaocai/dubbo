@@ -96,7 +96,7 @@ public class NettyServer extends AbstractServer implements Server {
         bootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)// 设置channel类型  nio
                 .childOption(ChannelOption.TCP_NODELAY, Boolean.TRUE)//禁止使用nagle算法
-                .childOption(ChannelOption.SO_REUSEADDR, Boolean.TRUE)
+                .childOption(ChannelOption.SO_REUSEADDR, Boolean.TRUE)// reuseaddr ,这个能实现快速启动服务器， 可重复使用addr
                 .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     @Override

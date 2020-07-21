@@ -514,7 +514,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                         }
 
 
-                        // invoker  使用ProxyFactory 生成 invoker对象，这里这个invoker其实是一个代理对象
+                        // invoker  使用ProxyFactory 生成 invoker对象，这里这个invoker其实是一个代理对象，  将url转成字符串fullString，然后将这fullString 设置到registerUrl中
                         Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));
                         // 创建  DelegateProvoderMetaInvoker 对象
                         DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
