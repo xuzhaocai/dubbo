@@ -44,7 +44,7 @@ public final class DubboCountCodec implements Codec2 {
         MultiMessage result = MultiMessage.create();
         do {
             Object obj = codec.decode(channel, buffer);
-            if (Codec2.DecodeResult.NEED_MORE_INPUT == obj) {
+            if (Codec2.DecodeResult.NEED_MORE_INPUT == obj) {// 需要更多的时候
                 buffer.readerIndex(save);
                 break;
             } else {
@@ -53,7 +53,7 @@ public final class DubboCountCodec implements Codec2 {
                 save = buffer.readerIndex();
             }
         } while (true);
-        if (result.isEmpty()) {
+        if (result.isEmpty()) {// 这里result如果是空的话，需要更多的输入
             return Codec2.DecodeResult.NEED_MORE_INPUT;
         }
         if (result.size() == 1) {
@@ -61,7 +61,7 @@ public final class DubboCountCodec implements Codec2 {
         }
         return result;
     }
-
+    // 记录消息长度
     private void logMessageLength(Object result, int bytes) {
         if (bytes <= 0) {
             return;
@@ -74,7 +74,7 @@ public final class DubboCountCodec implements Codec2 {
                 /* ignore */
             }
         } else if (result instanceof Response) {
-            try {
+            try {//添加  output  属性值是数据总长度
                 ((RpcResult) ((Response) result).getResult()).setAttachment(
                         Constants.OUTPUT_KEY, String.valueOf(bytes));
             } catch (Throwable e) {

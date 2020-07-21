@@ -98,23 +98,17 @@ final class NettyCodecAdapter {
      * netty 解码器
      */
     private class InternalDecoder extends ByteToMessageDecoder {
-
         @Override
         protected void decode(ChannelHandlerContext ctx, ByteBuf input, List<Object> out) throws Exception {
-
             ChannelBuffer message = new NettyBackedChannelBuffer(input);
-
             NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
-
             Object msg;
-
             int saveReaderIndex;
-
             try {
                 // decode object.
-                do {
+                do {// 获取buffer可读的位置
                     saveReaderIndex = message.readerIndex();
-                    try {
+                    try {// 解码
                         msg = codec.decode(channel, message);
                     } catch (IOException e) {
                         throw e;
@@ -128,12 +122,12 @@ final class NettyCodecAdapter {
                             throw new IOException("Decode without read data.");
                         }
                         if (msg != null) {
-                            out.add(msg);
+                            out.add(msg);// 将msg添加到out中
                         }
                     }
                 } while (message.readable());
             } finally {
-                NettyChannel.removeChannelIfDisconnected(ctx.channel());
+                NettyChannel.removeChannelIfDisconnected(ctx.channel());// 判断channel关了就移除
             }
         }
     }

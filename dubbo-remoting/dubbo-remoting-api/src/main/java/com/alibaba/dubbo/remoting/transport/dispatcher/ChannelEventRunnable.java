@@ -33,7 +33,7 @@ public class ChannelEventRunnable implements Runnable {
     public ChannelEventRunnable(Channel channel, ChannelHandler handler, ChannelState state) {
         this(channel, handler, state, null);
     }
-
+    // channel 是NettyChannel   handler是下一个handler  state是received  message是消息
     public ChannelEventRunnable(Channel channel, ChannelHandler handler, ChannelState state, Object message) {
         this(channel, handler, state, message, null);
     }
@@ -51,8 +51,8 @@ public class ChannelEventRunnable implements Runnable {
     }
 
     @Override
-    public void run() {
-        if (state == ChannelState.RECEIVED) {
+    public void run() {// 这里进行分发操作
+        if (state == ChannelState.RECEIVED) {//如果是received
             try {
                 handler.received(channel, message);
             } catch (Exception e) {

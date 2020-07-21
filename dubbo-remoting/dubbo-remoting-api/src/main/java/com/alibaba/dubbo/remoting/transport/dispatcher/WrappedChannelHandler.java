@@ -116,7 +116,7 @@ public class WrappedChannelHandler implements ChannelHandlerDelegate {
 
     public ExecutorService getExecutorService() {
         ExecutorService cexecutor = executor;
-        if (cexecutor == null || cexecutor.isShutdown()) {
+        if (cexecutor == null || cexecutor.isShutdown()) {// 如果你那个线程池shutdown了或者是没有  就是用共享的线程池
             cexecutor = SHARED_EXECUTOR;
         }
         return cexecutor;

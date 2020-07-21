@@ -187,7 +187,6 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
 
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
-
         // 设置最后读的时间
         channel.setAttribute(KEY_READ_TIMESTAMP, System.currentTimeMillis());
         // 创建ExchangeChannel对象
@@ -211,7 +210,6 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                 // 处理响应
             } else if (message instanceof Response) {
                 handleResponse(channel, (Response) message);
-
                 // 处理字符串的
             } else if (message instanceof String) {
                 if (isClientSide(channel)) {// 客户端不支持接收字符串的响应

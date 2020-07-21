@@ -76,7 +76,7 @@ public class AllChannelHandler extends WrappedChannelHandler {
         } catch (Throwable t) {
             //TODO A temporary solution to the problem that the exception information can not be sent to the opposite end after the thread pool is full. Need a refactoring
             //fix The thread pool is full, refuses to call, does not return, and causes the consumer to wait for time out
-        	if(message instanceof Request && t instanceof RejectedExecutionException){
+        	if(message instanceof Request && t instanceof RejectedExecutionException){// 如果是个请求， 然后是线程池满了，被拒绝了的话，发送一个线程池满了的错误
         		Request request = (Request)message;
         		if(request.isTwoWay()){
         			String msg = "Server side(" + url.getIp() + "," + url.getPort() + ") threadpool is exhausted ,detail msg:" + t.getMessage();

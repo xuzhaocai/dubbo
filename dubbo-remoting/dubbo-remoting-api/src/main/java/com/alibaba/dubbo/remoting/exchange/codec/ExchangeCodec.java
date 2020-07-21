@@ -89,20 +89,20 @@ public class ExchangeCodec extends TelnetCodec {
             super.encode(channel, buffer, msg);
         }
     }
-
+    // 解码
     @Override
     public Object decode(Channel channel, ChannelBuffer buffer) throws IOException {
-        int readable = buffer.readableBytes();
-        byte[] header = new byte[Math.min(readable, HEADER_LENGTH)];
+        int readable = buffer.readableBytes();// 可以读取的字节数
+        byte[] header = new byte[Math.min(readable, HEADER_LENGTH)];// 读取header使用的byte
         buffer.readBytes(header);
         return decode(channel, buffer, readable, header);
     }
-
+    // 数据解码
     @Override
     protected Object decode(Channel channel, ChannelBuffer buffer, int readable, byte[] header) throws IOException {
         // check magic number.
-        if (readable > 0 && header[0] != MAGIC_HIGH
-                || readable > 1 && header[1] != MAGIC_LOW) {
+        if (readable > 0 && header[0] != MAGIC_HIGH  // 第一个字节不是MAGIC_HIGH
+                || readable > 1 && header[1] != MAGIC_LOW) { // 第二个字节不是MAGIC_LOW
             int length = header.length;
             if (header.length < readable) {
                 header = Bytes.copyOf(header, readable);
@@ -118,19 +118,19 @@ public class ExchangeCodec extends TelnetCodec {
             return super.decode(channel, buffer, readable, header);
         }
         // check length.
-        if (readable < HEADER_LENGTH) {
-            return DecodeResult.NEED_MORE_INPUT;
+        if (readable < HEADER_LENGTH) {// 可读字节数小于 dubbo协议头长度
+            return DecodeResult.NEED_MORE_INPUT;///需要更多的输入
         }
 
-        // get data length.
+        // get data length.   获取数据部分长度
         int len = Bytes.bytes2int(header, 12);
         checkPayload(channel, len);
 
-        int tt = len + HEADER_LENGTH;
-        if (readable < tt) {
-            return DecodeResult.NEED_MORE_INPUT;
+        int tt = len + HEADER_LENGTH;//数据总长度
+        if (readable < tt) {// 如果这个 可读的数据小于 数据总长度，说明还需要读
+            return DecodeResult.NEED_MORE_INPUT;  // 还需要更多输入
         }
-
+        // 到这一步，buffer里面的可读数据长度与总的数据长度就校验完成了，这个buffer里面的就全了
         // limit input stream.
         ChannelBufferInputStream is = new ChannelBufferInputStream(buffer, len);
 
