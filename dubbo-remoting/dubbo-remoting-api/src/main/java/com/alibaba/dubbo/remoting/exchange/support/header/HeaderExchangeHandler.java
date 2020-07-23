@@ -96,7 +96,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
      * @throws RemotingException
      */
     Response handleRequest(ExchangeChannel channel, Request req) throws RemotingException {
-        Response res = new Response(req.getId(), req.getVersion());
+        Response res = new Response(req.getId(), req.getVersion());// 封装Response
         if (req.isBroken()) {// 设置bad request
             Object data = req.getData();
 
@@ -117,7 +117,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
             Object result = handler.reply(channel, msg);
             res.setStatus(Response.OK);
             res.setResult(result);
-        } catch (Throwable e) {
+        } catch (Throwable e) {// 调用异常的话， 设置响应的status SERVICE_ERROR，并设置错误信息
             res.setStatus(Response.SERVICE_ERROR);
             res.setErrorMessage(StringUtils.toString(e));
         }
