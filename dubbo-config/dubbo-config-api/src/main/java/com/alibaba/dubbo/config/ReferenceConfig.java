@@ -351,7 +351,7 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
         //attributes are stored by system context.
         StaticContext.getSystemContext().putAll(attributes);
         // 创建代理
-        ref = createProxy(map);
+        ref = createProxy(map);// 创建代理完成后，向 ApplicationModel 添加ConsumerModel。
         ConsumerModel consumerModel = new ConsumerModel(getUniqueServiceName(), this, ref, interfaceClass.getMethods());
         ApplicationModel.initConsumerModel(getUniqueServiceName(), consumerModel);
     }

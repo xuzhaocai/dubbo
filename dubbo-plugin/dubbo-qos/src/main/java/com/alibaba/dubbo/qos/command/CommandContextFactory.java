@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 package com.alibaba.dubbo.qos.command;
-
+//command context 工厂
 public class CommandContextFactory {
     public static CommandContext newInstance(String commandName){
         return new CommandContext(commandName);

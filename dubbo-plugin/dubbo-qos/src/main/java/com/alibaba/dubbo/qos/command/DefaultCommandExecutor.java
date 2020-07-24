@@ -22,14 +22,14 @@ public class DefaultCommandExecutor implements CommandExecutor {
     @Override
     public String execute(CommandContext commandContext) throws NoSuchCommandException {
         BaseCommand command = null;
-        try {
+        try {// 通过dubbo spi 查找 BeseCommand 实现类
             command = ExtensionLoader.getExtensionLoader(BaseCommand.class).getExtension(commandContext.getCommandName());
         } catch (Throwable throwable) {
                 //can't find command
         }
-        if (command == null) {
+        if (command == null) {// 没有找到抛出异常
             throw new NoSuchCommandException(commandContext.getCommandName());
         }
-        return command.execute(commandContext, commandContext.getArgs());
+        return command.execute(commandContext, commandContext.getArgs());// 执行
     }
 }

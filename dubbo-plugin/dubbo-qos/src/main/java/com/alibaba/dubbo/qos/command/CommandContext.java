@@ -23,16 +23,16 @@ public class CommandContext {
     private String[] args;
     private Channel remote;
     private boolean isHttp;
-    private Object orginRequest;
+    private Object orginRequest;// 原始请求信息
 
     public CommandContext(String commandName) {
         this.commandName = commandName;
     }
 
     public CommandContext(String commandName, String[] args,boolean isHttp) {
-        this.commandName = commandName;
-        this.args = args;
-        this.isHttp = isHttp;
+        this.commandName = commandName;// cmd 命令
+        this.args = args;  // 参数
+        this.isHttp = isHttp;  // 是否是http
     }
 
     public String getCommandName() {

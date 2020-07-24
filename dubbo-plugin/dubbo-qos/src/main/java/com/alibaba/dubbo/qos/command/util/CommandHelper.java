@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 public class CommandHelper {
-    public static boolean hasCommand(String commandName) {
+    public static boolean hasCommand(String commandName) {// 判断是否有xxx command
 
         BaseCommand command = null;
         try {
@@ -37,7 +37,7 @@ public class CommandHelper {
 
     }
 
-    public static List<Class<?>> getAllCommandClass(){
+    public static List<Class<?>> getAllCommandClass(){ // 获取所有cmd 的class
         final Set<String> commandList = ExtensionLoader.getExtensionLoader(BaseCommand.class).getSupportedExtensions();
         final List<Class<?>> classes = new ArrayList<Class<?>>();
 
@@ -50,7 +50,7 @@ public class CommandHelper {
     }
 
 
-    public static Class<?> getCommandClass(String commandName){
+    public static Class<?> getCommandClass(String commandName){// 通过commandName 获取对应的class
         if (hasCommand(commandName)){
             return ExtensionLoader.getExtensionLoader(BaseCommand.class).getExtension(commandName).getClass();
         }else {

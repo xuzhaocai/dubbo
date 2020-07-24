@@ -34,9 +34,9 @@ public class Help implements BaseCommand {
     @Override
     public String execute(CommandContext commandContext, String[] args) {
         if (args != null && args.length > 0) {
-            return commandHelp(args[0]);
+            return commandHelp(args[0]);// help 指定的help
         } else {
-            return mainHelp();
+            return mainHelp();//  help 所有的cmd
         }
 
     }
@@ -44,7 +44,7 @@ public class Help implements BaseCommand {
 
     private String commandHelp(String commandName) {
 
-        if (!CommandHelper.hasCommand(commandName)) {
+        if (!CommandHelper.hasCommand(commandName)) {//判断有没有指定的command
             return "no such command:" + commandName;
         }
 
@@ -88,7 +88,7 @@ public class Help implements BaseCommand {
         Collections.sort(classes, new Comparator<Class<?>>() {
 
             @Override
-            public int compare(Class<?> o1, Class<?> o2) {
+            public int compare(Class<?> o1, Class<?> o2) {// 取得help的 @Cmd注解
                 final Integer o1s = o1.getAnnotation(Cmd.class).sort();
                 final Integer o2s = o2.getAnnotation(Cmd.class).sort();
                 return o1s.compareTo(o2s);

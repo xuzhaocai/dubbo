@@ -45,7 +45,7 @@ public class Ls implements BaseCommand {
 
     public String listProvider() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("As Provider side:\n");
+        stringBuilder.append("As Provider side:\n");//通过ApplicationModel获取所有的provider，这个是服务注册上的时候添加到ApplicationModel 里面的
         Collection<ProviderModel> ProviderModelList = ApplicationModel.allProviderModels();
 
         TTable tTable = new TTable(new TTable.ColumnDefine[]{

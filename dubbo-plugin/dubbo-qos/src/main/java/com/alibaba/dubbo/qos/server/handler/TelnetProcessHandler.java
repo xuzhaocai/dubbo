@@ -42,17 +42,17 @@ public class TelnetProcessHandler extends SimpleChannelInboundHandler<String> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
 
-        if (StringUtils.isBlank(msg)) {
-            ctx.writeAndFlush(QosProcessHandler.prompt);
+        if (StringUtils.isBlank(msg)) {// 是否是空消息
+            ctx.writeAndFlush(QosProcessHandler.prompt);// 将dubbo>   写回去
         } else {
             CommandContext commandContext = TelnetCommandDecoder.decode(msg);
-            commandContext.setRemote(ctx.channel());
+            commandContext.setRemote(ctx.channel());// 设置channel
 
             try {
                 String result = commandExecutor.execute(commandContext);
-                if (StringUtils.equals(QosConstants.CLOSE, result)) {
+                if (StringUtils.equals(QosConstants.CLOSE, result)) {// 是否返回close
                     ctx.writeAndFlush(getByeLabel()).addListener(ChannelFutureListener.CLOSE);
-                } else {
+                } else {// 将结果写回去   xxx /r/n  dubbo>
                     ctx.writeAndFlush(result + QosConstants.BR_STR + QosProcessHandler.prompt);
                 }
             } catch (NoSuchCommandException ex) {

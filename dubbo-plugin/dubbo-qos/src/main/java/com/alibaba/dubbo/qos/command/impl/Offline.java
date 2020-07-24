@@ -35,7 +35,7 @@ import java.util.Set;
 @Cmd(name = "offline", summary = "offline dubbo", example = {
         "offline dubbo",
         "offline xx.xx.xxx.service"
-})
+})// 服务下线
 public class Offline implements BaseCommand {
     private Logger logger = LoggerFactory.getLogger(Offline.class);
     private RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
@@ -43,7 +43,7 @@ public class Offline implements BaseCommand {
     @Override
     public String execute(CommandContext commandContext, String[] args) {
         logger.info("receive offline command");
-        String servicePattern = ".*";
+        String servicePattern = ".*";// 默认是全部
         if (args != null && args.length > 0) {
             servicePattern = args[0];
         }
@@ -56,11 +56,11 @@ public class Offline implements BaseCommand {
                 Set<ProviderInvokerWrapper> providerInvokerWrapperSet = ProviderConsumerRegTable.getProviderInvoker(providerModel.getServiceName());
                 for (ProviderInvokerWrapper providerInvokerWrapper : providerInvokerWrapperSet) {
                     if (!providerInvokerWrapper.isReg()) {
-                        continue;
+                        continue;//如果服务没有注册
                     }
                     Registry registry = registryFactory.getRegistry(providerInvokerWrapper.getRegistryUrl());
-                    registry.unregister(providerInvokerWrapper.getProviderUrl());
-                    providerInvokerWrapper.setReg(false);
+                    registry.unregister(providerInvokerWrapper.getProviderUrl());// 使用注册中心进行服务下线工作
+                    providerInvokerWrapper.setReg(false);// 设置服务下线表标识
                 }
             }
         }

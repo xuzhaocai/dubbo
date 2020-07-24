@@ -36,7 +36,7 @@ import java.util.Set;
         "online dubbo",
         "online xx.xx.xxx.service"
 })
-public class Online implements BaseCommand {
+public class Online implements BaseCommand {/// 服务上线
     private Logger logger = LoggerFactory.getLogger(Online.class);
     private RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
 
@@ -49,19 +49,19 @@ public class Online implements BaseCommand {
         }
 
         boolean hasService = false;
-
+        // 获取到所有的服务provider
         List<ProviderModel> providerModelList = ApplicationModel.allProviderModels();
         for (ProviderModel providerModel : providerModelList) {
             if (providerModel.getServiceName().matches(servicePattern)) {
-                hasService = true;
+                hasService = true;// 设置hasService，表示有这个服务
                 Set<ProviderInvokerWrapper> providerInvokerWrapperSet = ProviderConsumerRegTable.getProviderInvoker(providerModel.getServiceName());
                 for (ProviderInvokerWrapper providerInvokerWrapper : providerInvokerWrapperSet) {
-                    if (providerInvokerWrapper.isReg()) {
+                    if (providerInvokerWrapper.isReg()) {// 服务是否已经注册
                         continue;
-                    }
+                    }// 获取到注册中心
                     Registry registry = registryFactory.getRegistry(providerInvokerWrapper.getRegistryUrl());
-                    registry.register(providerInvokerWrapper.getProviderUrl());
-                    providerInvokerWrapper.setReg(true);
+                    registry.register(providerInvokerWrapper.getProviderUrl());// 进行注册
+                    providerInvokerWrapper.setReg(true); //设置注册标识为true
                 }
             }
         }

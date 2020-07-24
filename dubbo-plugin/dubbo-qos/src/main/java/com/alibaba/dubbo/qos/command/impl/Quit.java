@@ -25,6 +25,6 @@ import com.alibaba.dubbo.qos.common.QosConstants;
 public class Quit implements BaseCommand {
     @Override
     public String execute(CommandContext commandContext, String[] args) {
-        return QosConstants.CLOSE;
+        return QosConstants.CLOSE;// 直接返回close
     }
 }

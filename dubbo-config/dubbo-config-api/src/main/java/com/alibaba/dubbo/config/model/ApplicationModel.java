@@ -44,7 +44,7 @@ public class ApplicationModel {
 
     public static final ConcurrentMap<String, Set<Invoker>> providedServicesInvoker = new ConcurrentHashMap<String, Set<Invoker>>();
 
-    public static List<ConsumerModel> allConsumerModels() {
+    public static List<ConsumerModel> allConsumerModels() {//获取所有的服务调用者
         return new ArrayList<ConsumerModel>(consumedServices.values());
     }
 
@@ -56,12 +56,12 @@ public class ApplicationModel {
         return consumedServices.get(serviceName);
     }
 
-    public static List<ProviderModel> allProviderModels() {
+    public static List<ProviderModel> allProviderModels() {//获取所有的服务提供着
         return new ArrayList<ProviderModel>(providedServices.values());
     }
 
     public static boolean initConsumerModel(String serviceName, ConsumerModel consumerModel) {
-        if (consumedServices.putIfAbsent(serviceName, consumerModel) != null) {
+        if (consumedServices.putIfAbsent(serviceName, consumerModel) != null) { // 添加服务调用者
             logger.warn("Already register the same consumer:" + serviceName);
             return false;
         }
@@ -69,7 +69,7 @@ public class ApplicationModel {
     }
 
     public static void initProviderModel(String serviceName, ProviderModel providerModel) {
-        if (providedServices.put(serviceName, providerModel) != null) {
+        if (providedServices.put(serviceName, providerModel) != null) {// 添加服务提供者
             logger.warn("already register the provider service: " + serviceName);
             return;
         }

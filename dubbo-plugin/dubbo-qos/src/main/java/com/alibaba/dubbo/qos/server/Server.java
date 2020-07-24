@@ -61,7 +61,7 @@ public class Server {
 
     private String welcome;
 
-    private AtomicBoolean hasStarted = new AtomicBoolean();
+    private AtomicBoolean hasStarted = new AtomicBoolean();//启动标识
 
     /**
      * welcome message
@@ -78,9 +78,10 @@ public class Server {
      * start server, bind port
      */
     public void start() throws Throwable {
-        if (!hasStarted.compareAndSet(false, true)) {
+        if (!hasStarted.compareAndSet(false, true)) {// 设置启动标识
             return;
         }
+        //使用netty
         boss = new NioEventLoopGroup(0, new DefaultThreadFactory("qos-boss", true));
         worker = new NioEventLoopGroup(0, new DefaultThreadFactory("qos-worker", true));
         ServerBootstrap serverBootstrap = new ServerBootstrap();
@@ -89,9 +90,9 @@ public class Server {
         serverBootstrap.childOption(ChannelOption.TCP_NODELAY, true);
         serverBootstrap.childOption(ChannelOption.SO_REUSEADDR, true);
         serverBootstrap.childHandler(new ChannelInitializer<Channel>() {
-
             @Override
             protected void initChannel(Channel ch) throws Exception {
+                // handler
                 ch.pipeline().addLast(new QosProcessHandler(welcome, acceptForeignIp));
             }
         });

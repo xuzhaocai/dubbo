@@ -47,7 +47,7 @@ public class QosProcessHandler extends ByteToMessageDecoder {
         this.welcome = welcome;
         this.acceptForeignIp = acceptForeignIp;
     }
-
+     // 连接上的时候
     @Override
     public void channelActive(final ChannelHandlerContext ctx) throws Exception {
         welcomeFuture = ctx.executor().schedule(new Runnable() {
@@ -73,7 +73,7 @@ public class QosProcessHandler extends ByteToMessageDecoder {
         final int magic = in.getByte(in.readerIndex());
 
         ChannelPipeline p = ctx.pipeline();
-        p.addLast(new LocalHostPermitHandler(acceptForeignIp));
+        p.addLast(new LocalHostPermitHandler(acceptForeignIp));// 添加
         if (isHttp(magic)) {//是否http请求
             // no welcome output for http protocol
             if (welcomeFuture != null && welcomeFuture.isCancellable()) {

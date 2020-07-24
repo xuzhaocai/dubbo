@@ -36,7 +36,7 @@ import static com.alibaba.dubbo.qos.common.QosConstants.DEFAULT_PORT;
 public class QosProtocolWrapper implements Protocol {
 
     private final Logger logger = LoggerFactory.getLogger(QosProtocolWrapper.class);
-
+    // 是否启动的一个标志
     private static AtomicBoolean hasStarted = new AtomicBoolean(false);
 
     private Protocol protocol;
@@ -68,7 +68,7 @@ public class QosProtocolWrapper implements Protocol {
     @Override
     public <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException {
         if (Constants.REGISTRY_PROTOCOL.equals(url.getProtocol())) {
-            startQosServer(url);
+            startQosServer(url);// 启动Qos 服务器
             return protocol.refer(type, url);
         }
         return protocol.refer(type, url);
@@ -77,12 +77,12 @@ public class QosProtocolWrapper implements Protocol {
     @Override
     public void destroy() {
         protocol.destroy();
-        stopServer();
+        stopServer();// 停止Qos 监听
     }
 
     private void startQosServer(URL url) {
         try {
-            //qos.enable
+            //参数    qos.enable  缺省是true
             boolean qosEnable = url.getParameter(QOS_ENABLE,true);
             if (!qosEnable) {
                 logger.info("qos won't be started because it is disabled. " +
@@ -94,13 +94,16 @@ public class QosProtocolWrapper implements Protocol {
             if (!hasStarted.compareAndSet(false, true)) {
                 return;
             }
-            // 默认的port 22222
+            //获取port 默认的port 22222
             int port = url.getParameter(QOS_PORT, DEFAULT_PORT);
+
+            // 获取  qos.accept.foreign.ip  缺省 false  默认接收任何主机发起命令
             boolean acceptForeignIp = Boolean.parseBoolean(url.getParameter(ACCEPT_FOREIGN_IP,"false"));
             Server server = com.alibaba.dubbo.qos.server.Server.getInstance();
             server.setPort(port);
             server.setAcceptForeignIp(acceptForeignIp);
-            server.start();
+            //server.setWelcome("welcome to dubbo qos");
+            server.start();// start
 
         } catch (Throwable throwable) {
             logger.warn("Fail to start qos server: ", throwable);
