@@ -222,7 +222,7 @@ public class RegistryProtocol implements Protocol {
 
     private URL getRegistryUrl(Invoker<?> originInvoker) {
         URL registryUrl = originInvoker.getUrl();
-        if (Constants.REGISTRY_PROTOCOL.equals(registryUrl.getProtocol())) {
+        if (Constants.REGISTRY_PROTOCOL.equals(registryUrl.getProtocol())) {// 将registry 参数值 设置到protocol成员中
             String protocol = registryUrl.getParameter(Constants.REGISTRY_KEY, Constants.DEFAULT_DIRECTORY);
             registryUrl = registryUrl.setProtocol(protocol).removeParameter(Constants.REGISTRY_KEY);
         }

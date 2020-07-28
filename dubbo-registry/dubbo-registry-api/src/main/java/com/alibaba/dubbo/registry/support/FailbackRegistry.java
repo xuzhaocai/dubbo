@@ -133,7 +133,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
     }
     // 注册
     @Override
-    public void register(URL url) {
+    public void register(URL url) {// 这个要注册的url是业务url
         super.register(url);  // 检查做缓存
         //移除失败的缓存
         failedRegistered.remove(url);
