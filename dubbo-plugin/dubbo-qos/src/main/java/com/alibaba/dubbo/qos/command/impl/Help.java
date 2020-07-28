@@ -43,25 +43,19 @@ public class Help implements BaseCommand {
 
 
     private String commandHelp(String commandName) {
-
         if (!CommandHelper.hasCommand(commandName)) {//判断有没有指定的command
             return "no such command:" + commandName;
         }
-
         Class<?> clazz = CommandHelper.getCommandClass(commandName);
-
         final Cmd cmd = clazz.getAnnotation(Cmd.class);
         final TTable tTable = new TTable(new TTable.ColumnDefine[]{
                 new TTable.ColumnDefine(TTable.Align.RIGHT),
                 new TTable.ColumnDefine(80, false, TTable.Align.LEFT)
         });
-
         tTable.addRow("COMMAND NAME", commandName);
-
         if (null != cmd.example()) {
             tTable.addRow("EXAMPLE", drawExample(cmd));
         }
-
         return tTable.padding(1).rendering();
     }
 

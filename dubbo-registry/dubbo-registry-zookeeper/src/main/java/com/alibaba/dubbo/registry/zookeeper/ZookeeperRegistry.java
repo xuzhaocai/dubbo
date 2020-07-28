@@ -76,7 +76,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 if (state == RECONNECTED) { // 状态是 已连接的时候
                     try {
 
-                        //
+                        //恢复 注册 与 订阅
                         recover();
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);

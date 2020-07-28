@@ -51,10 +51,10 @@ public class FailoverClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
     /**
      * 进行调用
-     * @param invocation
-     * @param invokers
-     * @param loadbalance
-     * @return
+     * @param invocation 封装调用信息实体
+     * @param invokers 服务提供者invoker集合
+     * @param loadbalance 具体某个负载均衡策略
+     * @return 执行结果
      * @throws RpcException
      */
     @Override
@@ -81,11 +81,9 @@ public class FailoverClusterInvoker<T> extends AbstractClusterInvoker<T> {
                 // check again
                 checkInvokers(copyinvokers, invocation);
             }
-
             // 选择一个invoker
             Invoker<T> invoker = select(loadbalance, invocation, copyinvokers, invoked);
             invoked.add(invoker);  // 添加到已经选择的列表中
-
             // 将已经选择过的invoker列表设置到context中
             RpcContext.getContext().setInvokers((List) invoked);
             try {

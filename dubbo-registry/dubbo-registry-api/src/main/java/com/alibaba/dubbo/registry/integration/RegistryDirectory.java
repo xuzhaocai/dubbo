@@ -234,14 +234,11 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
      */
     @Override
     public synchronized void notify(List<URL> urls) {
-
         // 对url进行分组
-
         List<URL> invokerUrls = new ArrayList<URL>();
         List<URL> routerUrls = new ArrayList<URL>();
         List<URL> configuratorUrls = new ArrayList<URL>();
         for (URL url : urls) {
-
             // 获取protocol
             String protocol = url.getProtocol();
             // 获取category分组信息             默认是providers
@@ -259,15 +256,12 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
                 logger.warn("Unsupported category " + category + " in notified url: " + url + " from registry " + getUrl().getAddress() + " to consumer " + NetUtils.getLocalHost());
             }
         }
-        // configurators
-
         // 处理配置规则url集合
         if (configuratorUrls != null && !configuratorUrls.isEmpty()) {
             this.configurators = toConfigurators(configuratorUrls);
         }
         //处理路由规则url集合
         // 当url 有变化的时候，重新设置router
-        // routers
         if (routerUrls != null && !routerUrls.isEmpty()) {
             List<Router> routers = toRouters(routerUrls);//将routerUrl转换成url
             if (routers != null) { // null - do nothing
@@ -446,7 +440,6 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
                 continue;
             }
             URL url = mergeUrl(providerUrl);// 处理了一下providerUrl
-
             String key = url.toFullString(); // The parameter urls are sorted
             if (keys.contains(key)) { // Repeated url
                 continue;
@@ -552,9 +545,9 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
         List<Invoker<T>> invokersList = new ArrayList<Invoker<T>>();
         if (invokersMap != null && invokersMap.size() > 0) {
             for (Invoker<T> invoker : invokersMap.values()) {
-                String parameter = invoker.getUrl().getParameter(Constants.METHODS_KEY);
+                String parameter = invoker.getUrl().getParameter(Constants.METHODS_KEY);//获取method方法名串
                 if (parameter != null && parameter.length() > 0) {
-                    String[] methods = Constants.COMMA_SPLIT_PATTERN.split(parameter);
+                    String[] methods = Constants.COMMA_SPLIT_PATTERN.split(parameter);//切割
                     if (methods != null && methods.length > 0) {
                         for (String method : methods) {
                             if (method != null && method.length() > 0

@@ -34,20 +34,16 @@ import static com.alibaba.dubbo.common.Constants.QOS_PORT;
 import static com.alibaba.dubbo.qos.common.QosConstants.DEFAULT_PORT;
 // Qos
 public class QosProtocolWrapper implements Protocol {
-
     private final Logger logger = LoggerFactory.getLogger(QosProtocolWrapper.class);
     // 是否启动的一个标志
     private static AtomicBoolean hasStarted = new AtomicBoolean(false);
-
     private Protocol protocol;
-
     public QosProtocolWrapper(Protocol protocol) {
         if (protocol == null) {
             throw new IllegalArgumentException("protocol == null");
         }
         this.protocol = protocol;
     }
-
     @Override
     public int getDefaultPort() {
         return protocol.getDefaultPort();
@@ -58,7 +54,7 @@ public class QosProtocolWrapper implements Protocol {
 
         //判断是registry
         if (Constants.REGISTRY_PROTOCOL.equals(invoker.getUrl().getProtocol())) {
-            // 启动Qos服务器？
+            // 启动Qos服务器
             startQosServer(invoker.getUrl());
             return protocol.export(invoker);
         }
@@ -102,7 +98,6 @@ public class QosProtocolWrapper implements Protocol {
             Server server = com.alibaba.dubbo.qos.server.Server.getInstance();
             server.setPort(port);
             server.setAcceptForeignIp(acceptForeignIp);
-            //server.setWelcome("welcome to dubbo qos");
             server.start();// start
 
         } catch (Throwable throwable) {

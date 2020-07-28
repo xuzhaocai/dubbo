@@ -68,10 +68,8 @@ public class QosProcessHandler extends ByteToMessageDecoder {
         if (in.readableBytes() < 1) {
             return;
         }
-
         // read one byte to guess protocol
         final int magic = in.getByte(in.readerIndex());
-
         ChannelPipeline p = ctx.pipeline();
         p.addLast(new LocalHostPermitHandler(acceptForeignIp));// 添加
         if (isHttp(magic)) {//是否http请求

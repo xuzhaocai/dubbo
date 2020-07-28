@@ -107,7 +107,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
     public Map<URL, Map<NotifyListener, List<URL>>> getFailedNotified() {
         return failedNotified;
     }
-
+    // 添加到失败订阅中
     private void addFailedSubscribed(URL url, NotifyListener listener) {
         Set<NotifyListener> listeners = failedSubscribed.get(url);
         if (listeners == null) {
@@ -288,7 +288,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
     @Override
     protected void recover() throws Exception {
         // register
-        Set<URL> recoverRegistered = new HashSet<URL>(getRegistered());
+        Set<URL> recoverRegistered = new HashSet<URL>(getRegistered());// 获取注册过的
         if (!recoverRegistered.isEmpty()) {
             if (logger.isInfoEnabled()) {
                 logger.info("Recover register url " + recoverRegistered);
@@ -297,8 +297,8 @@ public abstract class FailbackRegistry extends AbstractRegistry {
                 failedRegistered.add(url);
             }
         }
-        // subscribe
-        Map<URL, Set<NotifyListener>> recoverSubscribed = new HashMap<URL, Set<NotifyListener>>(getSubscribed());
+        // subscribe  重新订阅
+        Map<URL, Set<NotifyListener>> recoverSubscribed = new HashMap<URL, Set<NotifyListener>>(getSubscribed());//获取已经订阅的
         if (!recoverSubscribed.isEmpty()) {
             if (logger.isInfoEnabled()) {
                 logger.info("Recover subscribe url " + recoverSubscribed.keySet());
@@ -306,7 +306,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
             for (Map.Entry<URL, Set<NotifyListener>> entry : recoverSubscribed.entrySet()) {
                 URL url = entry.getKey();
                 for (NotifyListener listener : entry.getValue()) {
-                    addFailedSubscribed(url, listener);
+                    addFailedSubscribed(url, listener);// 添加到失败的订阅中
                 }
             }
         }

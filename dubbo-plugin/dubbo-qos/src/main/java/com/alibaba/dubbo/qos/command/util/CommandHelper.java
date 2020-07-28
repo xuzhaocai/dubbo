@@ -40,12 +40,10 @@ public class CommandHelper {
     public static List<Class<?>> getAllCommandClass(){ // 获取所有cmd 的class
         final Set<String> commandList = ExtensionLoader.getExtensionLoader(BaseCommand.class).getSupportedExtensions();
         final List<Class<?>> classes = new ArrayList<Class<?>>();
-
         for (String commandName : commandList) {
             BaseCommand command = ExtensionLoader.getExtensionLoader(BaseCommand.class).getExtension(commandName);
             classes.add(command.getClass());
         }
-
         return classes;
     }
 

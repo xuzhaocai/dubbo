@@ -47,7 +47,6 @@ public class Online implements BaseCommand {/// 服务上线
         if (args != null && args.length > 0) {
             servicePattern = args[0];
         }
-
         boolean hasService = false;
         // 获取到所有的服务provider
         List<ProviderModel> providerModelList = ApplicationModel.allProviderModels();

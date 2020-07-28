@@ -26,7 +26,6 @@ import java.util.List;
  * @see com.alibaba.dubbo.registry.RegistryService#subscribe(URL, NotifyListener)
  */
 public interface NotifyListener {
-
     /**
      * Triggered when a service change notification is received.
      * <p>

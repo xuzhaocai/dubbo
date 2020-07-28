@@ -61,10 +61,10 @@ public abstract class AbstractMonitorFactory implements MonitorFactory {
     }
 
     @Override
-    public Monitor getMonitor(URL url) {
+    public Monitor getMonitor(URL url) {// 设置path 为com.alibaba.dubbo.monitor.MonitorService ，添加参数interface
         url = url.setPath(MonitorService.class.getName()).addParameter(Constants.INTERFACE_KEY, MonitorService.class.getName());
         String key = url.toServiceStringWithoutResolving();
-        Monitor monitor = MONITORS.get(key);
+        Monitor monitor = MONITORS.get(key);// 获取monitor
         Future<Monitor> future = FUTURES.get(key);
         if (monitor != null || future != null) {
             return monitor;

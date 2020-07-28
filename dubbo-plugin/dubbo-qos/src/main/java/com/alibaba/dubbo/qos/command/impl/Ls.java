@@ -39,7 +39,6 @@ public class Ls implements BaseCommand {
         StringBuilder result = new StringBuilder();
         result.append(listProvider());
         result.append(listConsumer());
-
         return result.toString();
     }
 
