@@ -61,7 +61,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         if (url.isAnyHost()) {
             throw new IllegalStateException("registry address == null");
         }
-        // group     默认dubbo
+        // group     默认dubbo   获取根路径
         String group = url.getParameter(Constants.GROUP_KEY, DEFAULT_ROOT);
         if (!group.startsWith(Constants.PATH_SEPARATOR)) {
             group = Constants.PATH_SEPARATOR + group;   //例如 /dubbo
@@ -69,7 +69,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         this.root = group;
 
         //默认是使用的curator
-        zkClient = zookeeperTransporter.connect(url);
+        zkClient = zookeeperTransporter.connect(url);//进行连接，然后获得zkClient
         zkClient.addStateListener(new StateListener() {
             @Override
             public void stateChanged(int state) {
@@ -115,7 +115,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
     // 进行注册
     @Override
     protected void doRegister(URL url) {
-        try {
+        try {/// dynamic
             zkClient.create(toUrlPath(url), url.getParameter(Constants.DYNAMIC_KEY, true));
         } catch (Throwable e) {
             throw new RpcException("Failed to register " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
@@ -135,9 +135,9 @@ public class ZookeeperRegistry extends FailbackRegistry {
     protected void doSubscribe(final URL url, final NotifyListener listener) {
         try {
 
-            // *
+            // *  表示所有
             if (Constants.ANY_VALUE.equals(url.getServiceInterface())) {
-                String root = toRootPath();
+                String root = toRootPath();// 根路径
                 ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners.get(url);
                 if (listeners == null) {
                     zkListeners.putIfAbsent(url, new ConcurrentHashMap<NotifyListener, ChildListener>());
@@ -160,6 +160,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     });
                     zkListener = listeners.get(listener);
                 }
+                // 永久节点
                 zkClient.create(root, false);
                 List<String> services = zkClient.addChildListener(root, zkListener);
                 if (services != null && !services.isEmpty()) {
@@ -200,7 +201,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
             throw new RpcException("Failed to subscribe " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
         }
     }
-
+    // 取消订阅
     @Override
     protected void doUnsubscribe(URL url, NotifyListener listener) {
         ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners.get(url);
@@ -239,7 +240,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
     }
 
     private String toRootDir() {
-        if (root.equals(Constants.PATH_SEPARATOR)) {
+        if (root.equals(Constants.PATH_SEPARATOR)) {// root == /  ？
             return root;
         }
         return root + Constants.PATH_SEPARATOR;
@@ -250,10 +251,11 @@ public class ZookeeperRegistry extends FailbackRegistry {
     }
 
     private String toServicePath(URL url) {
-        String name = url.getServiceInterface();
+        String name = url.getServiceInterface();// 接口
         if (Constants.ANY_VALUE.equals(name)) {
             return toRootPath();
         }
+        //   "/dubbo/xxx.xxx.xxx.Xxxx"
         return toRootDir() + URL.encode(name);
     }
     // 对url进行分类category  是* 的话 ，就是providers ，comsumers ， routers ，configurators
@@ -273,10 +275,12 @@ public class ZookeeperRegistry extends FailbackRegistry {
     }
 
     private String toCategoryPath(URL url) {
+        // "/dubbo/xxx.xxx.xxx.Xxxx/gategory(providers)"
         return toServicePath(url) + Constants.PATH_SEPARATOR + url.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY);
     }
-
+    // 将url转成 urlPath
     private String toUrlPath(URL url) {
+        //  "/dubbo/xxx.xxx.xxx.Xxxx/gategory(providers)/urlfullString"
         return toCategoryPath(url) + Constants.PATH_SEPARATOR + URL.encode(url.toFullString());
     }
 

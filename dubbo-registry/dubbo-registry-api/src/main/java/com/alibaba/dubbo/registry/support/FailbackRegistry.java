@@ -118,15 +118,15 @@ public abstract class FailbackRegistry extends AbstractRegistry {
     }
 
     private void removeFailedSubscribed(URL url, NotifyListener listener) {
-        Set<NotifyListener> listeners = failedSubscribed.get(url);
+        Set<NotifyListener> listeners = failedSubscribed.get(url);// 移除失败的订阅
         if (listeners != null) {
             listeners.remove(listener);
         }
-        listeners = failedUnsubscribed.get(url);
+        listeners = failedUnsubscribed.get(url);  // 移除失败的取消订阅
         if (listeners != null) {
             listeners.remove(listener);
         }
-        Map<NotifyListener, List<URL>> notified = failedNotified.get(url);
+        Map<NotifyListener, List<URL>> notified = failedNotified.get(url);// 移除通知失败的 listener
         if (notified != null) {
             notified.remove(listener);
         }
@@ -135,11 +135,12 @@ public abstract class FailbackRegistry extends AbstractRegistry {
     @Override
     public void register(URL url) {
         super.register(url);  // 检查做缓存
+        //移除失败的缓存
         failedRegistered.remove(url);
         failedUnregistered.remove(url);
         try {
             // Sending a registration request to the server side
-            doRegister(url);
+            doRegister(url);// 进行注册
         } catch (Exception e) {
             Throwable t = e;
 
@@ -158,7 +159,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
             }
 
             // Record a failed registration request to a failed list, retry regularly
-            failedRegistered.add(url);
+            failedRegistered.add(url);//将url添加到failedRegistered 中
         }
     }
     //下线
@@ -194,11 +195,11 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     @Override
     public void subscribe(URL url, NotifyListener listener) {
-        super.subscribe(url, listener);
-        removeFailedSubscribed(url, listener);
+        super.subscribe(url, listener);// 交由父类缓存
+        removeFailedSubscribed(url, listener);// 移除失败的订阅
         try {
             // Sending a subscription request to the server side
-            doSubscribe(url, listener);
+            doSubscribe(url, listener);// 进行订阅
         } catch (Exception e) {
             Throwable t = e;
 

@@ -372,8 +372,8 @@ public final class URL implements Serializable {
      */
     public List<URL> getBackupUrls() {
         List<URL> urls = new ArrayList<URL>();
-        urls.add(this);
-        String[] backups = getParameter(Constants.BACKUP_KEY, new String[0]);
+        urls.add(this);//将自己添加进去
+        String[] backups = getParameter(Constants.BACKUP_KEY, new String[0]);// 获取backup的
         if (backups != null && backups.length > 0) {
             for (String backup : backups) {
                 urls.add(this.setAddress(backup));

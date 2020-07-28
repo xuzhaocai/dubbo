@@ -69,7 +69,7 @@ public abstract class AbstractRegistry implements Registry {
 
     private final boolean syncSaveFile;
     private final AtomicLong lastCacheChanged = new AtomicLong();
-    private final Set<URL> registered = new ConcurrentHashSet<URL>();
+    private final Set<URL> registered = new ConcurrentHashSet<URL>();// 已经注册的
 
     // 已经订阅的
     private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<URL, Set<NotifyListener>>();
@@ -81,9 +81,10 @@ public abstract class AbstractRegistry implements Registry {
 
 
     public AbstractRegistry(URL url) {
-        setUrl(url);// 设置url
+        setUrl(url);// 设置 注册 url
         // Start file save timer  是否同步保存到文件中
         syncSaveFile = url.getParameter(Constants.REGISTRY_FILESAVE_SYNC_KEY, false);
+        /// 生成文件名
         String filename = url.getParameter(Constants.FILE_KEY, System.getProperty("user.home") + "/.dubbo/dubbo-registry-" + url.getParameter(Constants.APPLICATION_KEY) + "-" + url.getAddress() + ".cache");
         File file = null;
         if (ConfigUtils.isNotEmpty(filename)) {
@@ -194,7 +195,7 @@ public abstract class AbstractRegistry implements Registry {
             logger.warn("Failed to save registry store file, cause: " + e.getMessage(), e);
         }
     }
-
+    // 将cache 文件流load到 properties中
     private void loadProperties() {
         if (file != null && file.exists()) {
             InputStream in = null;
@@ -277,7 +278,7 @@ public abstract class AbstractRegistry implements Registry {
         if (logger.isInfoEnabled()) {
             logger.info("Register: " + url);
         }
-        registered.add(url);
+        registered.add(url);// 将url添加到registered中
     }
     // 取消注册
     @Override
@@ -290,7 +291,12 @@ public abstract class AbstractRegistry implements Registry {
         }
         registered.remove(url);
     }
-    // 订阅
+
+    /**
+     * 订阅，这里就是添加缓存
+     * @param url      Subscription condition, not allowed to be empty, e.g. consumer://10.20.153.10/com.alibaba.foo.BarService?version=1.0.0&application=kylin
+     * @param listener A listener of the change event, not allowed to be empty
+     */
     @Override
     public void subscribe(URL url, NotifyListener listener) {
         if (url == null) {
@@ -302,6 +308,7 @@ public abstract class AbstractRegistry implements Registry {
         if (logger.isInfoEnabled()) {
             logger.info("Subscribe: " + url);
         }
+        // 缓存订阅的url与listener
         Set<NotifyListener> listeners = subscribed.get(url);
         if (listeners == null) {
             subscribed.putIfAbsent(url, new ConcurrentHashSet<NotifyListener>());
@@ -321,6 +328,8 @@ public abstract class AbstractRegistry implements Registry {
         if (logger.isInfoEnabled()) {
             logger.info("Unsubscribe: " + url);
         }
+
+        // 移除缓存中某个url的listener
         Set<NotifyListener> listeners = subscribed.get(url);
         if (listeners != null) {
             listeners.remove(listener);
