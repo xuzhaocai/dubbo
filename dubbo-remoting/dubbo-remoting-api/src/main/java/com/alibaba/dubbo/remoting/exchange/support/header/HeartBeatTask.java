@@ -38,8 +38,8 @@ final class HeartBeatTask implements Runnable {
 
     HeartBeatTask(ChannelProvider provider, int heartbeat, int heartbeatTimeout) {
         this.channelProvider = provider;
-        this.heartbeat = heartbeat;
-        this.heartbeatTimeout = heartbeatTimeout;
+        this.heartbeat = heartbeat;// 心跳间隔
+        this.heartbeatTimeout = heartbeatTimeout;// 超时
     }
 
     @Override
@@ -51,23 +51,31 @@ final class HeartBeatTask implements Runnable {
                     continue;
                 }
                 try {
+                    // 最后一次读
                     Long lastRead = (Long) channel.getAttribute(
                             HeaderExchangeHandler.KEY_READ_TIMESTAMP);
+                    // 最后一次写
                     Long lastWrite = (Long) channel.getAttribute(
                             HeaderExchangeHandler.KEY_WRITE_TIMESTAMP);
+
+
+
+                    // 最后一次读的时间不是null &&  最后一次读的时间距离现在不超过 心跳间隔时间
                     if ((lastRead != null && now - lastRead > heartbeat)
+
+                            // 或者最后一次写的时间不是null && 最后一次写的时间距离现在不超过 心跳间隔时间
                             || (lastWrite != null && now - lastWrite > heartbeat)) {
                         Request req = new Request();
                         req.setVersion(Version.getProtocolVersion());
                         req.setTwoWay(true);
-                        req.setEvent(Request.HEARTBEAT_EVENT);
-                        channel.send(req);
+                        req.setEvent(Request.HEARTBEAT_EVENT);// 设置心跳事件
+                        channel.send(req);//发送出去
                         if (logger.isDebugEnabled()) {
                             logger.debug("Send heartbeat to remote channel " + channel.getRemoteAddress()
                                     + ", cause: The channel has no data-transmission exceeds a heartbeat period: " + heartbeat + "ms");
                         }
                     }
-                    // 最后读的时间，超过心跳超时时间
+                    // 最后读的时间，超过心跳超时时间，就会进行重新连接
                     if (lastRead != null && now - lastRead > heartbeatTimeout) {
                         logger.warn("Close channel " + channel
                                 + ", because heartbeat read idle time out: " + heartbeatTimeout + "ms");
