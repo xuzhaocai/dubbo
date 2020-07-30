@@ -53,15 +53,15 @@ public class ProtocolFilterWrapper implements Protocol {
      *
      * @param invoker  invoker
      * @param key  service.filter
-     * @param group  provider
+     * @param group  provider consumer
      * @param <T>  EchoFilter ,ClassLoaderFilter,GenericFilter,ContextFilter,TraceFilter,TimeoutFilter,MonitorFilter,ExceptionFilter
      * @return
      */
     private static <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
         Invoker<T> last = invoker;    //  size = 8
         List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(invoker.getUrl(), key, group);
-        if (!filters.isEmpty()) {
-            for (int i = filters.size() - 1; i >= 0; i--) {
+        if (!filters.isEmpty()) {// provider : echo->classloader->generic->context->trace->timeout->moniter->exception
+            for (int i = filters.size() - 1; i >= 0; i--) {///consumer ConsumerContext-》Future-》Monitor
                 final Filter filter = filters.get(i);
                 final Invoker<T> next = last;
                 last = new Invoker<T>() {
@@ -77,7 +77,6 @@ public class ProtocolFilterWrapper implements Protocol {
                     public boolean isAvailable() {
                         return invoker.isAvailable();
                     }
-                    //exception->moniter->timeout->trace->context->generic->classloader->echo
                     @Override
                     public Result invoke(Invocation invocation) throws RpcException {
                         return filter.invoke(next, invocation);

@@ -27,6 +27,8 @@ import com.alibaba.dubbo.rpc.RpcResult;
 
 /**
  * EchoInvokerFilter
+ *
+ * 处理$echo  回声测试
  */
 @Activate(group = Constants.PROVIDER, order = -110000)
 public class EchoFilter implements Filter {
@@ -34,7 +36,7 @@ public class EchoFilter implements Filter {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation inv) throws RpcException {
 
-        //方法名是$echo的时候  并且参数是一个
+        //方法名是$echo的时候  并且参数是一个，然后就将传过来的返回去
         if (inv.getMethodName().equals(Constants.$ECHO) && inv.getArguments() != null && inv.getArguments().length == 1)
             return new RpcResult(inv.getArguments()[0]);
         return invoker.invoke(inv);

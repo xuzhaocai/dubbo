@@ -74,33 +74,33 @@ public class TraceFilter implements Filter {
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-        long start = System.currentTimeMillis();
+        long start = System.currentTimeMillis();// 开始时间
         Result result = invoker.invoke(invocation);
-        long end = System.currentTimeMillis();
+        long end = System.currentTimeMillis();// 结束时间
         if (tracers.size() > 0) {
-            String key = invoker.getInterface().getName() + "." + invocation.getMethodName();
-            Set<Channel> channels = tracers.get(key);
+            String key = invoker.getInterface().getName() + "." + invocation.getMethodName();// 接口全路径.方法名
+            Set<Channel> channels = tracers.get(key);// 获取对应tracers
             if (channels == null || channels.isEmpty()) {
-                key = invoker.getInterface().getName();
+                key = invoker.getInterface().getName();// 接口名
                 channels = tracers.get(key);
             }
             if (channels != null && !channels.isEmpty()) {
-                for (Channel channel : new ArrayList<Channel>(channels)) {
-                    if (channel.isConnected()) {
+                for (Channel channel : new ArrayList<Channel>(channels)) {//遍历这堆channel
+                    if (channel.isConnected()) {//不是关闭状态的话
                         try {
                             int max = 1;
-                            Integer m = (Integer) channel.getAttribute(TRACE_MAX);
+                            Integer m = (Integer) channel.getAttribute(TRACE_MAX);//获取trace.max属性
                             if (m != null) {
                                 max = (int) m;
                             }
                             int count = 0;
-                            AtomicInteger c = (AtomicInteger) channel.getAttribute(TRACE_COUNT);
-                            if (c == null) {
+                            AtomicInteger c = (AtomicInteger) channel.getAttribute(TRACE_COUNT);// trace.count
+                            if (c == null) {// 没有就新建然后设置进去
                                 c = new AtomicInteger();
                                 channel.setAttribute(TRACE_COUNT, c);
                             }
-                            count = c.getAndIncrement();
-                            if (count < max) {
+                            count = c.getAndIncrement();// 自增加
+                            if (count < max) {// 当count小于max的时候
                                 String prompt = channel.getUrl().getParameter(Constants.PROMPT_KEY, Constants.DEFAULT_PROMPT);
                                 channel.send("\r\n" + RpcContext.getContext().getRemoteAddress() + " -> "
                                         + invoker.getInterface().getName()

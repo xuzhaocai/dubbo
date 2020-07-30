@@ -46,13 +46,13 @@ public class FutureFilter implements Filter {
 
     @Override
     public Result invoke(final Invoker<?> invoker, final Invocation invocation) throws RpcException {
-        final boolean isAsync = RpcUtils.isAsync(invoker.getUrl(), invocation);
+        final boolean isAsync = RpcUtils.isAsync(invoker.getUrl(), invocation);// 是否异步执行
 
         fireInvokeCallback(invoker, invocation);
         // need to configure if there's return value before the invocation in order to help invoker to judge if it's
         // necessary to return future.
         Result result = invoker.invoke(invocation);
-        if (isAsync) {
+        if (isAsync) {// 异步
             asyncCallback(invoker, invocation);
         } else {
             syncCallback(invoker, invocation, result);
@@ -69,7 +69,7 @@ public class FutureFilter implements Filter {
     }
 
     private void asyncCallback(final Invoker<?> invoker, final Invocation invocation) {
-        Future<?> f = RpcContext.getContext().getFuture();
+        Future<?> f = RpcContext.getContext().getFuture();// 获取future
         if (f instanceof FutureAdapter) {
             ResponseFuture future = ((FutureAdapter<?>) f).getFuture();
             future.setCallback(new ResponseCallback() {

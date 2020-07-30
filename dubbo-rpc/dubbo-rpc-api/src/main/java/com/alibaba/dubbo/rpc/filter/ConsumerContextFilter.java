@@ -47,7 +47,7 @@ public class ConsumerContextFilter implements Filter {
         }
         try {
             RpcResult result = (RpcResult) invoker.invoke(invocation);
-            RpcContext.getServerContext().setAttachments(result.getAttachments());
+            RpcContext.getServerContext().setAttachments(result.getAttachments());// 将响应结果中的 attachments  设置到serverContext中
             return result;
         } finally {//       清楚context里面的东西
             RpcContext.getContext().clearAttachments();

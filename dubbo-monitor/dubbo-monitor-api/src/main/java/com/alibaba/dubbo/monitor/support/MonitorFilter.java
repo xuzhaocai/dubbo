@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MonitorFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(MonitorFilter.class);
-
+    // 缓存着 key=接口名.方法名       value= 计数器
     private final ConcurrentMap<String, AtomicInteger> concurrents = new ConcurrentHashMap<String, AtomicInteger>();
 
     private MonitorFactory monitorFactory;
@@ -56,22 +56,22 @@ public class MonitorFilter implements Filter {
     // intercepting invocation
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-        if (invoker.getUrl().hasParameter(Constants.MONITOR_KEY)) {
+        if (invoker.getUrl().hasParameter(Constants.MONITOR_KEY)) {// 判断是否有monitor参数
             RpcContext context = RpcContext.getContext(); // provider must fetch context before invoke() gets called
             String remoteHost = context.getRemoteHost();
             long start = System.currentTimeMillis(); // record start timestamp
-            getConcurrent(invoker, invocation).incrementAndGet(); // count up
+            getConcurrent(invoker, invocation).incrementAndGet(); // count up 自增加1
             try {
                 Result result = invoker.invoke(invocation); // proceed invocation chain
-                collect(invoker, invocation, result, remoteHost, start, false);
+                collect(invoker, invocation, result, remoteHost, start, false);// 进行收集
                 return result;
             } catch (RpcException e) {
                 collect(invoker, invocation, null, remoteHost, start, true);
                 throw e;
             } finally {
-                getConcurrent(invoker, invocation).decrementAndGet(); // count down
+                getConcurrent(invoker, invocation).decrementAndGet(); // count down 自减1
             }
-        } else {
+        } else {// 没有monitor参数就放行
             return invoker.invoke(invocation);
         }
     }
@@ -80,39 +80,41 @@ public class MonitorFilter implements Filter {
     private void collect(Invoker<?> invoker, Invocation invocation, Result result, String remoteHost, long start, boolean error) {
         try {
             // ---- service statistics ----
-            long elapsed = System.currentTimeMillis() - start; // invocation cost
-            int concurrent = getConcurrent(invoker, invocation).get(); // current concurrent count
-            String application = invoker.getUrl().getParameter(Constants.APPLICATION_KEY);
-            String service = invoker.getInterface().getName(); // service name
-            String method = RpcUtils.getMethodName(invocation); // method name
-            String group = invoker.getUrl().getParameter(Constants.GROUP_KEY);
-            String version = invoker.getUrl().getParameter(Constants.VERSION_KEY);
-            URL url = invoker.getUrl().getUrlParameter(Constants.MONITOR_KEY);
-            Monitor monitor = monitorFactory.getMonitor(url);
+            long elapsed = System.currentTimeMillis() - start; // invocation cost  调用耗时
+            int concurrent = getConcurrent(invoker, invocation).get(); // current concurrent count  获取当前的次数
+            String application = invoker.getUrl().getParameter(Constants.APPLICATION_KEY);  // application
+            String service = invoker.getInterface().getName(); // service name    //接口名
+            String method = RpcUtils.getMethodName(invocation); // method name   // 方法名
+            String group = invoker.getUrl().getParameter(Constants.GROUP_KEY);   // 分组
+            String version = invoker.getUrl().getParameter(Constants.VERSION_KEY);  // version
+            URL url = invoker.getUrl().getUrlParameter(Constants.MONITOR_KEY);  // monitor
+            Monitor monitor = monitorFactory.getMonitor(url);// 获取Monitor
             if (monitor == null) {
                 return;
             }
             int localPort;
             String remoteKey;
             String remoteValue;
-            if (Constants.CONSUMER_SIDE.equals(invoker.getUrl().getParameter(Constants.SIDE_KEY))) {
+            if (Constants.CONSUMER_SIDE.equals(invoker.getUrl().getParameter(Constants.SIDE_KEY))) {// 如果是服务调用端
                 // ---- for service consumer ----
                 localPort = 0;
                 remoteKey = MonitorService.PROVIDER;
                 remoteValue = invoker.getUrl().getAddress();
-            } else {
+            } else {// 如果是服务提供者端
                 // ---- for service provider ----
                 localPort = invoker.getUrl().getPort();
                 remoteKey = MonitorService.CONSUMER;
                 remoteValue = remoteHost;
             }
             String input = "", output = "";
-            if (invocation.getAttachment(Constants.INPUT_KEY) != null) {
+            if (invocation.getAttachment(Constants.INPUT_KEY) != null) {// input
                 input = invocation.getAttachment(Constants.INPUT_KEY);
             }
-            if (result != null && result.getAttachment(Constants.OUTPUT_KEY) != null) {
+            if (result != null && result.getAttachment(Constants.OUTPUT_KEY) != null) {// output
                 output = result.getAttachment(Constants.OUTPUT_KEY);
             }
+
+            //收集
             monitor.collect(new URL(Constants.COUNT_PROTOCOL,
                     NetUtils.getLocalHost(), localPort,
                     service + "/" + method,
@@ -132,11 +134,11 @@ public class MonitorFilter implements Filter {
         }
     }
 
-    // concurrent counter
+    // concurrent counter   获取计数器
     private AtomicInteger getConcurrent(Invoker<?> invoker, Invocation invocation) {
-        String key = invoker.getInterface().getName() + "." + invocation.getMethodName();
-        AtomicInteger concurrent = concurrents.get(key);
-        if (concurrent == null) {
+        String key = invoker.getInterface().getName() + "." + invocation.getMethodName();// 接口名.方法名
+        AtomicInteger concurrent = concurrents.get(key);// 获取统计器
+        if (concurrent == null) {// 没有就新建
             concurrents.putIfAbsent(key, new AtomicInteger());
             concurrent = concurrents.get(key);
         }

@@ -38,16 +38,16 @@ public class ContextFilter implements Filter {
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-        Map<String, String> attachments = invocation.getAttachments();
+        Map<String, String> attachments = invocation.getAttachments();// 获取附加参数
         if (attachments != null) {
             attachments = new HashMap<String, String>(attachments);
-            attachments.remove(Constants.PATH_KEY);
-            attachments.remove(Constants.GROUP_KEY);
-            attachments.remove(Constants.VERSION_KEY);
-            attachments.remove(Constants.DUBBO_VERSION_KEY);
-            attachments.remove(Constants.TOKEN_KEY);
-            attachments.remove(Constants.TIMEOUT_KEY);
-            attachments.remove(Constants.ASYNC_KEY);// Remove async property to avoid being passed to the following invoke chain.
+            attachments.remove(Constants.PATH_KEY);//path
+            attachments.remove(Constants.GROUP_KEY);//group
+            attachments.remove(Constants.VERSION_KEY);// version
+            attachments.remove(Constants.DUBBO_VERSION_KEY);//dubbo
+            attachments.remove(Constants.TOKEN_KEY);//token
+            attachments.remove(Constants.TIMEOUT_KEY);//timeou
+            attachments.remove(Constants.ASYNC_KEY);// Remove async property to avoid being passed to the following invoke chain.//是否异步
         }
         RpcContext.getContext()
                 .setInvoker(invoker)
@@ -59,24 +59,24 @@ public class ContextFilter implements Filter {
         // mreged from dubbox
         // we may already added some attachments into RpcContext before this filter (e.g. in rest protocol)
         if (attachments != null) {
-            if (RpcContext.getContext().getAttachments() != null) {
-                RpcContext.getContext().getAttachments().putAll(attachments);
+            if (RpcContext.getContext().getAttachments() != null) {// 如果存在attachments
+                RpcContext.getContext().getAttachments().putAll(attachments); // 将invoker里面的attachments设置到context中
             } else {
-                RpcContext.getContext().setAttachments(attachments);
+                RpcContext.getContext().setAttachments(attachments);// 设置attachments
             }
         }
 
         if (invocation instanceof RpcInvocation) {
-            ((RpcInvocation) invocation).setInvoker(invoker);
+            ((RpcInvocation) invocation).setInvoker(invoker);// invocation 中设置 invoker
         }
         try {
             RpcResult result = (RpcResult) invoker.invoke(invocation);
-            // pass attachments to result
+            // pass attachments to result result中添加servercontext的参数集
             result.addAttachments(RpcContext.getServerContext().getAttachments());
             return result;
         } finally {
-            RpcContext.removeContext();
-            RpcContext.getServerContext().clearAttachments();
+            RpcContext.removeContext();//remove context
+            RpcContext.getServerContext().clearAttachments();// 清除attachments
         }
     }
 }

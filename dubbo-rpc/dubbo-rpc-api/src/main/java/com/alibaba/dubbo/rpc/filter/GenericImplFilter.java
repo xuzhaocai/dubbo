@@ -41,6 +41,7 @@ import java.lang.reflect.Method;
 
 /**
  * GenericImplInvokerFilter
+ * 泛化调用
  */
 @Activate(group = Constants.CONSUMER, value = Constants.GENERIC_KEY, order = 20000)
 public class GenericImplFilter implements Filter {
@@ -51,14 +52,14 @@ public class GenericImplFilter implements Filter {
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-        String generic = invoker.getUrl().getParameter(Constants.GENERIC_KEY);
-        if (ProtocolUtils.isGeneric(generic)
+        String generic = invoker.getUrl().getParameter(Constants.GENERIC_KEY);// 是否是泛化调用
+        if (ProtocolUtils.isGeneric(generic)   // 是泛化调用
                 && !Constants.$INVOKE.equals(invocation.getMethodName())
                 && invocation instanceof RpcInvocation) {
             RpcInvocation invocation2 = (RpcInvocation) invocation;
-            String methodName = invocation2.getMethodName();
-            Class<?>[] parameterTypes = invocation2.getParameterTypes();
-            Object[] arguments = invocation2.getArguments();
+            String methodName = invocation2.getMethodName();//方法名
+            Class<?>[] parameterTypes = invocation2.getParameterTypes();// 参数类型们
+            Object[] arguments = invocation2.getArguments();// 具体参数
 
             String[] types = new String[parameterTypes.length];
             for (int i = 0; i < parameterTypes.length; i++) {

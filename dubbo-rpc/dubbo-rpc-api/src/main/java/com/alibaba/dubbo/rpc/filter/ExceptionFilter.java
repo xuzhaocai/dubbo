@@ -60,9 +60,9 @@ public class ExceptionFilter implements Filter {
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         try {
             Result result = invoker.invoke(invocation);
-            if (result.hasException() && GenericService.class != invoker.getInterface()) {
+            if (result.hasException() && GenericService.class != invoker.getInterface()) {/// 有异常，而且不是泛化调用
                 try {
-                    Throwable exception = result.getException();
+                    Throwable exception = result.getException();// 获取异常
 
                     // directly throw if it's checked exception
                     if (!(exception instanceof RuntimeException) && (exception instanceof Exception)) {
@@ -92,13 +92,13 @@ public class ExceptionFilter implements Filter {
                     if (serviceFile == null || exceptionFile == null || serviceFile.equals(exceptionFile)) {
                         return result;
                     }
-                    // directly throw if it's JDK exception
+                    // directly throw if it's JDK exception   jdk异常的话返回
                     String className = exception.getClass().getName();
-                    if (className.startsWith("java.") || className.startsWith("javax.")) {
+                    if (className.startsWith("java.") || className.startsWith("javax.")) {// java的异常
                         return result;
                     }
                     // directly throw if it's dubbo exception
-                    if (exception instanceof RpcException) {
+                    if (exception instanceof RpcException) {//   dubbo 异常的话也是返回
                         return result;
                     }
 
