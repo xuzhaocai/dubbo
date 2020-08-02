@@ -45,9 +45,9 @@ import java.util.concurrent.TimeoutException;
  * @see com.alibaba.dubbo.rpc.filter.ContextFilter
  */
 public class RpcContext {
-
     /**
      * use internal thread local to improve performance
+     * 这个是本地的context
      */
     private static final InternalThreadLocal<RpcContext> LOCAL = new InternalThreadLocal<RpcContext>() {
         @Override
@@ -55,36 +55,36 @@ public class RpcContext {
             return new RpcContext();
         }
     };
+    //远端的context，也就是服务提供者的context
     private static final InternalThreadLocal<RpcContext> SERVER_LOCAL = new InternalThreadLocal<RpcContext>() {
         @Override
         protected RpcContext initialValue() {
             return new RpcContext();
         }
     };
-
-    private final Map<String, String> attachments = new HashMap<String, String>();
+    private final Map<String, String> attachments = new HashMap<String, String>();// 附加信息，kv形式
     private final Map<String, Object> values = new HashMap<String, Object>();
-    private Future<?> future;
+    private Future<?> future;// 异步调用的时候，将这个future设置到这里
 
     private List<URL> urls;
 
     private URL url;
 
-    private String methodName;
+    private String methodName;// 调用方法名
 
-    private Class<?>[] parameterTypes;
+    private Class<?>[] parameterTypes;// 参数类型
 
-    private Object[] arguments;
+    private Object[] arguments;// 参数
 
-    private InetSocketAddress localAddress;
+    private InetSocketAddress localAddress;// 本地地址
 
-    private InetSocketAddress remoteAddress;
+    private InetSocketAddress remoteAddress;// 远端地址
     @Deprecated
-    private List<Invoker<?>> invokers;
+    private List<Invoker<?>> invokers;// 这个一般服务调用者端用到，存储服务提供者invoker们
     @Deprecated
-    private Invoker<?> invoker;
+    private Invoker<?> invoker;// invoker
     @Deprecated
-    private Invocation invocation;
+    private Invocation invocation;// 调用信息
 
     // now we don't use the 'values' map to hold these objects
     // we want these objects to be as generic as possible
@@ -94,38 +94,19 @@ public class RpcContext {
     protected RpcContext() {
     }
 
-    /**
-     * get server side context.
-     *
-     * @return server context
-     */
+    // 获得server端的上下文
     public static RpcContext getServerContext() {
         return SERVER_LOCAL.get();
     }
-
-    /**
-     * remove server side context.
-     *
-     * @see com.alibaba.dubbo.rpc.filter.ContextFilter
-     */
+    //移除server端的上线文
     public static void removeServerContext() {
         SERVER_LOCAL.remove();
     }
-
-    /**
-     * get context.
-     *
-     * @return context
-     */
+    //获得上下文
     public static RpcContext getContext() {
         return LOCAL.get();
     }
-
-    /**
-     * remove context.
-     *
-     * @see com.alibaba.dubbo.rpc.filter.ContextFilter
-     */
+    //移除上线文
     public static void removeContext() {
         LOCAL.remove();
     }
