@@ -52,29 +52,31 @@ public class GenericFilter implements Filter {
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation inv) throws RpcException {
-        if (inv.getMethodName().equals(Constants.$INVOKE)
+        if (inv.getMethodName().equals(Constants.$INVOKE)// 判断是不是泛化调用
                 && inv.getArguments() != null
                 && inv.getArguments().length == 3
-                && !invoker.getInterface().equals(GenericService.class)) {
-            String name = ((String) inv.getArguments()[0]).trim();
-            String[] types = (String[]) inv.getArguments()[1];
-            Object[] args = (Object[]) inv.getArguments()[2];
+                && !invoker.getInterface().equals(GenericService.class)) {// interface !=GenericService
+            String name = ((String) inv.getArguments()[0]).trim();// 获取第一个参数，也就是 方法名
+            String[] types = (String[]) inv.getArguments()[1];//类型参数
+            Object[] args = (Object[]) inv.getArguments()[2];// 参数列表
             try {
+
+                // 通过 interface  ， 方法名 ，方法参数类型 获得method
                 Method method = ReflectUtils.findMethodByMethodSignature(invoker.getInterface(), name, types);
                 Class<?>[] params = method.getParameterTypes();
-                if (args == null) {
+                if (args == null) {// 如果是null
                     args = new Object[params.length];
                 }
-                String generic = inv.getAttachment(Constants.GENERIC_KEY);
+                String generic = inv.getAttachment(Constants.GENERIC_KEY);//generic
 
-                if (StringUtils.isBlank(generic)) {
+                if (StringUtils.isBlank(generic)) {// 从rpccontext  中获取 generic
                     generic = RpcContext.getContext().getAttachment(Constants.GENERIC_KEY);
                 }
 
                 if (StringUtils.isEmpty(generic)
-                        || ProtocolUtils.isDefaultGenericSerialization(generic)) {
+                        || ProtocolUtils.isDefaultGenericSerialization(generic)) {// generic不是null，然后=true
                     args = PojoUtils.realize(args, params, method.getGenericParameterTypes());
-                } else if (ProtocolUtils.isJavaGenericSerialization(generic)) {
+                } else if (ProtocolUtils.isJavaGenericSerialization(generic)) {//nativejava
                     for (int i = 0; i < args.length; i++) {
                         if (byte[].class == args[i].getClass()) {
                             try {
@@ -95,7 +97,7 @@ public class GenericFilter implements Filter {
                                             args[i].getClass());
                         }
                     }
-                } else if (ProtocolUtils.isBeanGenericSerialization(generic)) {
+                } else if (ProtocolUtils.isBeanGenericSerialization(generic)) {//bean
                     for (int i = 0; i < args.length; i++) {
                         if (args[i] instanceof JavaBeanDescriptor) {
                             args[i] = JavaBeanSerializeUtil.deserialize((JavaBeanDescriptor) args[i]);
@@ -110,9 +112,11 @@ public class GenericFilter implements Filter {
                         }
                     }
                 }
+
+                //进行执行
                 Result result = invoker.invoke(new RpcInvocation(method, args, inv.getAttachments()));
                 if (result.hasException()
-                        && !(result.getException() instanceof GenericException)) {
+                        && !(result.getException() instanceof GenericException)) {// 有异常，且不是GenericException
                     return new RpcResult(new GenericException(result.getException()));
                 }
                 if (ProtocolUtils.isJavaGenericSerialization(generic)) {

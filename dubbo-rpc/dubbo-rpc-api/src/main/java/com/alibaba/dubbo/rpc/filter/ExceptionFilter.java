@@ -69,7 +69,7 @@ public class ExceptionFilter implements Filter {
                         return result;
                     }
                     // directly throw if the exception appears in the signature
-                    try {
+                    try {// 获取方法上的exception，如果本次异常是方法上的异常 则返回
                         Method method = invoker.getInterface().getMethod(invocation.getMethodName(), invocation.getParameterTypes());
                         Class<?>[] exceptionClassses = method.getExceptionTypes();
                         for (Class<?> exceptionClass : exceptionClassses) {
@@ -77,15 +77,15 @@ public class ExceptionFilter implements Filter {
                                 return result;
                             }
                         }
-                    } catch (NoSuchMethodException e) {
+                    } catch (NoSuchMethodException e) {// 没有找到该方法也将结果返回
                         return result;
                     }
-
+                    // 没有在method 上面找到对应的exception信息，就打印error log
                     // for the exception not found in method's signature, print ERROR message in server's log.
                     logger.error("Got unchecked and undeclared exception which called by " + RpcContext.getContext().getRemoteHost()
                             + ". service: " + invoker.getInterface().getName() + ", method: " + invocation.getMethodName()
                             + ", exception: " + exception.getClass().getName() + ": " + exception.getMessage(), exception);
-
+                    //如果异常类和接口类在同一个jar文件中，则直接抛出。
                     // directly throw if exception class and interface class are in the same jar file.
                     String serviceFile = ReflectUtils.getCodeBase(invoker.getInterface());
                     String exceptionFile = ReflectUtils.getCodeBase(exception.getClass());
@@ -93,7 +93,7 @@ public class ExceptionFilter implements Filter {
                         return result;
                     }
                     // directly throw if it's JDK exception   jdk异常的话返回
-                    String className = exception.getClass().getName();
+                    String className = exception.getClass().getName();// 获取class 全类名
                     if (className.startsWith("java.") || className.startsWith("javax.")) {// java的异常
                         return result;
                     }
@@ -101,7 +101,7 @@ public class ExceptionFilter implements Filter {
                     if (exception instanceof RpcException) {//   dubbo 异常的话也是返回
                         return result;
                     }
-
+                    // 将异常使用RuntimeException 包装起来然后返回给客户端
                     // otherwise, wrap with RuntimeException and throw back to the client
                     return new RpcResult(new RuntimeException(StringUtils.toString(exception)));
                 } catch (Throwable e) {
@@ -111,6 +111,7 @@ public class ExceptionFilter implements Filter {
                     return result;
                 }
             }
+            // 没有异常，或者是泛化异常 直接返回
             return result;
         } catch (RuntimeException e) {
             logger.error("Got unchecked and undeclared exception which called by " + RpcContext.getContext().getRemoteHost()

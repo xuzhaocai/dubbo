@@ -214,8 +214,8 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
         }
 
         // 如果泛化参数 为true 的时候， 就将interfaceClass 设置成GenericService.class
-        if (ProtocolUtils.isGeneric(getGeneric())) {
-            interfaceClass = GenericService.class;
+        if (ProtocolUtils.isGeneric(getGeneric())) {// 是泛化调用
+            interfaceClass = GenericService.class;// 设置interfaceClass= GenericService
         } else {
 
             // 普通参数

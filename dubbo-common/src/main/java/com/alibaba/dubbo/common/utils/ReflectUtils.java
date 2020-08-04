@@ -777,21 +777,27 @@ public final class ReflectUtils {
      */
     public static Method findMethodByMethodSignature(Class<?> clazz, String methodName, String[] parameterTypes)
             throws NoSuchMethodException, ClassNotFoundException {
+        // 全类名.方法名
         String signature = clazz.getName() + "." + methodName;
-        if (parameterTypes != null && parameterTypes.length > 0) {
-            signature += StringUtils.join(parameterTypes);
+        if (parameterTypes != null && parameterTypes.length > 0) {// 参数类型不是null的话
+            signature += StringUtils.join(parameterTypes);// signature+ 参数类型的拼接
         }
-        Method method = Signature_METHODS_CACHE.get(signature);
+        Method method = Signature_METHODS_CACHE.get(signature);// 从缓存中获取
         if (method != null) {
             return method;
         }
-        if (parameterTypes == null) {
+        if (parameterTypes == null) {// 没有参数的时候
+            // 找interface 下面同名方法
             List<Method> finded = new ArrayList<Method>();
             for (Method m : clazz.getMethods()) {
                 if (m.getName().equals(methodName)) {
                     finded.add(m);
                 }
             }
+
+
+
+            //没找到的话抛出异常
             if (finded.isEmpty()) {
                 throw new NoSuchMethodException("No such method " + methodName + " in class " + clazz);
             }
@@ -801,14 +807,17 @@ public final class ReflectUtils {
                 throw new IllegalStateException(msg);
             }
             method = finded.get(0);
-        } else {
+        } else {// 有参数的时候
             Class<?>[] types = new Class<?>[parameterTypes.length];
             for (int i = 0; i < parameterTypes.length; i++) {
+                // 将String 类型的参数类型 转成对应的类型class
                 types[i] = ReflectUtils.name2class(parameterTypes[i]);
             }
+            // 根据参数类型，方法名获取 Method class
             method = clazz.getMethod(methodName, types);
 
         }
+        /// 放到缓存中
         Signature_METHODS_CACHE.put(signature, method);
         return method;
     }

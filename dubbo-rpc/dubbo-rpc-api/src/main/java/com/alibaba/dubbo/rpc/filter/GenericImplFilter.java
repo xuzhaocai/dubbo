@@ -54,41 +54,41 @@ public class GenericImplFilter implements Filter {
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         String generic = invoker.getUrl().getParameter(Constants.GENERIC_KEY);// 是否是泛化调用
         if (ProtocolUtils.isGeneric(generic)   // 是泛化调用
-                && !Constants.$INVOKE.equals(invocation.getMethodName())
+                && !Constants.$INVOKE.equals(invocation.getMethodName())// 这里这个方法名不是$invoke
                 && invocation instanceof RpcInvocation) {
             RpcInvocation invocation2 = (RpcInvocation) invocation;
             String methodName = invocation2.getMethodName();//方法名
             Class<?>[] parameterTypes = invocation2.getParameterTypes();// 参数类型们
             Object[] arguments = invocation2.getArguments();// 具体参数
-
+            // 将参数类型class 们转成 string类型
             String[] types = new String[parameterTypes.length];
             for (int i = 0; i < parameterTypes.length; i++) {
                 types[i] = ReflectUtils.getName(parameterTypes[i]);
             }
 
             Object[] args;
-            if (ProtocolUtils.isBeanGenericSerialization(generic)) {
+            if (ProtocolUtils.isBeanGenericSerialization(generic)) {// bean
                 args = new Object[arguments.length];
-                for (int i = 0; i < arguments.length; i++) {
+                for (int i = 0; i < arguments.length; i++) {// 进行序列化
                     args[i] = JavaBeanSerializeUtil.serialize(arguments[i], JavaBeanAccessor.METHOD);
                 }
             } else {
                 args = PojoUtils.generalize(arguments);
             }
-
+            // 这里封装成 $invoke的 形式，就是封装成 跟调用 GenericService接的 $invoke 方法一样
             invocation2.setMethodName(Constants.$INVOKE);
             invocation2.setParameterTypes(GENERIC_PARAMETER_TYPES);
             invocation2.setArguments(new Object[]{methodName, types, args});
-            Result result = invoker.invoke(invocation2);
+            Result result = invoker.invoke(invocation2);//交给下一个invoker
 
-            if (!result.hasException()) {
-                Object value = result.getValue();
-                try {
+            if (!result.hasException()) {// 没有异常
+                Object value = result.getValue();// 获取结果值
+                try {// 获取原先调用的那个method
                     Method method = invoker.getInterface().getMethod(methodName, parameterTypes);
-                    if (ProtocolUtils.isBeanGenericSerialization(generic)) {
+                    if (ProtocolUtils.isBeanGenericSerialization(generic)) {// bean
                         if (value == null) {
                             return new RpcResult(value);
-                        } else if (value instanceof JavaBeanDescriptor) {
+                        } else if (value instanceof JavaBeanDescriptor) {// 需要反序列化
                             return new RpcResult(JavaBeanSerializeUtil.deserialize((JavaBeanDescriptor) value));
                         } else {
                             throw new RpcException(
@@ -99,7 +99,7 @@ public class GenericImplFilter implements Filter {
                                             ", and the result is " +
                                             value);
                         }
-                    } else {
+                    } else {// 使用Pojo的反序列化
                         return new RpcResult(PojoUtils.realize(value, method.getReturnType(), method.getGenericReturnType()));
                     }
                 } catch (NoSuchMethodException e) {
@@ -146,6 +146,9 @@ public class GenericImplFilter implements Filter {
             return result;
         }
 
+
+        ///-----------------------------------------------------------------
+        // 方法名= $invoke
         if (invocation.getMethodName().equals(Constants.$INVOKE)
                 && invocation.getArguments() != null
                 && invocation.getArguments().length == 3
@@ -166,7 +169,7 @@ public class GenericImplFilter implements Filter {
                     }
                 }
             }
-
+            // 设置generic=true
             ((RpcInvocation) invocation).setAttachment(
                     Constants.GENERIC_KEY, invoker.getUrl().getParameter(Constants.GENERIC_KEY));
         }
