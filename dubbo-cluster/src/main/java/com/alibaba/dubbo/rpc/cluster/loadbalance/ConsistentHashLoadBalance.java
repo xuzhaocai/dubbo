@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * ConsistentHashLoadBalance
- *
+ * 一致性hash 算法实现
  */
 public class ConsistentHashLoadBalance extends AbstractLoadBalance {
 
@@ -42,14 +42,29 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
     @SuppressWarnings("unchecked")
     @Override
     protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
+
+        // 获取方法名
         String methodName = RpcUtils.getMethodName(invocation);
+        // 拼接key， 接口全类名.方法名
         String key = invokers.get(0).getUrl().getServiceKey() + "." + methodName;
+
+        //根据invokers 计算个hashcode
         int identityHashCode = System.identityHashCode(invokers);
+
+        // 根据key 从缓存中获取ConsistentHashSelector
         ConsistentHashSelector<T> selector = (ConsistentHashSelector<T>) selectors.get(key);
+
+
+        // selector==null 或者是 selector的hashcode ！= 现在算出来的，说明这个invokers 变了
         if (selector == null || selector.identityHashCode != identityHashCode) {
+
+            // 创建ConsistentHashSelector 放入缓存中
             selectors.put(key, new ConsistentHashSelector<T>(invokers, methodName, identityHashCode));
+            // 获取新的selector
             selector = (ConsistentHashSelector<T>) selectors.get(key);
         }
+
+        // 是用selector 进行选择
         return selector.select(invocation);
     }
 
@@ -64,21 +79,34 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
         private final int[] argumentIndex;
 
         ConsistentHashSelector(List<Invoker<T>> invokers, String methodName, int identityHashCode) {
+
+            // 虚拟的invoker
             this.virtualInvokers = new TreeMap<Long, Invoker<T>>();
+            // hashcode
             this.identityHashCode = identityHashCode;
+            // 获取url
             URL url = invokers.get(0).getUrl();
+
+
+            //获取hash.nodes ，缺省是160  每个实例节点的个数
             this.replicaNumber = url.getMethodParameter(methodName, "hash.nodes", 160);
+
+
+            // 获取hash.arguments 缺省是0 然后进行切割
             String[] index = Constants.COMMA_SPLIT_PATTERN.split(url.getMethodParameter(methodName, "hash.arguments", "0"));
+
             argumentIndex = new int[index.length];
             for (int i = 0; i < index.length; i++) {
                 argumentIndex[i] = Integer.parseInt(index[i]);
             }
             for (Invoker<T> invoker : invokers) {
+                // 获取地址
                 String address = invoker.getUrl().getAddress();
+
                 for (int i = 0; i < replicaNumber / 4; i++) {
                     byte[] digest = md5(address + i);
                     for (int h = 0; h < 4; h++) {
-                        long m = hash(digest, h);
+                        long m = hash(digest, h);//计算位置
                         virtualInvokers.put(m, invoker);
                     }
                 }
@@ -86,6 +114,7 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
         }
 
         public Invoker<T> select(Invocation invocation) {
+            // 将参数转成key
             String key = toKey(invocation.getArguments());
             byte[] digest = md5(key);
             return selectForKey(hash(digest, 0));
@@ -95,17 +124,17 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
             StringBuilder buf = new StringBuilder();
             for (int i : argumentIndex) {
                 if (i >= 0 && i < args.length) {
-                    buf.append(args[i]);
+                    buf.append(args[i]);// 参数
                 }
             }
             return buf.toString();
         }
 
-        private Invoker<T> selectForKey(long hash) {
+        private Invoker<T> selectForKey(long hash) {//tailMap 是返回键值大于或等于key的那部分 ，然后再取第一个
             Map.Entry<Long, Invoker<T>> entry = virtualInvokers.tailMap(hash, true).firstEntry();
-            if (entry == null) {
+            if (entry == null) {//如果没有取到的话就说明hash就是最大的了，下面那个就是 treemap 第一个了
                 entry = virtualInvokers.firstEntry();
-            }
+            }// 返回对应的那个invoker
             return entry.getValue();
         }
 
