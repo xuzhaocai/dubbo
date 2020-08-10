@@ -46,6 +46,8 @@ public class FailsafeClusterInvoker<T> extends AbstractClusterInvoker<T> {
     public Result doInvoke(Invocation invocation, List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
         try {
             checkInvokers(invokers, invocation);
+
+            // 从invokers 选择一个invoker
             Invoker<T> invoker = select(loadbalance, invocation, invokers, null);
             return invoker.invoke(invocation);
         } catch (Throwable e) {

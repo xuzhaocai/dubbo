@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * BroadcastClusterInvoker
- *
+ * 广播方式
  */
 public class BroadcastClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
@@ -43,10 +43,15 @@ public class BroadcastClusterInvoker<T> extends AbstractClusterInvoker<T> {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Result doInvoke(final Invocation invocation, List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
+        // 检查 invokers 是否为空
         checkInvokers(invokers, invocation);
+
+        // 将invokers 塞到context中
         RpcContext.getContext().setInvokers((List) invokers);
         RpcException exception = null;
         Result result = null;
+
+        // 遍历invokers 执行， 结果只要最后一个不报错的result
         for (Invoker<T> invoker : invokers) {
             try {
                 result = invoker.invoke(invocation);
@@ -58,6 +63,7 @@ public class BroadcastClusterInvoker<T> extends AbstractClusterInvoker<T> {
                 logger.warn(e.getMessage(), e);
             }
         }
+        // 如果出现一个异常，  抛出异常
         if (exception != null) {
             throw exception;
         }

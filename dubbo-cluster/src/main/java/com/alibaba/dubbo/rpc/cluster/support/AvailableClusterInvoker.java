@@ -27,7 +27,7 @@ import java.util.List;
 
 /**
  * AvailableCluster
- *
+ * 不使用负载均衡算法选择invoker， 而是遍历找一个可用invoker进行调用
  */
 public class AvailableClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
@@ -38,10 +38,11 @@ public class AvailableClusterInvoker<T> extends AbstractClusterInvoker<T> {
     @Override
     public Result doInvoke(Invocation invocation, List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
         for (Invoker<T> invoker : invokers) {
-            if (invoker.isAvailable()) {
+            if (invoker.isAvailable()) {//从invokers 选择一个可用的 invoker 进行调用
                 return invoker.invoke(invocation);
             }
         }
+        // 抛出没有可用的invoker
         throw new RpcException("No provider available in " + invokers);
     }
 

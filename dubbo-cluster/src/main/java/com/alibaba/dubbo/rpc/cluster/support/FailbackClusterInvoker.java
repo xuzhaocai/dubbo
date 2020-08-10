@@ -42,6 +42,9 @@ import java.util.concurrent.TimeUnit;
  * When fails, record failure requests and schedule for retry on a regular interval.
  * Especially useful for services of notification.
  *
+ *
+ *
+ *  当失败时，记录失败请求并计划定期重试。特别适用于送达通知。
  * <a href="http://en.wikipedia.org/wiki/Failback">Failback</a>
  *
  */
@@ -49,7 +52,7 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(FailbackClusterInvoker.class);
 
-    private static final long RETRY_FAILED_PERIOD = 5 * 1000;
+    private static final long RETRY_FAILED_PERIOD = 5 * 1000;// 5秒
 
     /**
      * Use {@link NamedInternalThreadFactory} to produce {@link com.alibaba.dubbo.common.threadlocal.InternalThread}
@@ -65,6 +68,8 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
         super(directory);
     }
 
+
+    // 使用定时任务进行重试
     private void addFailed(Invocation invocation, AbstractClusterInvoker<?> router) {
         if (retryFuture == null) {
             synchronized (this) {
@@ -75,6 +80,8 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
                         public void run() {
                             // collect retry statistics
                             try {
+
+                                // 重试
                                 retryFailed();
                             } catch (Throwable t) { // Defensive fault tolerance
                                 logger.error("Unexpected error occur at collect statistic", t);
@@ -84,6 +91,8 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
                 }
             }
         }
+
+        // 添加到失败集合中
         failed.put(invocation, router);
     }
 
@@ -91,12 +100,16 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
         if (failed.size() == 0) {
             return;
         }
+        // 遍历重试
         for (Map.Entry<Invocation, AbstractClusterInvoker<?>> entry : new HashMap<Invocation, AbstractClusterInvoker<?>>(
                 failed).entrySet()) {
             Invocation invocation = entry.getKey();
             Invoker<?> invoker = entry.getValue();
             try {
+                // 调用， 我们看到是不接收执行结果，说明该容错类型只能用于通知类型，不适合普通业务调用
                 invoker.invoke(invocation);
+
+                // 没有异常，说明成功了， 从失败集合中移除
                 failed.remove(invocation);
             } catch (Throwable e) {
                 logger.error("Failed retry to invoke method " + invocation.getMethodName() + ", waiting again.", e);
@@ -107,13 +120,22 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
     @Override
     protected Result doInvoke(Invocation invocation, List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
         try {
+
+            // 检查 invoker 是否为空
             checkInvokers(invokers, invocation);
+
+            // 选取invoker
             Invoker<T> invoker = select(loadbalance, invocation, invokers, null);
             return invoker.invoke(invocation);
         } catch (Throwable e) {
+            // 如果异常的话，打印错误日志
+
             logger.error("Failback to invoke method " + invocation.getMethodName() + ", wait for retry in background. Ignored exception: "
                     + e.getMessage() + ", ", e);
+
+            // 添加失败
             addFailed(invocation, this);
+            // 这里直接返回一个空的RpcResult 结果
             return new RpcResult(); // ignore
         }
     }
