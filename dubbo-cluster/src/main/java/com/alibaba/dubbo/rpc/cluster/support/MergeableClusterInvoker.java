@@ -92,7 +92,7 @@ public class MergeableClusterInvoker<T> implements Invoker<T> {
 
         Class<?> returnType;
         try {
-            // 通过反射获得返回类型
+            // 通过反射获得返回值类型
             returnType = getInterface().getMethod(
                     invocation.getMethodName(), invocation.getParameterTypes()).getReturnType();
         } catch (NoSuchMethodException e) {
@@ -137,14 +137,17 @@ public class MergeableClusterInvoker<T> implements Invoker<T> {
         }
         // 判断结果集
         if (resultList.isEmpty()) { // 为空的时候
-            return new RpcResult((Object) null);
-        } else if (resultList.size() == 1) {  //一个的时候返回那
+            return new RpcResult((Object) null);// 放回个空的result
+        } else if (resultList.size() == 1) {  //一个的时候 直接将那个返回就好了
             return resultList.iterator().next();
         }
         // 返回值是void
         if (returnType == void.class) {
             return new RpcResult((Object) null);
         }
+
+
+
         //若 merger 为 "." 开头，指定合并方法，将调用返回结果的指定方法进行合并，合并方法的参数类型必须是返回结果类型本身。
         if (merger.startsWith(".")) {
             merger = merger.substring(1);
@@ -183,9 +186,10 @@ public class MergeableClusterInvoker<T> implements Invoker<T> {
             Merger resultMerger;
 
             // 根据返回值类型匹配merger
-            if (ConfigUtils.isDefault(merger)) {
+            if (ConfigUtils.isDefault(merger)) {  // true 或者是 default
+                // 根据返回值类型获取Merger
                 resultMerger = MergerFactory.getMerger(returnType);
-            } else {
+            } else {// 指定了 merger类型 ，通过dubbo spi 获取 对应的merger对象
                 resultMerger = ExtensionLoader.getExtensionLoader(Merger.class).getExtension(merger);
             }
 

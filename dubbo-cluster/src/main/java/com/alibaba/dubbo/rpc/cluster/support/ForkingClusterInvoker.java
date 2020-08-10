@@ -63,10 +63,8 @@ public class ForkingClusterInvoker<T> extends AbstractClusterInvoker<T> {
         try {
             // 检查invokers 是否为空
             checkInvokers(invokers, invocation);
+            // 记录选中的invoker们
             final List<Invoker<T>> selected;
-
-
-
             // forks 缺省2
             final int forks = getUrl().getParameter(Constants.FORKS_KEY, Constants.DEFAULT_FORKS);
 
@@ -78,8 +76,6 @@ public class ForkingClusterInvoker<T> extends AbstractClusterInvoker<T> {
             if (forks <= 0 || forks >= invokers.size()) {
                 selected = invokers;//使用全部的invokers
             } else {
-
-
                 selected = new ArrayList<Invoker<T>>();
                 for (int i = 0; i < forks; i++) {// 选择几个invoker
                     // TODO. Add some comment here, refer chinese version for more details.
@@ -89,9 +85,6 @@ public class ForkingClusterInvoker<T> extends AbstractClusterInvoker<T> {
                     }
                 }
             }
-
-
-
             // 将选中的invoker们 放到context中
             RpcContext.getContext().setInvokers((List) selected);
             final AtomicInteger count = new AtomicInteger();// 计数器
