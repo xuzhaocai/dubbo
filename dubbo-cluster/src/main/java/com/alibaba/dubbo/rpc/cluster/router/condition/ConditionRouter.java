@@ -55,18 +55,37 @@ public class ConditionRouter extends AbstractRouter {
 
     public ConditionRouter(URL url) {
         this.url = url;
+        // 获取优先级 缺省的话是2
         this.priority = url.getParameter(Constants.PRIORITY_KEY, DEFAULT_PRIORITY);
+        // 获取force参数值
         this.force = url.getParameter(Constants.FORCE_KEY, false);
         try {
+
+            //获取对应的rule 规则
             String rule = url.getParameterAndDecoded(Constants.RULE_KEY);
-            if (rule == null || rule.trim().length() == 0) {
+            if (rule == null || rule.trim().length() == 0) {// 如果规则是空的话 抛出异常
                 throw new IllegalArgumentException("Illegal route rule!");
             }
+
+            // 将consumer 与provider 替换成空字符串
             rule = rule.replace("consumer.", "").replace("provider.", "");
-            int i = rule.indexOf("=>");
+            int i = rule.indexOf("=>");// 获取=> 位置
+
+
+
+
+            // 截取  => 之前的
             String whenRule = i < 0 ? null : rule.substring(0, i).trim();
+
+            // 截取 => 之后的
             String thenRule = i < 0 ? rule.trim() : rule.substring(i + 2).trim();
+
+
+            // rule 是空 或者 是true ， 创建 空map ，否则解析前半部分的（whenRule）规则
             Map<String, MatchPair> when = StringUtils.isBlank(whenRule) || "true".equals(whenRule) ? new HashMap<String, MatchPair>() : parseRule(whenRule);
+
+
+
             Map<String, MatchPair> then = StringUtils.isBlank(thenRule) || "false".equals(thenRule) ? null : parseRule(thenRule);
             // NOTE: It should be determined on the business level whether the `When condition` can be empty or not.
             this.whenCondition = when;
@@ -76,10 +95,13 @@ public class ConditionRouter extends AbstractRouter {
         }
     }
 
+    // 解析规则
     private static Map<String, MatchPair> parseRule(String rule)
             throws ParseException {
+
+
         Map<String, MatchPair> condition = new HashMap<String, MatchPair>();
-        if (StringUtils.isBlank(rule)) {
+        if (StringUtils.isBlank(rule)) {// 如果是空的话，直接返回 空的condition
             return condition;
         }
         // Key-Value pair, stores both match and mismatch conditions
@@ -88,14 +110,14 @@ public class ConditionRouter extends AbstractRouter {
         Set<String> values = null;
         final Matcher matcher = ROUTE_PATTERN.matcher(rule);
         while (matcher.find()) { // Try to match one by one
-            String separator = matcher.group(1);
-            String content = matcher.group(2);
+            String separator = matcher.group(1);// 符号
+            String content = matcher.group(2);// 对应的内容
             // Start part of the condition expression.
             if (separator == null || separator.length() == 0) {
                 pair = new MatchPair();
                 condition.put(content, pair);
             }
-            // The KV part of the condition expression
+            // The KV part of the condition expression  如果是&
             else if ("&".equals(separator)) {
                 if (condition.get(content) == null) {
                     pair = new MatchPair();
@@ -104,7 +126,7 @@ public class ConditionRouter extends AbstractRouter {
                     pair = condition.get(content);
                 }
             }
-            // The Value in the KV part.
+            // The Value in the KV part.  分隔符是=
             else if ("=".equals(separator)) {
                 if (pair == null)
                     throw new ParseException("Illegal route rule \""

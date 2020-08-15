@@ -47,7 +47,7 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
     private final URL url;
     // 是否已经销毁
     private volatile boolean destroyed = false;
-    // 消费者url
+    // 服务调用者url
     private volatile URL consumerUrl;
     //router 数组
     private volatile List<Router> routers;
@@ -125,17 +125,17 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
     protected void setRouters(List<Router> routers) {
         // copy list
         routers = routers == null ? new ArrayList<Router>() : new ArrayList<Router>(routers);
-        // append url router   获取router参数
+        // append url router   获取router参数值
         String routerkey = url.getParameter(Constants.ROUTER_KEY);
-        if (routerkey != null && routerkey.length() > 0) {
+        if (routerkey != null && routerkey.length() > 0) {// 如果router参数值不是空的话， 获取对应的工厂
             RouterFactory routerFactory = ExtensionLoader.getExtensionLoader(RouterFactory.class).getExtension(routerkey);
             routers.add(routerFactory.getRouter(url));
         }
         // append mock invoker selector  添加几个系统自带的路由处理
-        routers.add(new MockInvokersSelector());
-        routers.add(new TagRouter());
+        routers.add(new MockInvokersSelector());// mock router
+        routers.add(new TagRouter());           // tag router
 
-        //排序
+        //路由排序
         Collections.sort(routers);
         this.routers = routers;
     }

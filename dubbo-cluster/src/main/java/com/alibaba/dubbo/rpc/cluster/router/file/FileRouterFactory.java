@@ -30,6 +30,7 @@ import java.io.IOException;
 
 /**
  * 基于文件读取路由规则，创建对应的 Router 实现类的对象
+ *
  */
 public class FileRouterFactory implements RouterFactory {
 
@@ -66,8 +67,9 @@ public class FileRouterFactory implements RouterFactory {
 
             // 读取规则内容
             String rule = IOUtils.read(new FileReader(new File(url.getAbsolutePath())));
-           // 创建路由规则 URL
+           // 创建路由规则 URL runtime 缺省 false
             boolean runtime = url.getParameter(Constants.RUNTIME_KEY, false);
+            // type
             URL script = url.setProtocol(protocol).addParameter(Constants.TYPE_KEY, type).addParameter(Constants.RUNTIME_KEY, runtime).addParameterAndEncoded(Constants.RULE_KEY, rule);
             //使用dubbo spi机制获得router
             return routerFactory.getRouter(script);

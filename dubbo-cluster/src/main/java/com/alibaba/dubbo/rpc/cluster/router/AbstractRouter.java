@@ -19,6 +19,10 @@ package com.alibaba.dubbo.rpc.cluster.router;
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.rpc.cluster.Router;
 
+
+/**
+ * 主要是处理 Router的排序问题
+ */
 public abstract class AbstractRouter implements Router {
 
     protected URL url;// 配置路由url
@@ -33,7 +37,7 @@ public abstract class AbstractRouter implements Router {
     public int compareTo(Router o) {
         return (this.getPriority() < o.getPriority()) ? -1 : ((this.getPriority() == o.getPriority()) ? 0 : 1);
     }
-
+    // 获取优先级
     public int getPriority() {
         return priority;
     }
