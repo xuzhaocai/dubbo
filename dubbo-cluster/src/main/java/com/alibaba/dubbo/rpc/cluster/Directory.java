@@ -38,13 +38,10 @@ public interface Directory<T> extends Node {
      * @return service type.
      */
     Class<T> getInterface();
-
-
     /**
      * list invokers.
      * 获得所有invoker 列表
      * @return invokers
      */
     List<Invoker<T>> list(Invocation invocation) throws RpcException;
-
 }

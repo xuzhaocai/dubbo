@@ -70,8 +70,6 @@ public class ForkingClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
             //timeout 缺省1s
             final int timeout = getUrl().getParameter(Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT);
-
-
             // forks 小于等于0  或者 forks 大于的 invoker的列表
             if (forks <= 0 || forks >= invokers.size()) {
                 selected = invokers;//使用全部的invokers
@@ -85,6 +83,7 @@ public class ForkingClusterInvoker<T> extends AbstractClusterInvoker<T> {
                     }
                 }
             }
+            ///---------------------------------------------------------
             // 将选中的invoker们 放到context中
             RpcContext.getContext().setInvokers((List) selected);
             final AtomicInteger count = new AtomicInteger();// 计数器
@@ -109,6 +108,7 @@ public class ForkingClusterInvoker<T> extends AbstractClusterInvoker<T> {
                     }
                 });
             }
+            //----------------------------------------------------------------------------
             try {
 
                 // 在超时范围内获取第一个结果

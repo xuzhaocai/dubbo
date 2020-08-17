@@ -66,33 +66,21 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
     private static final RouterFactory routerFactory = ExtensionLoader.getExtensionLoader(RouterFactory.class).getAdaptiveExtension();
     // configurator
     private static final ConfiguratorFactory configuratorFactory = ExtensionLoader.getExtensionLoader(ConfiguratorFactory.class).getAdaptiveExtension();
-
-
-
-
     private final String serviceKey; // Initialization at construction time, assertion not null
     // 服务类型
     private final Class<T> serviceType; // Initialization at construction time, assertion not null
     // consumer url 配置项url
     private final Map<String, String> queryMap; // Initialization at construction time, assertion not null
-
-
     // 原始目录url
     private final URL directoryUrl; // Initialization at construction time, assertion not null, and always assign non null value
     // 服务方法数组
     private final String[] serviceMethods;
     // 是否引用多分组
     private final boolean multiGroup;
-
-
-
-
-    // 注册中心 protocol
+    // protocol
     private Protocol protocol; // Initialization at the time of injection, the assertion is not null
-
     //注册中心
     private Registry registry; // Initialization at the time of injection, the assertion is not null
-
 
     /**
      * 是否禁止访问
@@ -165,7 +153,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
             }
             Map<String, String> override = new HashMap<String, String>(url.getParameters());
             //The anyhost parameter of override may be added automatically, it can't change the judgement of changing url
-            override.remove(Constants.ANYHOST_KEY);
+            override.remove(Constants.ANYHOST_KEY);//anyhost
             if (override.size() == 0) {
                 configurators.clear();
                 continue;
@@ -189,10 +177,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
      * @param url
      */
     public void subscribe(URL url) {
-
         // 向父类设置consumerUrl
         setConsumerUrl(url);
-
         // 向注册中心， 发起订阅
         registry.subscribe(url, this);
     }
@@ -540,18 +526,26 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
      * @return Mapping relation between Invoker and method
      */
     private Map<String, List<Invoker<T>>> toMethodInvokers(Map<String, Invoker<T>> invokersMap) {
+
+        // 存放 method 方法名与 invoker 集合对应关系的
         Map<String, List<Invoker<T>>> newMethodInvokerMap = new HashMap<String, List<Invoker<T>>>();
         // According to the methods classification declared by the provider URL, the methods is compatible with the registry to execute the filtered methods
         List<Invoker<T>> invokersList = new ArrayList<Invoker<T>>();
         if (invokersMap != null && invokersMap.size() > 0) {
+            // 遍历
             for (Invoker<T> invoker : invokersMap.values()) {
+
+                // methods方法名 字符串。
                 String parameter = invoker.getUrl().getParameter(Constants.METHODS_KEY);//获取method方法名串
                 if (parameter != null && parameter.length() > 0) {
+                    //使用英文逗号切割methods 方法名串
                     String[] methods = Constants.COMMA_SPLIT_PATTERN.split(parameter);//切割
                     if (methods != null && methods.length > 0) {
                         for (String method : methods) {
+                            // 方法名 不是空， 并且不是*
                             if (method != null && method.length() > 0
                                     && !Constants.ANY_VALUE.equals(method)) {
+                                // 没有设置过
                                 List<Invoker<T>> methodInvokers = newMethodInvokerMap.get(method);
                                 if (methodInvokers == null) {
                                     methodInvokers = new ArrayList<Invoker<T>>();
@@ -567,18 +561,26 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
         }
         // 通过router进行路由过滤
         List<Invoker<T>> newInvokersList = route(invokersList, null);
+
+        // 将 * 为key  value 为路由过滤完的invoker列表  缓存到 map中
         newMethodInvokerMap.put(Constants.ANY_VALUE, newInvokersList);
+
+        // 这个serviceMethods 是创建RegistryDirectory对象的时候构造方法中处理的
         if (serviceMethods != null && serviceMethods.length > 0) {
             for (String method : serviceMethods) {
+                // 根据method获取对应的invoker集合
                 List<Invoker<T>> methodInvokers = newMethodInvokerMap.get(method);
                 if (methodInvokers == null || methodInvokers.isEmpty()) {
                     methodInvokers = newInvokersList;
                 }
+                // 重新设置了一下，然后将 之前的methodInvokers 这个invoker集合使用router过滤了一下
                 newMethodInvokerMap.put(method, route(methodInvokers, method));
             }
         }
+
+
         // sort and unmodifiable
-        for (String method : new HashSet<String>(newMethodInvokerMap.keySet())) {
+        for (String method : new HashSet<String>(newMethodInvokerMap.keySet())) {// 进行排序
             List<Invoker<T>> methodInvokers = newMethodInvokerMap.get(method);
             Collections.sort(methodInvokers, InvokerComparator.getComparator());
             newMethodInvokerMap.put(method, Collections.unmodifiableList(methodInvokers));
@@ -655,7 +657,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
 
 
         // forbiden  出现的情况 没有服务提供者或者是服务提供者都不能用
-        if (forbidden) {
+        if (forbidden) {// 这个就是没有服务提供者
             // 1. No service provider 2. Service providers are disabled
             throw new RpcException(RpcException.FORBIDDEN_EXCEPTION,
                 "No provider available from registry " + getUrl().getAddress() + " for service " + getConsumerUrl().getServiceKey() + " on consumer " +  NetUtils.getLocalHost()
@@ -666,8 +668,11 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
         List<Invoker<T>> invokers = null;
         Map<String, List<Invoker<T>>> localMethodInvokerMap = this.methodInvokerMap; // local reference
         if (localMethodInvokerMap != null && localMethodInvokerMap.size() > 0) {
+            // 从调用信息中获取调用方法名
             String methodName = RpcUtils.getMethodName(invocation);
+            // 获取参数
             Object[] args = RpcUtils.getArguments(invocation);
+
             if (args != null && args.length > 0 && args[0] != null
                     && (args[0] instanceof String || args[0].getClass().isEnum())) {
                 invokers = localMethodInvokerMap.get(methodName + "." + args[0]); // The routing can be enumerated according to the first parameter
