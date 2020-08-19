@@ -18,6 +18,11 @@ package com.alibaba.dubbo.rpc.cluster.router;
 
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.rpc.cluster.Router;
+import com.alibaba.dubbo.rpc.cluster.router.tag.TagRouter;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -26,7 +31,7 @@ import com.alibaba.dubbo.rpc.cluster.Router;
 public abstract class AbstractRouter implements Router {
 
     protected URL url;// 配置路由url
-    protected int priority;  // 优先级  ， 优先级越大越需要先执行
+    protected int priority;  // 优先级
 
     @Override
     public URL getUrl() {

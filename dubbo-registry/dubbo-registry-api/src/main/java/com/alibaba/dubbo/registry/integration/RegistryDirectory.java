@@ -371,7 +371,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
                 if (Constants.EMPTY_PROTOCOL.equals(url.getProtocol())) {
                     continue;
                 }
-                // 获取router
+                // 获取router类型
                 String routerType = url.getParameter(Constants.ROUTER_KEY);
                 if (routerType != null && routerType.length() > 0) {
                     url = url.setProtocol(routerType);// 设置route 协议
