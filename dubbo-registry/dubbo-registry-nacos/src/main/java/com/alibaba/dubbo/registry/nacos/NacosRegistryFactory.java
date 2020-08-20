@@ -43,6 +43,8 @@ import static com.alibaba.nacos.client.naming.utils.UtilAndComs.NACOS_NAMING_LOG
  * Nacos {@link RegistryFactory}
  *
  * @since 2.6.6
+ *
+ * nacos 注册中心工厂
  */
 public class NacosRegistryFactory extends AbstractRegistryFactory {
 
@@ -53,9 +55,11 @@ public class NacosRegistryFactory extends AbstractRegistryFactory {
     }
 
     private NamingService buildNamingService(URL url) {
+        // 获取nacos的配置项
         Properties nacosProperties = buildNacosProperties(url);
         NamingService namingService = null;
         try {
+            //创建nameService
             namingService = NacosFactory.createNamingService(nacosProperties);
         } catch (NacosException e) {
             if (logger.isErrorEnabled()) {
@@ -73,35 +77,43 @@ public class NacosRegistryFactory extends AbstractRegistryFactory {
         return properties;
     }
 
+    /**
+     * 往properties 设置server addr
+     * @param url 注册中心 url
+     * @param properties 存放参数的
+     */
     private void setServerAddr(URL url, Properties properties) {
         StringBuilder serverAddrBuilder =
                 new StringBuilder(url.getHost()) // Host
                         .append(":")
                         .append(url.getPort()); // Port
-
+        // 备份参数
         // Append backup parameter as other servers
-        String backup = url.getParameter(BACKUP_KEY);
+        String backup = url.getParameter(BACKUP_KEY);// backup
         if (backup != null) {
             serverAddrBuilder.append(",").append(backup);
         }
 
         String serverAddr = serverAddrBuilder.toString();
+        // key： serverAddr  value： ip:port，backup
         properties.put(SERVER_ADDR, serverAddr);
     }
 
     private void setProperties(URL url, Properties properties) {
-        putPropertyIfAbsent(url, properties, NAMESPACE);
-        putPropertyIfAbsent(url, properties, NACOS_NAMING_LOG_NAME);
-        putPropertyIfAbsent(url, properties, ENDPOINT);
-        putPropertyIfAbsent(url, properties, NAMESPACE);
-        putPropertyIfAbsent(url, properties, ACCESS_KEY);
-        putPropertyIfAbsent(url, properties, SECRET_KEY);
-        putPropertyIfAbsent(url, properties, CLUSTER_NAME);
+        putPropertyIfAbsent(url, properties, NAMESPACE);// namespace
+        putPropertyIfAbsent(url, properties, NACOS_NAMING_LOG_NAME);//com.alibaba.nacos.naming.log.filename
+        putPropertyIfAbsent(url, properties, ENDPOINT);//endpoint
+        putPropertyIfAbsent(url, properties, NAMESPACE);// namespace
+        putPropertyIfAbsent(url, properties, ACCESS_KEY);//accessKey
+        putPropertyIfAbsent(url, properties, SECRET_KEY);//secretKey
+        putPropertyIfAbsent(url, properties, CLUSTER_NAME);//clusterName
     }
 
     private void putPropertyIfAbsent(URL url, Properties properties, String propertyName) {
+        // 从url中获取 某个参数值
         String propertyValue = url.getParameter(propertyName);
         if (StringUtils.isNotEmpty(propertyValue)) {
+            // 不是空的话，就设置到properties中
             properties.setProperty(propertyName, propertyValue);
         }
     }

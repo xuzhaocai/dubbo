@@ -67,10 +67,10 @@ public class NacosRegistry extends FailbackRegistry {
      * All supported categories
      */
     private static final String[] ALL_SUPPORTED_CATEGORIES = of(
-            PROVIDERS_CATEGORY,
-            CONSUMERS_CATEGORY,
-            ROUTERS_CATEGORY,
-            CONFIGURATORS_CATEGORY
+            PROVIDERS_CATEGORY,// providers
+            CONSUMERS_CATEGORY,// consumers
+            ROUTERS_CATEGORY,// routers
+            CONFIGURATORS_CATEGORY// configurators
     );
 
     private static final int CATEGORY_INDEX = 0;
@@ -107,9 +107,9 @@ public class NacosRegistry extends FailbackRegistry {
     private volatile ScheduledExecutorService scheduledExecutorService;
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
-
+    // nameservice
     private final NamingService namingService;
-
+    // listeners
     private final ConcurrentMap<String, EventListener> nacosListeners;
 
     public NacosRegistry(URL url, NamingService namingService) {
@@ -138,8 +138,10 @@ public class NacosRegistry extends FailbackRegistry {
         });
         return urls;
     }
-
+    // 进行注册
     protected void doRegister(URL url) {
+
+        // 获取serviceName
         final String serviceName = getServiceName(url);
         final Instance instance = createInstance(url);
         execute(new NamingServiceCallback() {
@@ -438,18 +440,19 @@ public class NacosRegistry extends FailbackRegistry {
     }
 
     private String getServiceName(URL url) {
+        // 获取分类信息
         String category = url.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY);
         return getServiceName(url, category);
     }
 
     private String getServiceName(URL url, String category) {
         StringBuilder serviceNameBuilder = new StringBuilder(category);
-        appendIfPresent(serviceNameBuilder, url, Constants.INTERFACE_KEY);
-        appendIfPresent(serviceNameBuilder, url, Constants.VERSION_KEY);
-        appendIfPresent(serviceNameBuilder, url, Constants.GROUP_KEY);
+        appendIfPresent(serviceNameBuilder, url, Constants.INTERFACE_KEY);// interface
+        appendIfPresent(serviceNameBuilder, url, Constants.VERSION_KEY); // version
+        appendIfPresent(serviceNameBuilder, url, Constants.GROUP_KEY);  // group
         return serviceNameBuilder.toString();
     }
-
+    //从url中获取 某参数值，然后值不为空的话就拼接到builder中
     private void appendIfPresent(StringBuilder target, URL url, String parameterName) {
         String parameterValue = url.getParameter(parameterName);
         if (!StringUtils.isBlank(parameterValue)) {

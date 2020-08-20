@@ -56,7 +56,7 @@ import java.util.concurrent.TimeUnit;
 
 public class RestProtocol extends AbstractProxyProtocol {
 
-    private static final int DEFAULT_PORT = 80;
+    private static final int DEFAULT_PORT = 80;// 默认端口
 
     private final Map<String, RestServer> servers = new ConcurrentHashMap<String, RestServer>();
 

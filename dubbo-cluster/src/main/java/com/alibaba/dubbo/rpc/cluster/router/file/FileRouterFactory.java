@@ -41,20 +41,13 @@ public class FileRouterFactory implements RouterFactory {
     public void setRouterFactory(RouterFactory routerFactory) {
         this.routerFactory = routerFactory;
     }
-
     @Override
     public Router getRouter(URL url) {
         try {
             // Transform File URL into Script Route URL, and Load
             // file:///d:/path/to/route.js?router=script ==> script:///d:/path/to/route.js?type=js&rule=<file-content>
-
-
-
-
             // 获取router 配置项。默认是script
             String protocol = url.getParameter(Constants.ROUTER_KEY, ScriptRouterFactory.NAME); // Replace original protocol (maybe 'file') with 'script'
-
-
             // 使用文件后缀作为类型
             String type = null; // Use file suffix to config script type, e.g., js, groovy ...
             String path = url.getPath();
@@ -64,7 +57,6 @@ public class FileRouterFactory implements RouterFactory {
                     type = path.substring(i + 1);
                 }
             }
-
             // 读取规则内容
             String rule = IOUtils.read(new FileReader(new File(url.getAbsolutePath())));
            // 创建路由规则 URL runtime 缺省 false
