@@ -66,16 +66,14 @@ public abstract class AbstractRegistry implements Registry {
     // File cache timing writing
     private final ExecutorService registryCacheExecutor = Executors.newFixedThreadPool(1, new NamedThreadFactory("DubboSaveRegistryCache", true));
     // Is it synchronized to save the file  是否同步保存到file中
-
     private final boolean syncSaveFile;
     private final AtomicLong lastCacheChanged = new AtomicLong();
     private final Set<URL> registered = new ConcurrentHashSet<URL>();// 已经注册的
-
     // 已经订阅的
     private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<URL, Set<NotifyListener>>();
     // 已经通知的
     private final ConcurrentMap<URL, Map<String, List<URL>>> notified = new ConcurrentHashMap<URL, Map<String, List<URL>>>();
-    private URL registryUrl;  // 注册url
+    private URL registryUrl;  // 注册中心url
     // Local disk cache file
     private File file;
 
@@ -146,28 +144,33 @@ public abstract class AbstractRegistry implements Registry {
     }
 
     public void doSaveProperties(long version) {
+        // 判断版本
         if (version < lastCacheChanged.get()) {
             return;
         }
+        // 判断file
         if (file == null) {
             return;
         }
         // Save
         try {
+            //创建锁文件。
             File lockfile = new File(file.getAbsolutePath() + ".lock");
-            if (!lockfile.exists()) {
+            if (!lockfile.exists()) {// 如果不存在的话就创建
                 lockfile.createNewFile();
             }
             RandomAccessFile raf = new RandomAccessFile(lockfile, "rw");
             try {
                 FileChannel channel = raf.getChannel();
                 try {
+                    //获取锁
                     FileLock lock = channel.tryLock();
                     if (lock == null) {
                         throw new IOException("Can not lock the registry cache file " + file.getAbsolutePath() + ", ignore and retry later, maybe multi java process use the file, please config: dubbo.registry.file=xxx.properties");
                     }
                     // Save
                     try {
+                        // 如果缓存文件不存在就
                         if (!file.exists()) {
                             file.createNewFile();
                         }
@@ -178,6 +181,7 @@ public abstract class AbstractRegistry implements Registry {
                             outputFile.close();
                         }
                     } finally {
+                        // 释放锁
                         lock.release();
                     }
                 } finally {
@@ -189,7 +193,7 @@ public abstract class AbstractRegistry implements Registry {
         } catch (Throwable e) {
             if (version < lastCacheChanged.get()) {
                 return;
-            } else {
+            } else {//出现异常 就异步保存
                 registryCacheExecutor.execute(new SaveProperties(lastCacheChanged.incrementAndGet()));
             }
             logger.warn("Failed to save registry store file, cause: " + e.getMessage(), e);
@@ -240,16 +244,19 @@ public abstract class AbstractRegistry implements Registry {
     @Override
     public List<URL> lookup(URL url) {
         List<URL> result = new ArrayList<URL>();
+        //从已经通知 缓存中获取某个url对应的分组url集合
         Map<String, List<URL>> notifiedUrls = getNotified().get(url);
         if (notifiedUrls != null && notifiedUrls.size() > 0) {
             for (List<URL> urls : notifiedUrls.values()) {
                 for (URL u : urls) {
+                    // protocol不是空的话
                     if (!Constants.EMPTY_PROTOCOL.equals(u.getProtocol())) {
                         result.add(u);
                     }
                 }
             }
         } else {
+            //使用listener订阅的方式获取 urls
             final AtomicReference<List<URL>> reference = new AtomicReference<List<URL>>();
             NotifyListener listener = new NotifyListener() {
                 @Override
@@ -328,7 +335,6 @@ public abstract class AbstractRegistry implements Registry {
         if (logger.isInfoEnabled()) {
             logger.info("Unsubscribe: " + url);
         }
-
         // 移除缓存中某个url的listener
         Set<NotifyListener> listeners = subscribed.get(url);
         if (listeners != null) {
@@ -435,26 +441,28 @@ public abstract class AbstractRegistry implements Registry {
         if (file == null) {
             return;
         }
-
         try {
             StringBuilder buf = new StringBuilder();
+            // 根据url从 已经通知集合中获取 分类 urls
             Map<String, List<URL>> categoryNotified = notified.get(url);
             if (categoryNotified != null) {
+                // 遍历拼接 url
                 for (List<URL> us : categoryNotified.values()) {
                     for (URL u : us) {
                         if (buf.length() > 0) {
-                            buf.append(URL_SEPARATOR);
+                            buf.append(URL_SEPARATOR);// 使用空字符串隔开
                         }
                         buf.append(u.toFullString());
                     }
                 }
             }
-            properties.setProperty(url.getServiceKey(), buf.toString());
-            // 版本
+            // key 接口全类名  value urls.toFullString
+            properties.setProperty(url.getServiceKey(),buf.toString());
+            // 获取版本
             long version = lastCacheChanged.incrementAndGet();
-            if (syncSaveFile) {// 同步
+            if (syncSaveFile) {// 同步保存
                 doSaveProperties(version);
-            } else { //异步
+            } else { //异步保存
                 registryCacheExecutor.execute(new SaveProperties(version));
             }
         } catch (Throwable t) {

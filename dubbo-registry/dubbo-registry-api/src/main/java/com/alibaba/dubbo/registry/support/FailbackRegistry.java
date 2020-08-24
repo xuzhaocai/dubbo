@@ -60,7 +60,6 @@ public abstract class FailbackRegistry extends AbstractRegistry {
 
     /**
      * The time in milliseconds the retryExecutor will wait
-     *
      * 重试时间间隔
      */
     private final int retryPeriod;
@@ -173,7 +172,6 @@ public abstract class FailbackRegistry extends AbstractRegistry {
             doUnregister(url);
         } catch (Exception e) {
             Throwable t = e;
-
             // If the startup detection is opened, the Exception is thrown directly.
             boolean check = getUrl().getParameter(Constants.CHECK_KEY, true)
                     && url.getParameter(Constants.CHECK_KEY, true)
@@ -202,7 +200,6 @@ public abstract class FailbackRegistry extends AbstractRegistry {
             doSubscribe(url, listener);// 进行订阅
         } catch (Exception e) {
             Throwable t = e;
-
             List<URL> urls = getCacheUrls(url);
             if (urls != null && !urls.isEmpty()) {
                 notify(url, listener, urls);
