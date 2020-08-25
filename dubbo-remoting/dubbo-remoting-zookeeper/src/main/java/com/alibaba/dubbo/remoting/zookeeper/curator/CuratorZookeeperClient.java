@@ -69,7 +69,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
-
+    // 创建永久节点
     @Override
     public void createPersistent(String path) {
         try {
@@ -79,7 +79,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
-
+    // 创建临时节点
     @Override
     public void createEphemeral(String path) {
         try {
@@ -89,7 +89,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
-
+    // 删除节点
     @Override
     public void delete(String path) {
         try {
@@ -99,7 +99,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
-
+    // 获取节点的子节点们
     @Override
     public List<String> getChildren(String path) {
         try {
@@ -110,7 +110,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
-
+    // 检查节点是否存在
     @Override
     public boolean checkExists(String path) {
         try {
@@ -135,7 +135,7 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
     public CuratorWatcher createTargetChildListener(String path, ChildListener listener) {
         return new CuratorWatcherImpl(listener);
     }
-
+    // 添加节点监听器
     @Override
     public List<String> addTargetChildListener(String path, CuratorWatcher listener) {
         try {
@@ -146,27 +146,24 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
             throw new IllegalStateException(e.getMessage(), e);
         }
     }
-
+    // 移除节点监听器
     @Override
     public void removeTargetChildListener(String path, CuratorWatcher listener) {
         ((CuratorWatcherImpl) listener).unwatch();
     }
-
+    // 实现CuratorWatcher 接口，
     private class CuratorWatcherImpl implements CuratorWatcher {
-
         private volatile ChildListener listener;
-
         public CuratorWatcherImpl(ChildListener listener) {
             this.listener = listener;
         }
-
         public void unwatch() {
             this.listener = null;
         }
-
         @Override
         public void process(WatchedEvent event) throws Exception {
             if (listener != null) {
+                // 获取path
                 String path = event.getPath() == null ? "" : event.getPath();
                 listener.childChanged(path,
                         // if path is null, curator using watcher will throw NullPointerException.

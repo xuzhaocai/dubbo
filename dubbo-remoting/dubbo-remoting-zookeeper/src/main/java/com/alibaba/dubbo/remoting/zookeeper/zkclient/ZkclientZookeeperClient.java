@@ -37,6 +37,7 @@ public class ZkclientZookeeperClient extends AbstractZookeeperClient<IZkChildLis
 
     public ZkclientZookeeperClient(URL url) {
         super(url);
+        // 创建ZkClientWrapper对象
         client = new ZkClientWrapper(url.getBackupAddress(), 30000);
         client.addListener(new IZkStateListener() {
             @Override
@@ -109,12 +110,12 @@ public class ZkclientZookeeperClient extends AbstractZookeeperClient<IZkChildLis
     public void doClose() {
         client.close();
     }
-
+    // 创建子类监听器对象
     @Override
     public IZkChildListener createTargetChildListener(String path, final ChildListener listener) {
         return new IZkChildListener() {
             @Override
-            public void handleChildChange(String parentPath, List<String> currentChilds)
+            public void handleChildChange(String parentPath, List<String> currentChilds)// 子类发生变动的时候
                     throws Exception {
                 listener.childChanged(parentPath, currentChilds);
             }
@@ -125,7 +126,6 @@ public class ZkclientZookeeperClient extends AbstractZookeeperClient<IZkChildLis
     public List<String> addTargetChildListener(String path, final IZkChildListener listener) {
         return client.subscribeChildChanges(path, listener);
     }
-
     @Override
     public void removeTargetChildListener(String path, IZkChildListener listener) {
         client.unsubscribeChildChanges(path, listener);

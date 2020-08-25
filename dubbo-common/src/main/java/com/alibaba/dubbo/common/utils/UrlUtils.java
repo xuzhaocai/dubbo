@@ -343,40 +343,48 @@ public class UrlUtils {
 
     public static boolean isMatchCategory(String category, String categories) {
         if (categories == null || categories.length() == 0) {
-            return Constants.DEFAULT_CATEGORY.equals(category);
-        } else if (categories.contains(Constants.ANY_VALUE)) {
+            return Constants.DEFAULT_CATEGORY.equals(category);// provider category 是默认的
+        } else if (categories.contains(Constants.ANY_VALUE)) {// consumer category 是*
             return true;
-        } else if (categories.contains(Constants.REMOVE_VALUE_PREFIX)) {
-            return !categories.contains(Constants.REMOVE_VALUE_PREFIX + category);
-        } else {
+        } else if (categories.contains(Constants.REMOVE_VALUE_PREFIX)) {// 当consumer  category中存在 -
+            return !categories.contains(Constants.REMOVE_VALUE_PREFIX + category); //consumer category 没有排除 provider的category
+        } else {// consumer 中包含 provider的catogory
             return categories.contains(category);
         }
     }
 
     public static boolean isMatch(URL consumerUrl, URL providerUrl) {
-        String consumerInterface = consumerUrl.getServiceInterface();
-        String providerInterface = providerUrl.getServiceInterface();
-        if (!(Constants.ANY_VALUE.equals(consumerInterface) || StringUtils.isEquals(consumerInterface, providerInterface)))
+        String consumerInterface = consumerUrl.getServiceInterface();// 获取接口
+        String providerInterface = providerUrl.getServiceInterface(); // 获取接口
+        // consumerInterface 不是*  或者 consumerInterface 与providerInterface 不相等
+        if (!(Constants.ANY_VALUE.equals(consumerInterface) ||
+                // consumerInterface 与providerInterface 相等
+                StringUtils.isEquals(consumerInterface, providerInterface)))
             return false;
-
+        // category 是否符合要求
         if (!isMatchCategory(providerUrl.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY),
                 consumerUrl.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY))) {
             return false;
         }
+        // provider enable是flase  &&  consumer enable 不是 *
         if (!providerUrl.getParameter(Constants.ENABLED_KEY, true)
                 && !Constants.ANY_VALUE.equals(consumerUrl.getParameter(Constants.ENABLED_KEY))) {
             return false;
         }
-
+        // group
         String consumerGroup = consumerUrl.getParameter(Constants.GROUP_KEY);
+        // version
         String consumerVersion = consumerUrl.getParameter(Constants.VERSION_KEY);
+        // classifier 缺省是*
         String consumerClassifier = consumerUrl.getParameter(Constants.CLASSIFIER_KEY, Constants.ANY_VALUE);
-
         String providerGroup = providerUrl.getParameter(Constants.GROUP_KEY);
         String providerVersion = providerUrl.getParameter(Constants.VERSION_KEY);
         String providerClassifier = providerUrl.getParameter(Constants.CLASSIFIER_KEY, Constants.ANY_VALUE);
+                    // consumer category 是*  或者   category相等 或者是 consumer category中包含着 provider的category
         return (Constants.ANY_VALUE.equals(consumerGroup) || StringUtils.isEquals(consumerGroup, providerGroup) || StringUtils.isContains(consumerGroup, providerGroup))
+                //  consumer的version 是 * 或者 两个version 相等
                 && (Constants.ANY_VALUE.equals(consumerVersion) || StringUtils.isEquals(consumerVersion, providerVersion))
+                //consumerClassifier 是null 或者 consumerClassifier 是*   或者相等。
                 && (consumerClassifier == null || Constants.ANY_VALUE.equals(consumerClassifier) || StringUtils.isEquals(consumerClassifier, providerClassifier));
     }
 

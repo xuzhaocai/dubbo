@@ -21,25 +21,25 @@ import com.alibaba.dubbo.common.URL;
 import java.util.List;
 
 public interface ZookeeperClient {
-
+    // 创建节点
     void create(String path, boolean ephemeral);
-
+    // 删除节点
     void delete(String path);
-
+    // 获取某个节点的子节点
     List<String> getChildren(String path);
-
+    //为某个节点添加子节点监听器
     List<String> addChildListener(String path, ChildListener listener);
-
+    // 移除某个节点的某个子节点监听器
     void removeChildListener(String path, ChildListener listener);
-
+    // 添加 连接状态监听器
     void addStateListener(StateListener listener);
-
+    // 移除 连接状态监听器
     void removeStateListener(StateListener listener);
-
+    // 是否连接
     boolean isConnected();
-
+    // 关闭
     void close();
-
+    // 获取url
     URL getUrl();
 
 }

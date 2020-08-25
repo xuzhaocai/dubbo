@@ -39,14 +39,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class ZkClientWrapper {
     Logger logger = LoggerFactory.getLogger(ZkClientWrapper.class);
-
-    private long timeout;
-    private ZkClient client;
-    private volatile KeeperState state;
-    private ListenableFutureTask<ZkClient> listenableFutureTask;
-    private volatile boolean started = false;
-
-
+    private long timeout;// 超时时间
+    private ZkClient client;// zkClient
+    private volatile KeeperState state;// 状态
+    private ListenableFutureTask<ZkClient> listenableFutureTask;// 异步future
+    private volatile boolean started = false;// 启动状态的记录
     public ZkClientWrapper(final String serverAddr, long timeout) {
         this.timeout = timeout;
         listenableFutureTask = ListenableFutureTask.create(new Callable<ZkClient>() {
@@ -73,7 +70,6 @@ public class ZkClientWrapper {
             logger.warn("Zkclient has already been started!");
         }
     }
-
     public void addListener(final IZkStateListener listener) {
         listenableFutureTask.addListener(new Runnable() {
             @Override
@@ -123,7 +119,7 @@ public class ZkClientWrapper {
         Assert.notNull(client, new IllegalStateException("Zookeeper is not connected yet!"));
         client.close();
     }
-    // 订阅子节点
+    // 订阅节点
     public List<String> subscribeChildChanges(String path, final IZkChildListener listener) {
         Assert.notNull(client, new IllegalStateException("Zookeeper is not connected yet!"));
         return client.subscribeChildChanges(path, listener);
