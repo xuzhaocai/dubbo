@@ -62,10 +62,17 @@ public abstract class AbstractMonitorFactory implements MonitorFactory {
 
     @Override
     public Monitor getMonitor(URL url) {// 设置path 为com.alibaba.dubbo.monitor.MonitorService ，添加参数interface
+        // 设置path com.alibaba.dubbo.monitor.MonitorService  interface =com.alibaba.dubbo.monitor.MonitorService
         url = url.setPath(MonitorService.class.getName()).addParameter(Constants.INTERFACE_KEY, MonitorService.class.getName());
+
+        // 生成一个key
         String key = url.toServiceStringWithoutResolving();
+
+
         Monitor monitor = MONITORS.get(key);// 获取monitor
         Future<Monitor> future = FUTURES.get(key);
+
+        // 如果缓存了具体的monitor就 返回
         if (monitor != null || future != null) {
             return monitor;
         }
@@ -79,6 +86,7 @@ public abstract class AbstractMonitorFactory implements MonitorFactory {
             }
 
             final URL monitorUrl = url;
+
             final ListenableFutureTask<Monitor> listenableFutureTask = ListenableFutureTask.create(new MonitorCreator(monitorUrl));
             listenableFutureTask.addListener(new MonitorListener(key));
             executor.execute(listenableFutureTask);
@@ -90,7 +98,7 @@ public abstract class AbstractMonitorFactory implements MonitorFactory {
             LOCK.unlock();
         }
     }
-
+    // 具体还是子类来进行创建
     protected abstract Monitor createMonitor(URL url);
 
     class MonitorCreator implements Callable<Monitor> {
@@ -121,6 +129,7 @@ public abstract class AbstractMonitorFactory implements MonitorFactory {
             try {
                 ListenableFuture<Monitor> listenableFuture = AbstractMonitorFactory.FUTURES.get(key);
                 AbstractMonitorFactory.MONITORS.put(key, listenableFuture.get());
+
                 AbstractMonitorFactory.FUTURES.remove(key);
             } catch (InterruptedException e) {
                 logger.warn("Thread was interrupted unexpectedly, monitor will never be got.");

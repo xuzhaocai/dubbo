@@ -58,11 +58,15 @@ public class MonitorFilter implements Filter {
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         if (invoker.getUrl().hasParameter(Constants.MONITOR_KEY)) {// 判断是否有monitor参数
             RpcContext context = RpcContext.getContext(); // provider must fetch context before invoke() gets called
+
             String remoteHost = context.getRemoteHost();
             long start = System.currentTimeMillis(); // record start timestamp
+            // 计数器+1
             getConcurrent(invoker, invocation).incrementAndGet(); // count up 自增加1
             try {
+                // 进行调用
                 Result result = invoker.invoke(invocation); // proceed invocation chain
+
                 collect(invoker, invocation, result, remoteHost, start, false);// 进行收集
                 return result;
             } catch (RpcException e) {
@@ -81,6 +85,7 @@ public class MonitorFilter implements Filter {
         try {
             // ---- service statistics ----
             long elapsed = System.currentTimeMillis() - start; // invocation cost  调用耗时
+
             int concurrent = getConcurrent(invoker, invocation).get(); // current concurrent count  获取当前的次数
             String application = invoker.getUrl().getParameter(Constants.APPLICATION_KEY);  // application
             String service = invoker.getInterface().getName(); // service name    //接口名
@@ -88,6 +93,8 @@ public class MonitorFilter implements Filter {
             String group = invoker.getUrl().getParameter(Constants.GROUP_KEY);   // 分组
             String version = invoker.getUrl().getParameter(Constants.VERSION_KEY);  // version
             URL url = invoker.getUrl().getUrlParameter(Constants.MONITOR_KEY);  // monitor
+
+
             Monitor monitor = monitorFactory.getMonitor(url);// 获取Monitor
             if (monitor == null) {
                 return;
@@ -99,32 +106,39 @@ public class MonitorFilter implements Filter {
                 // ---- for service consumer ----
                 localPort = 0;
                 remoteKey = MonitorService.PROVIDER;
-                remoteValue = invoker.getUrl().getAddress();
+                remoteValue = invoker.getUrl().getAddress();// 远程地址
             } else {// 如果是服务提供者端
                 // ---- for service provider ----
-                localPort = invoker.getUrl().getPort();
+                localPort = invoker.getUrl().getPort();// 获取服务提供者端的port
                 remoteKey = MonitorService.CONSUMER;
-                remoteValue = remoteHost;
+                remoteValue = remoteHost;// 远程地址
             }
             String input = "", output = "";
+            // 获取input
             if (invocation.getAttachment(Constants.INPUT_KEY) != null) {// input
                 input = invocation.getAttachment(Constants.INPUT_KEY);
             }
+            // 获取output
             if (result != null && result.getAttachment(Constants.OUTPUT_KEY) != null) {// output
                 output = result.getAttachment(Constants.OUTPUT_KEY);
             }
-
             //收集
-            monitor.collect(new URL(Constants.COUNT_PROTOCOL,
+            monitor.collect(new URL(Constants.COUNT_PROTOCOL,// count
                     NetUtils.getLocalHost(), localPort,
-                    service + "/" + method,
+                    service + "/" + method,// path
+
+
+
+                    // 下面这一堆被安排在了 parameters中
                     MonitorService.APPLICATION, application,
                     MonitorService.INTERFACE, service,
                     MonitorService.METHOD, method,
                     remoteKey, remoteValue,
+
+                    // 是否是错误（这里变动的是key）
                     error ? MonitorService.FAILURE : MonitorService.SUCCESS, "1",
-                    MonitorService.ELAPSED, String.valueOf(elapsed),
-                    MonitorService.CONCURRENT, String.valueOf(concurrent),
+                    MonitorService.ELAPSED, String.valueOf(elapsed),// 耗时
+                    MonitorService.CONCURRENT, String.valueOf(concurrent),// 当前的一个并发数
                     Constants.INPUT_KEY, input,
                     Constants.OUTPUT_KEY, output,
                     Constants.GROUP_KEY, group,

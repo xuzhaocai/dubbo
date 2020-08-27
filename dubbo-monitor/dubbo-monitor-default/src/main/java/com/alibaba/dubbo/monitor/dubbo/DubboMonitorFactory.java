@@ -44,10 +44,15 @@ public class DubboMonitorFactory extends AbstractMonitorFactory {
 
     @Override
     protected Monitor createMonitor(URL url) {
+
         url = url.setProtocol(url.getParameter(Constants.PROTOCOL_KEY, "dubbo"));
+
+        // 判断path
         if (url.getPath() == null || url.getPath().length() == 0) {
             url = url.setPath(MonitorService.class.getName());
         }
+
+
         String filter = url.getParameter(Constants.REFERENCE_FILTER_KEY);
         if (filter == null || filter.length() == 0) {
             filter = "";
@@ -57,7 +62,9 @@ public class DubboMonitorFactory extends AbstractMonitorFactory {
         url = url.addParameters(Constants.CLUSTER_KEY, "failsafe", Constants.CHECK_KEY, String.valueOf(false),
                 Constants.REFERENCE_FILTER_KEY, filter + "-monitor");
         Invoker<MonitorService> monitorInvoker = protocol.refer(MonitorService.class, url);
+        // dubbo 的MonitorService 引用
         MonitorService monitorService = proxyFactory.getProxy(monitorInvoker);
+        // 创建DubboMonitor对象
         return new DubboMonitor(monitorInvoker, monitorService);
     }
 

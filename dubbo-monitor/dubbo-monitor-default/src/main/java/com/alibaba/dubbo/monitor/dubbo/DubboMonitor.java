@@ -59,6 +59,8 @@ public class DubboMonitor implements Monitor {
     public DubboMonitor(Invoker<MonitorService> monitorInvoker, MonitorService monitorService) {
         this.monitorInvoker = monitorInvoker;
         this.monitorService = monitorService;
+
+        // 获取interval  ，缺省是60s
         this.monitorInterval = monitorInvoker.getUrl().getPositiveParameter("interval", 60000);
         // collect timer for collecting statistics data
         sendFuture = scheduledExecutorService.scheduleWithFixedDelay(new Runnable() {
@@ -66,6 +68,8 @@ public class DubboMonitor implements Monitor {
             public void run() {
                 // collect data
                 try {
+
+                    /// 发送data
                     send();
                 } catch (Throwable t) {
                     logger.error("Unexpected error occur at send statistic, cause: " + t.getMessage(), t);
@@ -76,6 +80,7 @@ public class DubboMonitor implements Monitor {
 
     public void send() {
         logger.debug("Send statistics to monitor " + getUrl());
+        // 时间
         String timestamp = String.valueOf(System.currentTimeMillis());
         for (Map.Entry<Statistics, AtomicReference<long[]>> entry : statisticsMap.entrySet()) {
             // get statistics data
@@ -156,7 +161,7 @@ public class DubboMonitor implements Monitor {
         long[] update = new long[LENGTH];
         do {
             current = reference.get();
-            if (current == null) {
+            if (current == null) {// 第一次的时候
                 update[0] = success;
                 update[1] = failure;
                 update[2] = input;
@@ -168,12 +173,17 @@ public class DubboMonitor implements Monitor {
                 update[8] = elapsed;
                 update[9] = concurrent;
             } else {
+
+                // 累加操作
                 update[0] = current[0] + success;
                 update[1] = current[1] + failure;
                 update[2] = current[2] + input;
                 update[3] = current[3] + output;
                 update[4] = current[4] + elapsed;
+                //concurrent
                 update[5] = (current[5] + concurrent) / 2;
+
+                // max
                 update[6] = current[6] > input ? current[6] : input;
                 update[7] = current[7] > output ? current[7] : output;
                 update[8] = current[8] > elapsed ? current[8] : elapsed;

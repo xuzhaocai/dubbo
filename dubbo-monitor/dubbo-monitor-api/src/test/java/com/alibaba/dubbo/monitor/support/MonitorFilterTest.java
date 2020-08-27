@@ -44,7 +44,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 /**
- * MonitorFilterTest
+ * Test
  */
 public class MonitorFilterTest {
 
