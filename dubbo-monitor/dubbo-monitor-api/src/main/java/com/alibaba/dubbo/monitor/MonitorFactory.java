@@ -25,10 +25,9 @@ import com.alibaba.dubbo.common.extension.SPI;
  */
 @SPI("dubbo")
 public interface MonitorFactory {
-
     /**
      * Create monitor.
-     *
+     * 获取monitor对象
      * @param url
      * @return monitor
      */

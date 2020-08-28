@@ -64,19 +64,14 @@ public abstract class AbstractMonitorFactory implements MonitorFactory {
     public Monitor getMonitor(URL url) {// 设置path 为com.alibaba.dubbo.monitor.MonitorService ，添加参数interface
         // 设置path com.alibaba.dubbo.monitor.MonitorService  interface =com.alibaba.dubbo.monitor.MonitorService
         url = url.setPath(MonitorService.class.getName()).addParameter(Constants.INTERFACE_KEY, MonitorService.class.getName());
-
         // 生成一个key
         String key = url.toServiceStringWithoutResolving();
-
-
         Monitor monitor = MONITORS.get(key);// 获取monitor
         Future<Monitor> future = FUTURES.get(key);
-
         // 如果缓存了具体的monitor就 返回
         if (monitor != null || future != null) {
             return monitor;
         }
-
         LOCK.lock();
         try {
             monitor = MONITORS.get(key);
@@ -84,14 +79,11 @@ public abstract class AbstractMonitorFactory implements MonitorFactory {
             if (monitor != null || future != null) {
                 return monitor;
             }
-
             final URL monitorUrl = url;
-
             final ListenableFutureTask<Monitor> listenableFutureTask = ListenableFutureTask.create(new MonitorCreator(monitorUrl));
             listenableFutureTask.addListener(new MonitorListener(key));
             executor.execute(listenableFutureTask);
             FUTURES.put(key, listenableFutureTask);
-
             return null;
         } finally {
             // unlock
@@ -102,13 +94,10 @@ public abstract class AbstractMonitorFactory implements MonitorFactory {
     protected abstract Monitor createMonitor(URL url);
 
     class MonitorCreator implements Callable<Monitor> {
-
         private URL url;
-
         public MonitorCreator(URL url) {
             this.url = url;
         }
-
         @Override
         public Monitor call() throws Exception {
             Monitor monitor = AbstractMonitorFactory.this.createMonitor(url);
@@ -117,19 +106,18 @@ public abstract class AbstractMonitorFactory implements MonitorFactory {
     }
 
     class MonitorListener implements Runnable {
-
         private String key;
-
         public MonitorListener(String key) {
             this.key = key;
         }
-
         @Override
         public void run() {
             try {
+                // 根据key 从缓存中获取ListenableFuture 任务
                 ListenableFuture<Monitor> listenableFuture = AbstractMonitorFactory.FUTURES.get(key);
+                // 从ListenableFuture获取创建的那个Monitor对象，然后放到Monitor缓存中
                 AbstractMonitorFactory.MONITORS.put(key, listenableFuture.get());
-
+                //从任务缓存中移除这个任务
                 AbstractMonitorFactory.FUTURES.remove(key);
             } catch (InterruptedException e) {
                 logger.warn("Thread was interrupted unexpectedly, monitor will never be got.");

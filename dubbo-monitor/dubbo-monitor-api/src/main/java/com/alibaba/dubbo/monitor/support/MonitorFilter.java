@@ -33,6 +33,7 @@ import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.dubbo.rpc.RpcException;
 import com.alibaba.dubbo.rpc.support.RpcUtils;
 
+import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * MonitorFilter. (SPI, Singleton, ThreadSafe)
  */
 @Activate(group = {Constants.PROVIDER, Constants.CONSUMER})
-public class MonitorFilter implements Filter {
+public class MonitorFilter implements Filter  {
 
     private static final Logger logger = LoggerFactory.getLogger(MonitorFilter.class);
     // 缓存着 key=接口名.方法名       value= 计数器
@@ -58,7 +59,7 @@ public class MonitorFilter implements Filter {
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         if (invoker.getUrl().hasParameter(Constants.MONITOR_KEY)) {// 判断是否有monitor参数
             RpcContext context = RpcContext.getContext(); // provider must fetch context before invoke() gets called
-
+            // 获取远端host
             String remoteHost = context.getRemoteHost();
             long start = System.currentTimeMillis(); // record start timestamp
             // 计数器+1
@@ -85,16 +86,14 @@ public class MonitorFilter implements Filter {
         try {
             // ---- service statistics ----
             long elapsed = System.currentTimeMillis() - start; // invocation cost  调用耗时
-
-            int concurrent = getConcurrent(invoker, invocation).get(); // current concurrent count  获取当前的次数
+            int concurrent = getConcurrent(invoker, invocation).get(); // current concurrent count  获取当前的并发数
             String application = invoker.getUrl().getParameter(Constants.APPLICATION_KEY);  // application
             String service = invoker.getInterface().getName(); // service name    //接口名
             String method = RpcUtils.getMethodName(invocation); // method name   // 方法名
             String group = invoker.getUrl().getParameter(Constants.GROUP_KEY);   // 分组
             String version = invoker.getUrl().getParameter(Constants.VERSION_KEY);  // version
-            URL url = invoker.getUrl().getUrlParameter(Constants.MONITOR_KEY);  // monitor
-
-
+            URL url = invoker.getUrl().getUrlParameter(Constants.MONITOR_KEY);  // monitorUrl
+            // 根据monitorUrl 从监控工厂中获取对应的监控对象
             Monitor monitor = monitorFactory.getMonitor(url);// 获取Monitor
             if (monitor == null) {
                 return;
@@ -106,14 +105,15 @@ public class MonitorFilter implements Filter {
                 // ---- for service consumer ----
                 localPort = 0;
                 remoteKey = MonitorService.PROVIDER;
-                remoteValue = invoker.getUrl().getAddress();// 远程地址
+                remoteValue = invoker.getUrl().getAddress();// 远端地址，在这里就是服务提供者方的地址
             } else {// 如果是服务提供者端
                 // ---- for service provider ----
                 localPort = invoker.getUrl().getPort();// 获取服务提供者端的port
                 remoteKey = MonitorService.CONSUMER;
-                remoteValue = remoteHost;// 远程地址
+                remoteValue = remoteHost;// 远端地址，这里是服务提供者方的地址
             }
             String input = "", output = "";
+            // 这两个会在Serialize层添加上
             // 获取input
             if (invocation.getAttachment(Constants.INPUT_KEY) != null) {// input
                 input = invocation.getAttachment(Constants.INPUT_KEY);
@@ -122,13 +122,10 @@ public class MonitorFilter implements Filter {
             if (result != null && result.getAttachment(Constants.OUTPUT_KEY) != null) {// output
                 output = result.getAttachment(Constants.OUTPUT_KEY);
             }
-            //收集
+            //-----------------------monitor收集-------------------------
             monitor.collect(new URL(Constants.COUNT_PROTOCOL,// count
                     NetUtils.getLocalHost(), localPort,
                     service + "/" + method,// path
-
-
-
                     // 下面这一堆被安排在了 parameters中
                     MonitorService.APPLICATION, application,
                     MonitorService.INTERFACE, service,
