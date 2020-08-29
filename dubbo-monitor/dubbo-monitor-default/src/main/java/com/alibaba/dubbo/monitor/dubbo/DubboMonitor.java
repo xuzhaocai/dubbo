@@ -43,17 +43,17 @@ public class DubboMonitor implements Monitor {
     private static final Logger logger = LoggerFactory.getLogger(DubboMonitor.class);
 
     private static final int LENGTH = 10;
-
+    // 定时调度线程池
     private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(3, new NamedThreadFactory("DubboMonitorSendTimer", true));
-
+    // 定时上报监控信息任务
     private final ScheduledFuture<?> sendFuture;
-
+    // Monitor的invoker
     private final Invoker<MonitorService> monitorInvoker;
-
+    // Monitor MonitorService接口代理
     private final MonitorService monitorService;
-
+    //监控间隔，缺省1min
     private final long monitorInterval;
-
+    // 缓存 某个接口方法 与  监控指标值的对应关系
     private final ConcurrentMap<Statistics, AtomicReference<long[]>> statisticsMap = new ConcurrentHashMap<Statistics, AtomicReference<long[]>>();
 
     public DubboMonitor(Invoker<MonitorService> monitorInvoker, MonitorService monitorService) {
@@ -98,7 +98,6 @@ public class DubboMonitor implements Monitor {
             long maxElapsed = numbers[8];
             long maxConcurrent = numbers[9];
             String version = getUrl().getParameter(Constants.DEFAULT_PROTOCOL);
-
             // send statistics data
             URL url = statistics.getUrl()
                     .addParameters(MonitorService.TIMESTAMP, timestamp,
@@ -114,21 +113,21 @@ public class DubboMonitor implements Monitor {
                             MonitorService.MAX_CONCURRENT, String.valueOf(maxConcurrent),
                             Constants.DEFAULT_PROTOCOL, version
                     );
+            /// 远程调用发送
             monitorService.collect(url);
-
             // reset
             long[] current;
             long[] update = new long[LENGTH];
             do {
                 current = reference.get();
-                if (current == null) {
-                    update[0] = 0;
-                    update[1] = 0;
-                    update[2] = 0;
-                    update[3] = 0;
-                    update[4] = 0;
-                    update[5] = 0;
-                } else {
+                if (current == null) {// 这里是重置
+                    update[0] = 0;/// 监控周期内总成功次数
+                    update[1] = 0;/// 监控周期内总失败次数
+                    update[2] = 0;/// 监控周期内接收请求字节数
+                    update[3] = 0;/// 监控周期内接收响应字节数
+                    update[4] = 0;/// 监控周期内总响应时间
+                    update[5] = 0;/// 监控周期内平均并发数
+                } else {// 这个周期发送完了，减去上个周期的的统计数
                     update[0] = current[0] - success;
                     update[1] = current[1] - failure;
                     update[2] = current[2] - input;
@@ -136,6 +135,7 @@ public class DubboMonitor implements Monitor {
                     update[4] = current[4] - elapsed;
                     update[5] = current[5] - concurrent;
                 }
+                // cas 替换监控指标值数组
             } while (!reference.compareAndSet(current, update));
         }
     }
