@@ -25,14 +25,12 @@ import java.util.Collection;
  * ExchangeServer. (API/SPI, Prototype, ThreadSafe)
  */
 public interface ExchangeServer extends Server {
-
     /**
      * get channels.
      *
      * @return channels
      */
     Collection<ExchangeChannel> getExchangeChannels();
-
     /**
      * get channel.
      *
@@ -40,5 +38,4 @@ public interface ExchangeServer extends Server {
      * @return channel
      */
     ExchangeChannel getExchangeChannel(InetSocketAddress remoteAddress);
-
 }

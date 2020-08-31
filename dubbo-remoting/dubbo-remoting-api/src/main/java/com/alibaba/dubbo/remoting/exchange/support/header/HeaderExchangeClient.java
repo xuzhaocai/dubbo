@@ -43,9 +43,11 @@ import java.util.concurrent.TimeUnit;
 public class HeaderExchangeClient implements ExchangeClient {
 
     private static final Logger logger = LoggerFactory.getLogger(HeaderExchangeClient.class);
-
+    // 任务调度线程池
     private static final ScheduledThreadPoolExecutor scheduled = new ScheduledThreadPoolExecutor(2, new NamedThreadFactory("dubbo-remoting-client-heartbeat", true));
+    // client
     private final Client client;
+    // channel连接
     private final ExchangeChannel channel;
     // heartbeat timer  心跳定时器
     private ScheduledFuture<?> heartbeatTimer;
@@ -54,16 +56,11 @@ public class HeaderExchangeClient implements ExchangeClient {
     private int heartbeatTimeout; // 心跳间隔时间
 
     public HeaderExchangeClient(Client client, boolean needHeartbeat) {
-
-
-
         // 判断client
         if (client == null) {
             throw new IllegalArgumentException("client == null");
         }
         this.client = client;
-
-
         // channel
         this.channel = new HeaderExchangeChannel(client);
         // dubbo版本
@@ -71,7 +68,6 @@ public class HeaderExchangeClient implements ExchangeClient {
 
         //获取心跳  这个前面已经设置了1m ，可以直接取出来
         this.heartbeat = client.getUrl().getParameter(Constants.HEARTBEAT_KEY, dubbo != null && dubbo.startsWith("1.0.") ? Constants.DEFAULT_HEARTBEAT : 0);
-
         //心跳超时时间
         this.heartbeatTimeout = client.getUrl().getParameter(Constants.HEARTBEAT_TIMEOUT_KEY, heartbeat * 3);
 
@@ -84,10 +80,6 @@ public class HeaderExchangeClient implements ExchangeClient {
         }
     }
 
-    @Override
-    public ResponseFuture request(Object request) throws RemotingException {
-        return channel.request(request);
-    }
 
     @Override
     public URL getUrl() {
@@ -110,6 +102,11 @@ public class HeaderExchangeClient implements ExchangeClient {
     public ResponseFuture request(Object request, int timeout) throws RemotingException {
         return channel.request(request, timeout);
     }
+    @Override
+    public ResponseFuture request(Object request) throws RemotingException {
+        return channel.request(request);
+    }
+
 
     @Override
     public ChannelHandler getChannelHandler() {
@@ -151,7 +148,6 @@ public class HeaderExchangeClient implements ExchangeClient {
         doClose();
         channel.close();
     }
-
     @Override
     public void close(int timeout) {
         // Mark the client into the closure process
@@ -159,7 +155,6 @@ public class HeaderExchangeClient implements ExchangeClient {
         doClose();
         channel.close(timeout);
     }
-
     @Override
     public void startClose() {
         channel.startClose();

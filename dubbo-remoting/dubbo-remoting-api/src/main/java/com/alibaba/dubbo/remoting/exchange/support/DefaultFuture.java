@@ -60,7 +60,6 @@ public class DefaultFuture implements ResponseFuture {
     private final int timeout;// 超时
     private final Lock lock = new ReentrantLock();
     private final Condition done = lock.newCondition();
-
     // 创建开始时间
     private final long start = System.currentTimeMillis();
     private volatile long sent;// 发送时间
@@ -71,12 +70,9 @@ public class DefaultFuture implements ResponseFuture {
         this.channel = channel;
         this.request = request;
         this.id = request.getId();// 请求id
-
-
         //默认超时时间 1s
         this.timeout = timeout > 0 ? timeout : channel.getUrl().getPositiveParameter(Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT);
         // put into waiting map.
-
         /**
          *将请求放到缓存中，异步会根据请求编号获取请求future
          */
@@ -350,7 +346,6 @@ public class DefaultFuture implements ResponseFuture {
                         if (future == null || future.isDone()) {
                             continue;
                         }
-
                         // 判断超时
                         if (System.currentTimeMillis() - future.getStartTimestamp() > future.getTimeout()) {
                             // create exception response. 创建异常响应

@@ -46,27 +46,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class HeaderExchangeServer implements ExchangeServer {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-
+    // 任务调度线程池
     private final ScheduledExecutorService scheduled = Executors.newScheduledThreadPool(1,
             new NamedThreadFactory(
                     "dubbo-remoting-server-heartbeat",
                     true));
-    private final Server server;
+    private final Server server;// server对象
     // heartbeat timer
     private ScheduledFuture<?> heartbeatTimer;
     // heartbeat timeout (ms), default value is 0 , won't execute a heartbeat.
-    private int heartbeat;
-    private int heartbeatTimeout;
-    private AtomicBoolean closed = new AtomicBoolean(false);
+    private int heartbeat;// 心跳
+    private int heartbeatTimeout;//心跳超时
+    private AtomicBoolean closed = new AtomicBoolean(false);// 关闭的标识
 
     public HeaderExchangeServer(Server server) {
         if (server == null) {
             throw new IllegalArgumentException("server == null");
         }
-
         // 服务器
         this.server = server;
-
         //心跳
         this.heartbeat = server.getUrl().getParameter(Constants.HEARTBEAT_KEY, 0);
 
@@ -75,7 +73,6 @@ public class HeaderExchangeServer implements ExchangeServer {
         if (heartbeatTimeout < heartbeat * 2) {
             throw new IllegalStateException("heartbeatTimeout < heartbeatInterval * 2");
         }
-
         // 启动心跳
         startHeartbeatTimer();
     }
@@ -92,12 +89,10 @@ public class HeaderExchangeServer implements ExchangeServer {
     private boolean isRunning() {
         Collection<Channel> channels = getChannels();
         for (Channel channel : channels) {
-
             /**
              *  If there are any client connections,
              *  our server should be running.
              */
-
             if (channel.isConnected()) {
                 return true;
             }
@@ -257,7 +252,6 @@ public class HeaderExchangeServer implements ExchangeServer {
         }
         server.send(message);
     }
-
     @Override
     public void send(Object message, boolean sent) throws RemotingException {
         if (closed.get()) {

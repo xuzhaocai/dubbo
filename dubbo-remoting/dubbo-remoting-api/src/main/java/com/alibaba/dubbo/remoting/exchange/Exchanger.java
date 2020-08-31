@@ -31,25 +31,20 @@ import com.alibaba.dubbo.remoting.exchange.support.header.HeaderExchanger;
  */
 @SPI(HeaderExchanger.NAME)  // 默认header
 public interface Exchanger {
-
     /**
      * bind. 绑定一个服务器
-     *
      * @param url
      * @param handler
      * @return message server
      */
     @Adaptive({Constants.EXCHANGER_KEY})
     ExchangeServer bind(URL url, ExchangeHandler handler) throws RemotingException;
-
     /**
      * connect.
-     *
      * @param url
      * @param handler
      * @return message channel
      */
     @Adaptive({Constants.EXCHANGER_KEY})
     ExchangeClient connect(URL url, ExchangeHandler handler) throws RemotingException;
-
 }

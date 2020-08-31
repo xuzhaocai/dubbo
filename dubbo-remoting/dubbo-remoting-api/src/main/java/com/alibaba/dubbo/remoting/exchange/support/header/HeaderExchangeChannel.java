@@ -102,7 +102,6 @@ final class HeaderExchangeChannel implements ExchangeChannel {
     public ResponseFuture request(Object request) throws RemotingException {
         return request(request, channel.getUrl().getPositiveParameter(Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT));
     }
-
     /**
      *
      * 发送消息

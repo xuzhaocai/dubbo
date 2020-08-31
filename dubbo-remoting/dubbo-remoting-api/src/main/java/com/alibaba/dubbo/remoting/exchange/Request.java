@@ -50,7 +50,6 @@ public class Request {
     private boolean mEvent = false;
     /**
      * 是否异常的请求。
-     *
      * 在消息解析的时候，会出现。
      */
     private boolean mBroken = false;
@@ -58,15 +57,12 @@ public class Request {
      * 数据
      */
     private Object mData;
-
     public Request() {
-        mId = newId();
+        mId = newId();//创建一个请求id
     }
-
     public Request(long id) {
         mId = id;
     }
-
     /**
      * 获取请求id
      * @return

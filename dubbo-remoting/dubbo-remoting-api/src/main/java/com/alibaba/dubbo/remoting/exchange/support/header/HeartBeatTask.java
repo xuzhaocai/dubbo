@@ -29,7 +29,7 @@ import java.util.Collection;
 final class HeartBeatTask implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(HeartBeatTask.class);
-    // 用于查询获得需要的通道数组
+    // 用于查询获得需要的通道
     private ChannelProvider channelProvider;
     // 心跳间隔时间
     private int heartbeat;
@@ -57,12 +57,8 @@ final class HeartBeatTask implements Runnable {
                     // 最后一次写
                     Long lastWrite = (Long) channel.getAttribute(
                             HeaderExchangeHandler.KEY_WRITE_TIMESTAMP);
-
-
-
                     // 最后一次读的时间不是null &&  最后一次读的时间距离现在不超过 心跳间隔时间
                     if ((lastRead != null && now - lastRead > heartbeat)
-
                             // 或者最后一次写的时间不是null && 最后一次写的时间距离现在不超过 心跳间隔时间
                             || (lastWrite != null && now - lastWrite > heartbeat)) {
                         Request req = new Request();

@@ -115,11 +115,10 @@ public class Exchangers {
     }
 
     public static Exchanger getExchanger(URL url) {
-        // 获取exchanger  缺省header
+        // 获取exchanger属性值  缺省header
         String type = url.getParameter(Constants.EXCHANGER_KEY, Constants.DEFAULT_EXCHANGER);
         return getExchanger(type);
     }
-
     public static Exchanger getExchanger(String type) {
         return ExtensionLoader.getExtensionLoader(Exchanger.class).getExtension(type);
     }

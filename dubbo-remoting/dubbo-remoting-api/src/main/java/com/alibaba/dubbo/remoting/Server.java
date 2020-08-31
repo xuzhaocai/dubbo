@@ -29,21 +29,18 @@ import java.util.Collection;
  * @see com.alibaba.dubbo.remoting.Transporter#bind(com.alibaba.dubbo.common.URL, ChannelHandler)
  */
 public interface Server extends Endpoint, Resetable {
-
     /**
      * is bound.
      * 是否绑定本地端口， 提供服务， 即是否启动成功， 可连接，可接受消息
      * @return bound
      */
     boolean isBound();
-
     /**
      * get channels.
      * 获取所有的channel ，所有客户端
      * @return channels
      */
     Collection<Channel> getChannels();
-
     /**
      * get channel.
      * 根据地址获取channel
