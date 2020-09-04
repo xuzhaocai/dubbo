@@ -34,7 +34,6 @@ public interface Transporter {
 
     /**
      * Bind a server.
-     *
      * @param url     server url
      * @param handler
      * @return server
@@ -43,10 +42,8 @@ public interface Transporter {
      */
     @Adaptive({Constants.SERVER_KEY, Constants.TRANSPORTER_KEY})
     Server bind(URL url, ChannelHandler handler) throws RemotingException;
-
     /**
      * Connect to a server.
-     *
      * @param url     server url
      * @param handler
      * @return client

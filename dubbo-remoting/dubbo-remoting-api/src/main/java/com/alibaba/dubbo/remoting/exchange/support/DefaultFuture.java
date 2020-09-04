@@ -42,12 +42,13 @@ import java.util.concurrent.locks.ReentrantLock;
 public class DefaultFuture implements ResponseFuture {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultFuture.class);
-
+    // 缓存请求id 与 channel 的对应关系
     private static final Map<Long, Channel> CHANNELS = new ConcurrentHashMap<Long, Channel>();
-    //缓存的 请求id  与 future
+    //缓存的 请求id  与 future 对应关系
     private static final Map<Long, DefaultFuture> FUTURES = new ConcurrentHashMap<Long, DefaultFuture>();
 
     static {
+        // 创建扫描  调用超时  的线程
         Thread th = new Thread(new RemotingInvocationTimeoutScan(), "DubboResponseTimeoutScanTimer");
         th.setDaemon(true);
         th.start();
@@ -193,7 +194,6 @@ public class DefaultFuture implements ResponseFuture {
 
     @Override
     public boolean isDone() {
-
         // 是否结束    判断response 是否是null
         return response != null;
     }
@@ -219,7 +219,6 @@ public class DefaultFuture implements ResponseFuture {
             }
         }
     }
-
     /**
      * 进行回调
      * @param c
@@ -234,14 +233,12 @@ public class DefaultFuture implements ResponseFuture {
         if (res == null) {
             throw new IllegalStateException("response cannot be null. url:" + channel.getUrl());
         }
-
         if (res.getStatus() == Response.OK) {// 正常的时候
             try { /// 进行回调处理
                 callbackCopy.done(res.getResult());
             } catch (Exception e) {
                 logger.error("callback invoke error .reasult:" + res.getResult() + ",url:" + channel.getUrl(), e);
             }
-
             // 超时的时候
         } else if (res.getStatus() == Response.CLIENT_TIMEOUT || res.getStatus() == Response.SERVER_TIMEOUT) {
             try {// 超时回调
@@ -268,7 +265,6 @@ public class DefaultFuture implements ResponseFuture {
         if (res.getStatus() == Response.OK) {
             return res.getResult();// 正常返回
         }
-
         // 超时异常
         if (res.getStatus() == Response.CLIENT_TIMEOUT || res.getStatus() == Response.SERVER_TIMEOUT) {
             throw new TimeoutException(res.getStatus() == Response.SERVER_TIMEOUT, channel, res.getErrorMessage());
@@ -337,7 +333,6 @@ public class DefaultFuture implements ResponseFuture {
      * 超时扫描线程
      */
     private static class RemotingInvocationTimeoutScan implements Runnable {
-
         @Override
         public void run() {
             while (true) {

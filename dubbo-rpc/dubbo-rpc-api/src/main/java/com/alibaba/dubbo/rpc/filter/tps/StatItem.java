@@ -31,23 +31,26 @@ class StatItem {
     private int rate;
 
     StatItem(String name, int rate, long interval) {
-        this.name = name;
+        this.name = name;// servicekey
         this.rate = rate;
         this.interval = interval;
+        // 最后重置时间
         this.lastResetTime = System.currentTimeMillis();
         this.token = new AtomicInteger(rate);
     }
 
     public boolean isAllowable() {
         long now = System.currentTimeMillis();
-        if (now > lastResetTime + interval) {
-            token.set(rate);
+        if (now > lastResetTime + interval) {// 过了时间窗口
+            token.set(rate);// 重置
             lastResetTime = now;
         }
 
         int value = token.get();
         boolean flag = false;
         while (value > 0 && !flag) {
+            // 使用cas
+            //当 value 小于等于0   或者 flag 是true的时候 就不会到 while中了
             flag = token.compareAndSet(value, value - 1);
             value = token.get();
         }

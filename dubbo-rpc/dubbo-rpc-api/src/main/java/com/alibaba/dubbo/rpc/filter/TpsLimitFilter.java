@@ -46,7 +46,6 @@ public class TpsLimitFilter implements Filter {
                             invocation.getMethodName() +
                             " because exceed max service tps.");
         }
-
         return invoker.invoke(invocation);
     }
 

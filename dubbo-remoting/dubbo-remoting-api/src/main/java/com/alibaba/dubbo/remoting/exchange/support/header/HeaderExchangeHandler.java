@@ -99,14 +99,12 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         Response res = new Response(req.getId(), req.getVersion());// 封装Response
         if (req.isBroken()) {// 设置bad request
             Object data = req.getData();
-
             String msg;
             if (data == null) msg = null;
             else if (data instanceof Throwable) msg = StringUtils.toString((Throwable) data);
             else msg = data.toString();
             res.setErrorMessage("Fail to decode request due to: " + msg);
             res.setStatus(Response.BAD_REQUEST);
-
             return res;
         }
         // 使用 ExchangeHandler 处理，并返回响应
@@ -135,7 +133,6 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
             HeaderExchangeChannel.removeChannelIfDisconnected(channel);
         }
     }
-
     @Override
     public void disconnected(Channel channel) throws RemotingException {
         channel.setAttribute(KEY_READ_TIMESTAMP, System.currentTimeMillis());
@@ -171,6 +168,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         }
         if (message instanceof Request) {
             Request request = (Request) message;
+            //这里只是记录一下 发送时间
             DefaultFuture.sent(channel, request);// 这里表示已经发送了
         }
         if (exception != null) {

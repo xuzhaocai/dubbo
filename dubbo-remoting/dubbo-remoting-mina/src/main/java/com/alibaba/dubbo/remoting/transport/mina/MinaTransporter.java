@@ -24,17 +24,13 @@ import com.alibaba.dubbo.remoting.Server;
 import com.alibaba.dubbo.remoting.Transporter;
 
 public class MinaTransporter implements Transporter {
-
     public static final String NAME = "mina";
-
     @Override
     public Server bind(URL url, ChannelHandler handler) throws RemotingException {
         return new MinaServer(url, handler);
     }
-
     @Override
     public Client connect(URL url, ChannelHandler handler) throws RemotingException {
         return new MinaClient(url, handler);
     }
-
 }

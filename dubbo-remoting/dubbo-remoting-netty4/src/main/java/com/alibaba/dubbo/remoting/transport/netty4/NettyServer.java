@@ -53,10 +53,7 @@ public class NettyServer extends AbstractServer implements Server {
     private static final Logger logger = LoggerFactory.getLogger(NettyServer.class);
     /**
      * 通道集合
-     *
-     *
      * Channel 是dubbo的 channel
-     *
      */
     private Map<String, Channel> channels; // <ip:port, channel>
 
@@ -72,7 +69,6 @@ public class NettyServer extends AbstractServer implements Server {
     public NettyServer(URL url, ChannelHandler handler) throws RemotingException {
         super(url, ChannelHandlers.wrap(handler, ExecutorUtil.setThreadName(url, SERVER_THREAD_POOL_NAME)));
     }
-
     @Override
     protected void doOpen() throws Throwable {
         bootstrap = new ServerBootstrap();
@@ -82,16 +78,12 @@ public class NettyServer extends AbstractServer implements Server {
                 new DefaultThreadFactory("NettyServerWorker", true));
         final NettyServerHandler nettyServerHandler = new NettyServerHandler(getUrl(), this);
         channels = nettyServerHandler.getChannels();
-/**
- *  ChannelOption.SO_REUSEADDR  这个参数表示允许重复使用本地地址和端口，
- *
- * 　　　　比如，某个服务器进程占用了TCP的80端口进行监听，此时再次监听该端口就会返回错误，使用该参数就可以解决问题，该参数允许共用该端口，这个在服务器程序中比较常使用，
- *
- * 　　　　比如某个进程非正常退出，该程序占用的端口可能要被占用一段时间才能允许其他进程使用，而且程序死掉以后，内核一需要一定的时间才能够释放此端口，不设置SO_REUSEADDR
- *
- * 　　　　就无法正常使用该端口。
- */
-
+        /**
+         *  ChannelOption.SO_REUSEADDR  这个参数表示允许重复使用本地地址和端口，
+         *  比如，某个服务器进程占用了TCP的80端口进行监听，此时再次监听该端口就会返回错误，使用该参数就可以解决问题，该参数允许共用该端口，这个在服务器程序中比较常使用，
+         *  比如某个进程非正常退出，该程序占用的端口可能要被占用一段时间才能允许其他进程使用，而且程序死掉以后，内核一需要一定的时间才能够释放此端口，不设置SO_REUSEADDR
+         *  就无法正常使用该端口。
+         */
         // 设置线程组
         bootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)// 设置channel类型  nio
@@ -121,7 +113,6 @@ public class NettyServer extends AbstractServer implements Server {
      */
     @Override
     protected void doClose() throws Throwable {
-
         // 关闭服务器
         try {
             if (channel != null) {
@@ -131,7 +122,6 @@ public class NettyServer extends AbstractServer implements Server {
         } catch (Throwable e) {
             logger.warn(e.getMessage(), e);
         }
-
         /**
          *关闭所有的channel
          */
