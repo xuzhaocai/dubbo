@@ -56,15 +56,9 @@ public class NettyClient extends AbstractClient {
     public NettyClient(final URL url, final ChannelHandler handler) throws RemotingException {
         super(url, wrapChannelHandler(url, handler));
     }
-
     @Override
     protected void doOpen() throws Throwable {
-
-
         final NettyClientHandler nettyClientHandler = new NettyClientHandler(getUrl(), this);
-
-
-
         bootstrap = new Bootstrap();
         bootstrap.group(nioEventLoopGroup)
                 .option(ChannelOption.SO_KEEPALIVE, true)
@@ -79,11 +73,7 @@ public class NettyClient extends AbstractClient {
             // 使用用户设置的超时时间
             bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getConnectTimeout());
         }
-
-
-
         bootstrap.handler(new ChannelInitializer() {
-
             @Override
             protected void initChannel(Channel ch) throws Exception {
                 NettyCodecAdapter adapter = new NettyCodecAdapter(getCodec(), getUrl(), NettyClient.this);
@@ -102,12 +92,10 @@ public class NettyClient extends AbstractClient {
     @Override
     protected void doConnect() throws Throwable {
         long start = System.currentTimeMillis();
-
         // 连接
         ChannelFuture future = bootstrap.connect(getConnectAddress());
         try {
             boolean ret = future.awaitUninterruptibly(getConnectTimeout(), TimeUnit.MILLISECONDS);
-
             if (ret && future.isSuccess()) {// 连接成功的时候
                 Channel newChannel = future.channel();/// 获取channel
                 try {
@@ -135,7 +123,6 @@ public class NettyClient extends AbstractClient {
                             NettyChannel.removeChannelIfDisconnected(newChannel);
                         }
                     } else {
-
                         // 将新生成的channel  设置成channel
                         NettyClient.this.channel = newChannel;
                     }

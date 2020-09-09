@@ -25,8 +25,6 @@ import com.alibaba.dubbo.remoting.RemotingException;
 
 /**
  * AbstractPeer
- *
- *
  * 这个类保存着
  * url handler
  * 以及关闭状态

@@ -29,61 +29,13 @@ import java.net.InetSocketAddress;
  * @see com.alibaba.dubbo.remoting.Server
  */
 public interface Endpoint {
-
-    /**
-     * get url.
-     * 获取url
-     * @return url
-     */
-    URL getUrl();
-
-    /**
-     * get channel handler.
-     * 获取channelhandler
-     * @return channel handler
-     */
-    ChannelHandler getChannelHandler();
-
-    /**
-     * get local address.
-     * 获取本地地址
-     * @return local address.
-     */
-    InetSocketAddress getLocalAddress();
-
-    /**
-     * send message.
-     *
-     * @param message
-     * @throws RemotingException
-     */
-    void send(Object message) throws RemotingException;
-
-    /**
-     * send message.
-     *
-     * @param message
-     * @param sent    already sent to socket?
-     */
-    void send(Object message, boolean sent) throws RemotingException;
-
-    /**
-     * close the channel.
-     */
-    void close();
-
-    /**
-     * Graceful close the channel.
-     */
-    void close(int timeout);
-
-    void startClose();
-
-    /**
-     * is closed.
-     *
-     * @return closed
-     */
-    boolean isClosed();
-
+    URL getUrl();// 获取url
+    ChannelHandler getChannelHandler();//获取channelhandler
+    InetSocketAddress getLocalAddress();//获取本地地址
+    void send(Object message) throws RemotingException;//send message
+    void send(Object message, boolean sent) throws RemotingException;//send message
+    void close();// 关闭
+    void close(int timeout);// 优雅关闭
+    void startClose();// 开始关闭
+    boolean isClosed();// 判断是否关闭
 }

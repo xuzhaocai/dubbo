@@ -103,6 +103,7 @@ public class ExchangeCodec extends TelnetCodec {
         // check magic number.
         if (readable > 0 && header[0] != MAGIC_HIGH  // 第一个字节不是MAGIC_HIGH
                 || readable > 1 && header[1] != MAGIC_LOW) { // 第二个字节不是MAGIC_LOW
+            //这种需要交给telnet来处理
             int length = header.length;
             if (header.length < readable) {
                 header = Bytes.copyOf(header, readable);
@@ -117,19 +118,30 @@ public class ExchangeCodec extends TelnetCodec {
             }
             return super.decode(channel, buffer, readable, header);
         }
+
         // check length.
         if (readable < HEADER_LENGTH) {// 可读字节数小于 dubbo协议头长度
             return DecodeResult.NEED_MORE_INPUT;///需要更多的输入
         }
 
+
+
+
+
         // get data length.   获取数据部分长度
         int len = Bytes.bytes2int(header, 12);
+        // 检查数据长度是否合法
         checkPayload(channel, len);
 
         int tt = len + HEADER_LENGTH;//数据总长度
         if (readable < tt) {// 如果这个 可读的数据小于 数据总长度，说明还需要读
             return DecodeResult.NEED_MORE_INPUT;  // 还需要更多输入
         }
+
+
+
+
+
         // 到这一步，buffer里面的可读数据长度与总的数据长度就校验完成了，这个buffer里面的就全了
         // limit input stream.
         ChannelBufferInputStream is = new ChannelBufferInputStream(buffer, len);
@@ -149,15 +161,16 @@ public class ExchangeCodec extends TelnetCodec {
             }
         }
     }
-
+    // 解析内容
     protected Object decodeBody(Channel channel, InputStream is, byte[] header) throws IOException {
         byte flag = header[2], proto = (byte) (flag & SERIALIZATION_MASK);
-        // get request id.
+        // get request id. 获取请求id
         long id = Bytes.bytes2long(header, 4);
         if ((flag & FLAG_REQUEST) == 0) {
             // decode response.
             Response res = new Response(id);
             if ((flag & FLAG_EVENT) != 0) {
+                // 心跳
                 res.setEvent(Response.HEARTBEAT_EVENT);
             }
             // get status.
@@ -165,17 +178,17 @@ public class ExchangeCodec extends TelnetCodec {
             res.setStatus(status);
             try {
                 ObjectInput in = CodecSupport.deserialize(channel.getUrl(), is, proto);
-                if (status == Response.OK) {
+                if (status == Response.OK) {// 如果状态是Ok
                     Object data;
-                    if (res.isHeartbeat()) {
+                    if (res.isHeartbeat()) {// 心跳
                         data = decodeHeartbeatData(channel, in);
-                    } else if (res.isEvent()) {
+                    } else if (res.isEvent()) {// 解码事件响应
                         data = decodeEventData(channel, in);
-                    } else {
+                    } else {// 解码普通响应
                         data = decodeResponseData(channel, in, getRequestData(id));
                     }
                     res.setResult(data);
-                } else {
+                } else {// 异常
                     res.setErrorMessage(in.readUTF());
                 }
             } catch (Throwable t) {
@@ -184,7 +197,7 @@ public class ExchangeCodec extends TelnetCodec {
             }
             return res;
         } else {
-            // decode request.
+            // decode request.  解码请求
             Request req = new Request(id);
             req.setVersion(Version.getProtocolVersion());
             req.setTwoWay((flag & FLAG_TWOWAY) != 0);
@@ -203,7 +216,7 @@ public class ExchangeCodec extends TelnetCodec {
                 }
                 req.setData(data);
             } catch (Throwable t) {
-                // bad request
+                // bad request  抛出异常  broken
                 req.setBroken(true);
                 req.setData(t);
             }
@@ -220,22 +233,26 @@ public class ExchangeCodec extends TelnetCodec {
             return null;
         return req.getData();
     }
-
+    /**
+     * 编码请求
+     * @param channel
+     * @param buffer
+     * @param req
+     * @throws IOException
+     */
     protected void encodeRequest(Channel channel, ChannelBuffer buffer, Request req) throws IOException {
         Serialization serialization = getSerialization(channel);// 缺省hessian2
         // header.  创建一个header的字节数组  16 byte
         byte[] header = new byte[HEADER_LENGTH];
         // set magic number.
-
-
         Bytes.short2bytes(MAGIC, header);
-
-        // set request and serialization flag.
+        // set request and serialization flag
+        // 使用 FLAG_REQUEST |  系列化id
         header[2] = (byte) (FLAG_REQUEST | serialization.getContentTypeId());
         // 设置是单向还是多项
         if (req.isTwoWay()) header[2] |= FLAG_TWOWAY;
         if (req.isEvent()) header[2] |= FLAG_EVENT;
-
+        ///设置请求id
         // set request id.
         Bytes.long2bytes(req.getId(), header, 4);
 
@@ -274,6 +291,7 @@ public class ExchangeCodec extends TelnetCodec {
             // set magic number.
             Bytes.short2bytes(MAGIC, header);
             // set request and serialization flag.
+
             header[2] = serialization.getContentTypeId();
             if (res.isHeartbeat()) header[2] |= FLAG_EVENT;
             // set response status.

@@ -28,50 +28,10 @@ import java.net.InetSocketAddress;
  * @see com.alibaba.dubbo.remoting.Server#getChannel(InetSocketAddress)
  */
 public interface Channel extends Endpoint {
-
-    /**
-     * get remote address.
-     * 获取远程地址
-     * @return remote address.
-     */
-    InetSocketAddress getRemoteAddress();
-
-    /**
-     * is connected.
-     * 是否已连接
-     * @return connected
-     */
-    boolean isConnected();
-
-    /**
-     * has attribute.
-     * 根据key判断属性值是否存在
-     * @param key key.
-     * @return has or has not.
-     */
-    boolean hasAttribute(String key);
-
-    /**
-     * get attribute.
-     * 根据key获取属性值
-     * @param key key.
-     * @return value.
-     */
-    Object getAttribute(String key);
-
-    /**
-     * set attribute.
-     * 设置属性值
-     * @param key   key.
-     * @param value value.
-     */
-    void setAttribute(String key, Object value);
-
-    /**
-     * remove attribute.
-     * 移除属性值
-     * @param key key.
-     */
-    void removeAttribute(String key);
-
+    InetSocketAddress getRemoteAddress();//获取远程地址
+    boolean isConnected();//是否已连接
+    boolean hasAttribute(String key);//根据key判断属性值是否存在
+    Object getAttribute(String key);//根据key获取属性值
+    void setAttribute(String key, Object value);//设置属性值
+    void removeAttribute(String key);//移除属性值
 }

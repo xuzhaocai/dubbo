@@ -174,10 +174,13 @@ public class DubboCodec extends ExchangeCodec implements Codec2 {
         RpcInvocation inv = (RpcInvocation) data;
 
         out.writeUTF(version);
+        // path
         out.writeUTF(inv.getAttachment(Constants.PATH_KEY));
+        // version
         out.writeUTF(inv.getAttachment(Constants.VERSION_KEY));
-
+        // method Name
         out.writeUTF(inv.getMethodName());
+        // 参数类型
         out.writeUTF(ReflectUtils.getDesc(inv.getParameterTypes()));
         Object[] args = inv.getArguments();
         if (args != null)

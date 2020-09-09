@@ -42,6 +42,8 @@ public class ChannelBufferInputStream extends InputStream {
         }
 
         this.buffer = buffer;
+
+        // 这里一顿操作buffer
         startIndex = buffer.readerIndex();// 开始
         endIndex = startIndex + length;// 结束
         buffer.markReaderIndex();
