@@ -26,13 +26,11 @@ import com.alibaba.dubbo.remoting.telnet.TelnetHandler;
 public interface ExchangeHandler extends ChannelHandler, TelnetHandler {
 
     /**
-     * reply.
-     *
+     * reply. 回答
      * @param channel
      * @param request
      * @return response
      * @throws RemotingException
      */
     Object reply(ExchangeChannel channel, Object request) throws RemotingException;
-
 }

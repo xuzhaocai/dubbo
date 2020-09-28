@@ -67,7 +67,6 @@ public class AllChannelHandler extends WrappedChannelHandler {
             throw new ExecutionException("disconnect event", channel, getClass() + " error when process disconnected event .", t);
         }
     }
-
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
         ExecutorService cexecutor = getExecutorService();
@@ -90,7 +89,6 @@ public class AllChannelHandler extends WrappedChannelHandler {
             throw new ExecutionException(message, channel, getClass() + " error when process received event .", t);
         }
     }
-    //
     @Override
     public void caught(Channel channel, Throwable exception) throws RemotingException {
         ExecutorService cexecutor = getExecutorService();

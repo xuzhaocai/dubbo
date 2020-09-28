@@ -61,7 +61,6 @@ public class NettyServerHandler extends ChannelDuplexHandler {
     // 服务端与客户端连接成功的时候进行触发
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-
         // 交给下一个节点处理。 实际上NettyServerHandler是最后一个节点
         ctx.fireChannelActive();
         // 根据netty 自己的channel来创建dubbo  的NettyChannel
